@@ -155,6 +155,10 @@ public class Game : GameWindow
 				_player.Take(thing);
 				toRemove.Add(thing);
 			}
+			else if (thing.BoundingBox.Max.Y < -90f)
+			{
+				toRemove.Add(thing);
+			}
 		}
 
 		foreach(var thing in toRemove)

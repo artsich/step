@@ -31,13 +31,17 @@ namespace Step.Main;
 public class Player(
 	Vector2 position,
 	Vector2 size,
-	KeyboardState input, 
+	KeyboardState input,
 	Box2 worldBb)
 {
 	private float _velocity;
 	private Vector2 _position = position;
 
 	public float MaxSpeed { get; } = 200f;
+
+	public float DashScale { get; } = 5f;
+	public float DashCd = 2f;
+	private float dashCdEllapsed = 0f;
 
 	public float Acceleration { get; } = 10f;
 
@@ -100,7 +104,18 @@ public class Player(
 			targetSpeed = MaxSpeed;
 		}
 
+		dashCdEllapsed += dt;
+		if (input.IsKeyDown(Keys.LeftShift) && dashCdEllapsed > DashCd)
+		{
+			if (targetSpeed != 0f)
+			{
+				_velocity *= DashScale;
+				dashCdEllapsed = 0f;
+			}
+		}
+
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed, Acceleration * dt);
+
 		_position.X += _velocity * dt;
 	}
 }
