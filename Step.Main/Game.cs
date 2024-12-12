@@ -1,0 +1,180 @@
+﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
+
+/*
+ * Goals:
+ * 1) smooth platform moving, dash, screen bounding box
+ * 2) falling spheres
+ * 
+ * 
+ */
+// StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
+// DynamicDraw: This buffer will change frequently after being initially uploaded.
+// StreamDraw: This buffer will change on every frame.
+
+// To do this, we use the GL.VertexAttribPointer function
+// This function has two jobs, to tell opengl about the format of the data, but also to associate the current array buffer with the VAO.
+// This means that after this call, we have setup this attribute to source data from the current array buffer and interpret it in the way we specified.
+// Arguments:
+//   Location of the input variable in the shader. the layout(location = 0) line in the vertex shader explicitly sets it to 0.
+//   How many elements will be sent to the variable. In this case, 3 floats for every vertex.
+//   The data type of the elements set, in this case float.
+//   Whether or not the data should be converted to normalized device coordinates. In this case, false, because that's already done.
+//   The stride; this is how many bytes are between the last element of one vertex and the first element of the next. 3 * sizeof(float) in this case.
+//   The offset; this is how many bytes it should skip to find the first element of the first vertex. 0 as of right now.
+// Stride and Offset are just sort of glossed over for now, but when we get into texture coordinates they'll be shown in better detail.
+
+namespace Step.Main;
+
+public class Game : GameWindow
+{
+	private readonly float[] _rectVertices =
+	{
+		-0.5f, -0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.5f,  0.5f, 0.0f,
+		-0.5f,  0.5f, 0.0f
+	};
+
+	private int _vertexBufferObject;
+	private int _vertexArrayObject;
+
+	private Shader _shader;
+
+	private Matrix4 _viewProj = Matrix4.CreateOrthographicOffCenter(-180f, 180f, -90f, 90f, -1f, 100f);
+
+	private readonly List<Thing> _fallingThings = [];
+
+	private Spawner _spawner;
+	private Player _player;
+
+	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
+		: base(gameWindowSettings, nativeWindowSettings)
+	{
+	}
+
+	protected override void OnLoad()
+	{
+		base.OnLoad();
+
+		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+
+		_vertexBufferObject = GL.GenBuffer();
+		GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+
+		GL.BufferData(BufferTarget.ArrayBuffer, _rectVertices.Length * sizeof(float), _rectVertices, BufferUsage.StaticDraw);
+
+		_vertexArrayObject = GL.GenVertexArray();
+		GL.BindVertexArray(_vertexArrayObject);
+
+		GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+		GL.EnableVertexAttribArray(0);
+
+		_shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+		_spawner = new Spawner(
+		[
+			new(150f, 100f),
+			new(110f, 105f),
+			new(-150f, 95f),
+			new(-110f, 110f)
+		],
+		new Vector2(20, 20),
+		2f);
+
+		_player = new Player(new(0f, -75f), new(50f, 20f), this.KeyboardState, new Box2(-180f, -90f, 177f, 90f));
+	}
+
+	protected override void OnRenderFrame(FrameEventArgs e)
+	{
+		base.OnRenderFrame(e);
+
+		GL.Clear(ClearBufferMask.ColorBufferBit);
+
+		DrawRect(_player.Position, _player.Size, Color4.Red);
+
+		foreach(var thing in _fallingThings)
+		{
+			DrawRect(thing.Position, thing.Size, Color4.Green);
+		}
+
+		SwapBuffers();
+	}
+
+	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color)
+	{
+		_shader.Use();
+		_shader.SetMatrix4("viewProj", _viewProj);
+
+		var model = Matrix4.CreateScale(size.To3(1f)) * Matrix4.CreateTranslation(position.To3());
+		_shader.SetMatrix4("model", model);
+		_shader.SetColor("color", color);
+
+		GL.BindVertexArray(_vertexArrayObject);
+		GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+	}
+
+	protected override void OnUpdateFrame(FrameEventArgs e)
+	{
+		base.OnUpdateFrame(e);
+		float dt = (float)e.Time;
+
+		var input = KeyboardState;
+
+		if (input.IsKeyDown(Keys.Escape))
+		{
+			Close();
+		}
+
+		_player.Update(dt);
+
+		var spawnedThing = _spawner.Get(dt);
+		if (spawnedThing is not null)
+		{
+			_fallingThings.Add(spawnedThing);
+		}
+
+		foreach(var thing in _fallingThings)
+		{
+			thing.Update(dt);
+		}
+
+		List<Thing> toRemove = [];
+		var playerBox = _player.Box;
+		foreach (var thing in _fallingThings)
+		{
+			if (thing.BoundingBox.Contains(playerBox))
+			{
+				Console.WriteLine("Collected....");
+				toRemove.Add(thing);
+			}
+		}
+
+		foreach(var thing in toRemove)
+		{
+			_fallingThings.Remove(thing);
+		}
+	}
+
+	protected override void OnResize(ResizeEventArgs e)
+	{
+		base.OnResize(e);
+		GL.Viewport(0, 0, Size.X, Size.Y);
+	}
+
+	protected override void OnUnload()
+	{
+		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+		GL.BindVertexArray(0);
+		GL.UseProgram(0);
+
+		GL.DeleteBuffer(_vertexBufferObject);
+		GL.DeleteVertexArray(_vertexArrayObject);
+
+		GL.DeleteProgram(_shader.Handle);
+
+		base.OnUnload();
+	}
+}
