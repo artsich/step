@@ -8,9 +8,11 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
  * Goals:
  * 1) smooth platform moving, dash, screen bounding box
  * 2) falling spheres
- * 
+ * 3) guns - pistol, knife
  * 
  */
+
+
 // StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
 // DynamicDraw: This buffer will change frequently after being initially uploaded.
 // StreamDraw: This buffer will change on every frame.
@@ -46,7 +48,7 @@ public class Game : GameWindow
 
 	private Matrix4 _viewProj = Matrix4.CreateOrthographicOffCenter(-180f, 180f, -90f, 90f, -1f, 100f);
 
-	private readonly List<Thing> _fallingThings = [];
+	private readonly List<IThing> _fallingThings = [];
 
 	private Spawner _spawner;
 	private Player _player;
@@ -93,11 +95,14 @@ public class Game : GameWindow
 
 		GL.Clear(ClearBufferMask.ColorBufferBit);
 
-		DrawRect(_player.Position, _player.Size, Color4.Red);
+		Vector4 hpColor = (Vector4)Color4.Red;
+		float hpScaleFactor = (float)_player.Hp / (float)_player.MaxHp;
+		hpColor *= hpScaleFactor;
+		DrawRect(_player.Position, _player.Size, (Color4<Rgba>)hpColor);
 
 		foreach(var thing in _fallingThings)
 		{
-			DrawRect(thing.Position, thing.Size, Color4.Green);
+			DrawRect(thing.Position, thing.Size, thing.Color);
 		}
 
 		SwapBuffers();
@@ -141,13 +146,13 @@ public class Game : GameWindow
 			thing.Update(dt);
 		}
 
-		List<Thing> toRemove = [];
+		List<IThing> toRemove = [];
 		var playerBox = _player.Box;
 		foreach (var thing in _fallingThings)
 		{
 			if (thing.BoundingBox.Contains(playerBox))
 			{
-				Console.WriteLine("Collected....");
+				_player.Take(thing);
 				toRemove.Add(thing);
 			}
 		}

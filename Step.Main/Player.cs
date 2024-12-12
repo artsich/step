@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 
@@ -46,14 +47,26 @@ public class Player(
 
 	public Box2 Box => new(Position - (Size / 2f), Position + (Size / 2f));
 
+
+	public int MaxHp = 5;
+
+	public int Hp { get; private set; } = 1;
+
 	public void Update(float dt)
 	{
 		Move(input, dt);
 		ResolveWorldCollision();
 	}
 
+	public void AddHp(int hp)
+	{
+		Hp += hp;
+		Hp = Math.Min(Hp, MaxHp);
+	}
+
 	public void Take(IThing thing)
 	{
+		Console.WriteLine($"Collected.... {thing.GetType().Name}");
 		thing.ApplyEffect(this);
 	}
 
