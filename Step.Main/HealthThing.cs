@@ -1,16 +1,23 @@
-﻿using OpenTK.Mathematics;
+﻿namespace Step.Main;
 
-namespace Step.Main;
-
-public class HealthThing(Vector2 position, Vector2 size, float acceleration = 20f) 
-	: Thing(position, size, acceleration)
+public interface IEffect
 {
-	public int Hp { get; init; } = 1;
+	void Use();
+}
 
-	public override Color4<Rgba> Color => Color4.Red;
-
-	public override void ApplyEffect(Player player)
+public class HealEffect(int hp, Player player) : IEffect
+{
+	public void Use()
 	{
-		player.AddHp(Hp);
+		Console.WriteLine("Heal effect used...");
+		player.AddHp(hp);
+	}
+}
+
+public class BombEffect(IGameScene scene) : IEffect
+{
+	public void Use()
+	{
+		scene.KillThings();
 	}
 }

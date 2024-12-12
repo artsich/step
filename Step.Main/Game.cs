@@ -9,6 +9,8 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
  * 1) smooth platform moving, dash, screen bounding box
  * 2) falling spheres
  * 3) guns - pistol, knife
+ * 4) graphics
+ *		shadows
  * 
  */
 
@@ -31,7 +33,14 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Step.Main;
 
-public class Game : GameWindow
+public interface IGameScene
+{
+	Player Player { get; }
+
+	void KillThings();
+}
+
+public class Game : GameWindow, IGameScene
 {
 	private readonly float[] _rectVertices =
 	{
@@ -48,10 +57,14 @@ public class Game : GameWindow
 
 	private Matrix4 _viewProj = Matrix4.CreateOrthographicOffCenter(-180f, 180f, -90f, 90f, -1f, 100f);
 
-	private readonly List<IThing> _fallingThings = [];
+	private readonly List<Thing> _fallingThings = [];
 
 	private Spawner _spawner;
 	private Player _player;
+
+	public Player Player => _player;
+
+	private Queue<Action> _postActions = [];
 
 	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
@@ -76,6 +89,8 @@ public class Game : GameWindow
 		GL.EnableVertexAttribArray(0);
 
 		_shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+		_player = new Player(new(0f, -75f), new(50f, 20f), this.KeyboardState, new Box2(-180f, -90f, 177f, 90f));
+
 		_spawner = new Spawner(
 		[
 			new(150f, 100f),
@@ -84,9 +99,8 @@ public class Game : GameWindow
 			new(-110f, 110f)
 		],
 		new Vector2(20, 20),
-		2f);
-
-		_player = new Player(new(0f, -75f), new(50f, 20f), this.KeyboardState, new Box2(-180f, -90f, 177f, 90f));
+		1f,
+		this);
 	}
 
 	protected override void OnRenderFrame(FrameEventArgs e)
@@ -146,7 +160,7 @@ public class Game : GameWindow
 			thing.Update(dt);
 		}
 
-		List<IThing> toRemove = [];
+		List<Thing> toRemove = [];
 		var playerBox = _player.Box;
 		foreach (var thing in _fallingThings)
 		{
@@ -164,6 +178,11 @@ public class Game : GameWindow
 		foreach(var thing in toRemove)
 		{
 			_fallingThings.Remove(thing);
+		}
+
+		while(_postActions.TryDequeue(out var action))
+		{
+			action();
 		}
 	}
 
@@ -185,5 +204,10 @@ public class Game : GameWindow
 		GL.DeleteProgram(_shader.Handle);
 
 		base.OnUnload();
+	}
+
+	public void KillThings()
+	{
+		_postActions.Enqueue(_fallingThings.Clear);
 	}
 }

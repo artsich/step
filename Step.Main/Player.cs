@@ -53,8 +53,11 @@ public class Player(
 
 
 	public int MaxHp = 5;
+	private List<IEffect> _effects = [];
 
 	public int Hp { get; private set; } = 1;
+
+	public bool IsFullHp => Hp == MaxHp;
 
 	public void Update(float dt)
 	{
@@ -68,9 +71,15 @@ public class Player(
 		Hp = Math.Min(Hp, MaxHp);
 	}
 
-	public void Take(IThing thing)
+	public void AddEffect(IEffect effect)
 	{
-		Console.WriteLine($"Collected.... {thing.GetType().Name}");
+		Console.WriteLine($"Effect added {effect.GetType().Name}");
+		_effects.Add(effect);
+	}
+
+	public void Take(Thing thing)
+	{
+		Console.WriteLine("Collected thing...");
 		thing.ApplyEffect(this);
 	}
 
@@ -104,6 +113,11 @@ public class Player(
 			targetSpeed = MaxSpeed;
 		}
 
+		if (input.IsKeyPressed(Keys.Up))
+		{
+			UseNextEffect();
+		}
+
 		dashCdEllapsed += dt;
 		if (input.IsKeyDown(Keys.LeftShift) && dashCdEllapsed > DashCd)
 		{
@@ -117,5 +131,14 @@ public class Player(
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed, Acceleration * dt);
 
 		_position.X += _velocity * dt;
+	}
+
+	private void UseNextEffect()
+	{
+		if (_effects.Count > 0)
+		{
+			_effects.Last().Use();
+			_effects.RemoveAt(_effects.Count - 1);
+		}
 	}
 }
