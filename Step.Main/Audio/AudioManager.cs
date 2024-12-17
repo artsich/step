@@ -106,14 +106,17 @@ public class AudioManager : IDisposable
 		string vendor = AL.Get(ALGetString.Vendor) ?? "Vendor not found...";
 		string renderer = AL.Get(ALGetString.Renderer) ?? "Renderer not found...";
 		string version = AL.Get(ALGetString.Version) ?? "OpenAL version not found...";
-		string extensions = AL.Get(ALGetString.Extensions) ?? "Extensions not found...";
+		string extensionsStr = AL.Get(ALGetString.Extensions) ?? "Extensions not found...";
+
+		var extensions = extensionsStr.Split(' ');
+		extensionsStr = string.Join('\n', extensions);
 
 		Console.WriteLine("---------------------------------------");
 		Console.WriteLine("OpenAL Information:");
 		Console.WriteLine($"Vendor:   {vendor}");
 		Console.WriteLine($"Renderer: {renderer}");
 		Console.WriteLine($"Version:  {version}");
-		Console.WriteLine($"Extensions:\n{extensions}");
+		Console.WriteLine($"Extensions:\n{extensionsStr}");
 		Console.WriteLine("---------------------------------------");
 	}
 }

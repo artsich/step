@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using ImGuiNET;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
@@ -7,14 +8,14 @@ using Step.Main.Audio;
 
 /*
  * Goals:
- *  Guns - pistol, knife - additional effects...
- *  Camera shake.
+ *  Add score
  *  Render player Stats
  *  - inventory contains available effects of the user.
  *  - current health
- *
  *  Helpers
  *  - God mode...
+ *  
+ *  Guns - pistol, knife - additional effects...
  */
 
 namespace Step.Main;
@@ -35,6 +36,7 @@ public class Game : GameWindow, IGameScene
 		0.5f,  0.5f, 0.0f,
 		-0.5f,  0.5f, 0.0f
 	};
+	ImGuiController _controller;
 
 	private int _vertexBufferObject;
 	private int _vertexArrayObject;
@@ -53,6 +55,8 @@ public class Game : GameWindow, IGameScene
 	private Queue<Action> _postActions = [];
 
 	private bool paused = false;
+
+	private bool showImgui = false;
 
 	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
@@ -79,6 +83,9 @@ public class Game : GameWindow, IGameScene
 
 		_shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 		_player = new Player(new(0f, -75f), new(50f, 20f), this.KeyboardState, new Box2(-180f, -90f, 177f, 90f));
+
+		_controller = new ImGuiController(ClientSize.X, ClientSize.Y);
+		_controller.FontGlobalScale = 2f;
 
 		_spawner = new Spawner(
 		[
@@ -125,6 +132,7 @@ public class Game : GameWindow, IGameScene
 	protected override void OnRenderFrame(FrameEventArgs e)
 	{
 		base.OnRenderFrame(e);
+		_controller.Update(this, (float)e.Time);
 
 		GL.Clear(ClearBufferMask.ColorBufferBit);
 
@@ -136,6 +144,15 @@ public class Game : GameWindow, IGameScene
 		foreach(var thing in _fallingThings)
 		{
 			DrawObject(thing.Position, thing.Size, thing.Color);
+		}
+
+		if (showImgui)
+		{
+			// Enable Docking
+			//ImGui.DockSpaceOverViewport();
+			ImGui.ShowDemoWindow();
+			_controller.Render();
+			ImGuiController.CheckGLError("End of frame");
 		}
 
 		SwapBuffers();
@@ -152,6 +169,8 @@ public class Game : GameWindow, IGameScene
 		GL.Disable(EnableCap.Blend);
 
 		DrawRect(position, size, color);
+
+		GL.Disable(EnableCap.Blend);
 	}
 
 	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color)
@@ -182,6 +201,11 @@ public class Game : GameWindow, IGameScene
 		if (input.IsKeyPressed(Keys.P))
 		{
 			paused = !paused;
+		}
+
+		if (input.IsKeyPressed(Keys.GraveAccent))
+		{
+			showImgui = !showImgui;
 		}
 
 		CheckWindowStateToggle(input);
@@ -257,10 +281,30 @@ public class Game : GameWindow, IGameScene
 		}
 	}
 
+	protected override void OnTextInput(TextInputEventArgs e)
+	{
+		base.OnTextInput(e);
+
+		if (showImgui)
+		{
+			_controller.PressChar((char)e.Unicode);
+		}
+	}
+
+	protected override void OnMouseWheel(MouseWheelEventArgs e)
+	{
+		base.OnMouseWheel(e);
+		if (showImgui)
+		{
+			_controller.MouseScroll(e.Offset);
+		}
+	}
+
 	protected override void OnResize(ResizeEventArgs e)
 	{
 		base.OnResize(e);
-		GL.Viewport(0, 0, Size.X, Size.Y);
+		GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
+		_controller.WindowResized(ClientSize.X, ClientSize.Y);
 	}
 
 	protected override void OnUnload()
@@ -292,12 +336,17 @@ public class Game : GameWindow, IGameScene
 		string version = GL.GetString(StringName.Version) ?? "Opengl version is not found...";
 		string glslVersion = GL.GetString(StringName.ShadingLanguageVersion) ?? "GLSL version not found...";
 
+		string extensionsStr = GL.GetString(StringName.Extensions) ?? "NotFound...";
+		var extensions = extensionsStr.Split(' ');
+		extensionsStr = string.Join('\n', extensions);
+
 		Console.WriteLine("---------------------------------------");
 		Console.WriteLine("OpenGL Information:");
 		Console.WriteLine($"Vendor: {vendor}");
 		Console.WriteLine($"Renderer: {renderer}");
 		Console.WriteLine($"OpenGL Version: {version}");
 		Console.WriteLine($"GLSL Version: {glslVersion}");
+		Console.WriteLine($"Extensions:\n{extensionsStr}");
 		Console.WriteLine("---------------------------------------");
 	}
 }
