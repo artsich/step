@@ -36,6 +36,7 @@ public class Game : GameWindow, IGameScene
 		0.5f,  0.5f, 0.0f,
 		-0.5f,  0.5f, 0.0f
 	};
+
 	ImGuiController _controller;
 
 	private int _vertexBufferObject;
@@ -43,7 +44,7 @@ public class Game : GameWindow, IGameScene
 
 	private Shader _shader;
 
-	private Camera2d _camera = new(360, 180);
+	private readonly Camera2d _camera = new(360, 180);
 
 	private readonly List<Thing> _fallingThings = [];
 
@@ -68,7 +69,8 @@ public class Game : GameWindow, IGameScene
 	protected override void OnLoad()
 	{
 		base.OnLoad();
-		PrintOpenGLInfo();
+		CenterWindow();
+		Graphics.PrintOpenGLInfo();
 
 		GL.ClearColor(0.2f, 0.2f, 0.2f, 1f);
 
@@ -84,7 +86,11 @@ public class Game : GameWindow, IGameScene
 		GL.EnableVertexAttribArray(0);
 
 		_shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
-		_player = new Player(new(0f, -75f), new(50f, 20f), this.KeyboardState, new Box2(-180f, -90f, 177f, 90f));
+		_player = new Player(
+			new(0f, -75f),
+			new(50f, 20f),
+			KeyboardState,
+			new Box2(-180f, -90f, 177f, 90f));
 
 		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
 		{
@@ -336,26 +342,5 @@ public class Game : GameWindow, IGameScene
 		_postActions.Enqueue(_fallingThings.Clear);
 		AudioManager.Ins.PlaySound("kill_all");
 		_camera.Shake(magnitude: 5f, duration: 2f);
-	}
-
-	static void PrintOpenGLInfo()
-	{
-		string vendor = GL.GetString(StringName.Vendor) ?? "Vendor not found...";
-		string renderer = GL.GetString(StringName.Renderer) ?? "Renderer not found...";
-		string version = GL.GetString(StringName.Version) ?? "Opengl version is not found...";
-		string glslVersion = GL.GetString(StringName.ShadingLanguageVersion) ?? "GLSL version not found...";
-
-		string extensionsStr = GL.GetString(StringName.Extensions) ?? "NotFound...";
-		var extensions = extensionsStr.Split(' ');
-		extensionsStr = string.Join('\n', extensions);
-
-		Console.WriteLine("---------------------------------------");
-		Console.WriteLine("OpenGL Information:");
-		Console.WriteLine($"Vendor: {vendor}");
-		Console.WriteLine($"Renderer: {renderer}");
-		Console.WriteLine($"OpenGL Version: {version}");
-		Console.WriteLine($"GLSL Version: {glslVersion}");
-		Console.WriteLine($"Extensions:\n{extensionsStr}");
-		Console.WriteLine("---------------------------------------");
 	}
 }
