@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Step.Main.Audio;
 using System.Drawing;
 
 /*
@@ -246,6 +247,7 @@ public class Game : GameWindow, IGameScene
 
 	protected override void OnUnload()
 	{
+		AudioManager.Ins.Dispose();
 		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 		GL.BindVertexArray(0);
 		GL.UseProgram(0);
