@@ -9,6 +9,8 @@ using Step.Main.Audio;
 /*
  * Goals:
  *  Add score
+ *  Effects 
+ *    - split platform on two but smaller size and move it simultaneously
  *  Render player Stats
  *  - inventory contains available effects of the user.
  *  - current health
@@ -170,9 +172,11 @@ public class Game : GameWindow, IGameScene
 				ImGui.SeparatorText("Game info");
 				ImGui.Text($"Score: {_score}");
 				ImGui.Text($"Health: {_player.Hp}");
+				ImGui.Text($"Falling things: {_fallingThings.Count}");
 				ImGui.SeparatorText("Game settings");
 				ImGui.Checkbox("God mode", ref _godModeEnabled);
 				ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
+				ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
 			}
 			ImGui.End();
 			_controller.Render();
@@ -249,7 +253,9 @@ public class Game : GameWindow, IGameScene
 	private void GameUpdate(float dt)
 	{
 		_camera.Update(dt);
+
 		_spawner.Speed = _thingsSpeed;
+		_spawner.TimeInterval = _spawnTimeInterval;
 
 		_player.SetGodMode(_godModeEnabled);
 		_player.Update(dt);
@@ -351,7 +357,12 @@ public class Game : GameWindow, IGameScene
 
 	public void KillThings()
 	{
-		_postUpdateActions.Enqueue(_fallingThings.Clear);
+		_postUpdateActions.Enqueue(() =>
+		{
+			_score += _fallingThings.Count;
+			_fallingThings.Clear();
+		});
+
 		AudioManager.Ins.PlaySound("kill_all");
 		_camera.Shake(magnitude: 5f, duration: 2f);
 	}

@@ -1,7 +1,6 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OpenTK.Audio.OpenAL;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Step.Main.Audio;
 

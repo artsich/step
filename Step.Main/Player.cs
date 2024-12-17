@@ -31,12 +31,12 @@ public class Player(
 
 	public Box2 Box => new(Position - (Size / 2f), Position + (Size / 2f));
 
-	public int MaxHp = 5;
-	private List<IEffect> _effects = [];
+	public int MaxHp { get; set; } = 5;
+	private readonly List<IEffect> _effects = [];
 
 	public int Hp { get; private set; } = 5;
 
-	public bool IsFullHp => Hp == MaxHp;
+	public bool IsFullHp => Hp >= MaxHp;
 
 	public void Update(float dt)
 	{
@@ -94,7 +94,7 @@ public class Player(
 	{
 		if (enabled)
 		{
-			Hp = 999999;
+			Hp = int.MaxValue;
 		}
 		else
 		{

@@ -14,14 +14,14 @@ public class Spawner(
 
 	public float Speed { get; set; } = 60f;
 
-	public float TimeInterval { get; set; } = 1f;
+	public float TimeInterval { get; set; } = timeInterval;
 
 	public Thing? Get(float dt)
 	{
 		timeElapsed += dt;
 		Thing? result = null;
 
-		if (timeElapsed > timeInterval)
+		if (timeElapsed > TimeInterval)
 		{
 			timeElapsed = 0f;
 			var index = Random.Next(spawnPoints.Count);
