@@ -65,6 +65,8 @@ public class Game : GameWindow, IGameScene
 
 	private Queue<Action> _postActions = [];
 
+	private bool paused = false;
+
 	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
 	{
@@ -160,6 +162,27 @@ public class Game : GameWindow, IGameScene
 			Close();
 		}
 
+		if (input.IsKeyPressed(Keys.P))
+		{
+			paused = !paused;
+		}
+
+		CheckWindowStateToggle(input);
+
+		if (!paused)
+		{
+			GameUpdate(dt);
+		}
+
+
+		while (_postActions.TryDequeue(out var action))
+		{
+			action();
+		}
+	}
+
+	private void GameUpdate(float dt)
+	{
 		_player.Update(dt);
 
 		var spawnedThing = _spawner.Get(dt);
@@ -168,7 +191,7 @@ public class Game : GameWindow, IGameScene
 			_fallingThings.Add(spawnedThing);
 		}
 
-		foreach(var thing in _fallingThings)
+		foreach (var thing in _fallingThings)
 		{
 			thing.Update(dt);
 		}
@@ -188,14 +211,30 @@ public class Game : GameWindow, IGameScene
 			}
 		}
 
-		foreach(var thing in toRemove)
+		foreach (var thing in toRemove)
 		{
 			_fallingThings.Remove(thing);
 		}
+	}
 
-		while(_postActions.TryDequeue(out var action))
+	private void CheckWindowStateToggle(KeyboardState input)
+	{
+		if (input.IsKeyDown(Keys.LeftAlt))
 		{
-			action();
+			if (input.IsKeyPressed(Keys.Enter))
+			{
+				_postActions.Enqueue(() =>
+				{
+					if (WindowState == WindowState.Fullscreen)
+					{
+						WindowState = WindowState.Normal;
+					}
+					else
+					{
+						WindowState = WindowState.Fullscreen;
+					}
+				});
+			}
 		}
 	}
 
