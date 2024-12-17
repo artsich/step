@@ -46,7 +46,7 @@ public class Spawner(
 				{ 
 					Color = new Color4<Rgba>(0.45f, 0.29f, 0.27f, 1f) 
 				},
-				2 => new Thing(position, thingSize, new BombEffect(gameScene)) 
+				2 => new Thing(position, thingSize, new KillAllEffect(gameScene))
 				{ 
 					Color = new Color4<Rgba>(0.21f, 0.24f, 0.26f, 1f) 
 				},

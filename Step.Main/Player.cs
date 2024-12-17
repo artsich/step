@@ -1,30 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
+﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-
-
-/*
- * Goals:
- * 1) smooth platform moving, dash, screen bounding box
- * 2) falling spheres
- * 
- * 
- */
-// StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
-// DynamicDraw: This buffer will change frequently after being initially uploaded.
-// StreamDraw: This buffer will change on every frame.
-
-// To do this, we use the GL.VertexAttribPointer function
-// This function has two jobs, to tell opengl about the format of the data, but also to associate the current array buffer with the VAO.
-// This means that after this call, we have setup this attribute to source data from the current array buffer and interpret it in the way we specified.
-// Arguments:
-//   Location of the input variable in the shader. the layout(location = 0) line in the vertex shader explicitly sets it to 0.
-//   How many elements will be sent to the variable. In this case, 3 floats for every vertex.
-//   The data type of the elements set, in this case float.
-//   Whether or not the data should be converted to normalized device coordinates. In this case, false, because that's already done.
-//   The stride; this is how many bytes are between the last element of one vertex and the first element of the next. 3 * sizeof(float) in this case.
-//   The offset; this is how many bytes it should skip to find the first element of the first vertex. 0 as of right now.
-// Stride and Offset are just sort of glossed over for now, but when we get into texture coordinates they'll be shown in better detail.
 
 namespace Step.Main;
 
@@ -36,6 +11,9 @@ public class Player(
 {
 	private float _velocity;
 	private Vector2 _position = position;
+
+	public event Action? OnPlayerHeal;
+	public event Action<Thing>? OnThingTaken;
 
 	public float MaxSpeed { get; } = 200f;
 
@@ -67,8 +45,11 @@ public class Player(
 
 	public void AddHp(int hp)
 	{
-		Hp += hp;
-		Hp = Math.Min(Hp, MaxHp);
+		if (Hp + hp <= MaxHp)
+		{
+			Hp += hp;
+			OnPlayerHeal?.Invoke();
+		}
 	}
 
 	public void AddEffect(IEffect effect)
@@ -81,6 +62,7 @@ public class Player(
 	{
 		Console.WriteLine("Collected thing...");
 		thing.ApplyEffect(this);
+		OnThingTaken?.Invoke(thing);
 	}
 
 	private void ResolveWorldCollision()

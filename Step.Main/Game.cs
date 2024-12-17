@@ -8,11 +8,7 @@ using System.Drawing;
 
 /*
  * Goals:
- * 1) smooth platform moving, dash, screen bounding box
- * 2) falling spheres
- * 3) guns - pistol, knife
- * 4) graphics
- *		shadows
+ *	guns - pistol, knife
  */
 
 // StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
@@ -104,6 +100,23 @@ public class Game : GameWindow, IGameScene
 		new Vector2(20, 20),
 		1f,
 		this);
+
+		AudioManager.Ins.LoadSound("start", "Music/ok_lets_go.mp3");
+		AudioManager.Ins.LoadSound("player_heal", "Music/player_heal.mp3");
+		AudioManager.Ins.LoadSound("thing_taken", "Music/thing_taken.wav");
+		AudioManager.Ins.LoadSound("kill_all", "Music/kill_all.mp3");
+
+		AudioManager.Ins.PlaySound("start");
+
+		Player.OnPlayerHeal += () =>
+		{
+			AudioManager.Ins.PlaySound("player_heal");
+		};
+
+		Player.OnThingTaken += (_) =>
+		{
+			AudioManager.Ins.PlaySound("thing_taken");
+		};
 	}
 
 	protected override void OnRenderFrame(FrameEventArgs e)
@@ -263,6 +276,7 @@ public class Game : GameWindow, IGameScene
 	public void KillThings()
 	{
 		_postActions.Enqueue(_fallingThings.Clear);
+		AudioManager.Ins.PlaySound("kill_all");
 	}
 
 	static void PrintOpenGLInfo()

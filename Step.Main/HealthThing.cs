@@ -9,15 +9,16 @@ public class HealEffect(int hp, Player player) : IEffect
 {
 	public void Use()
 	{
-		Console.WriteLine("Heal effect used...");
 		player.AddHp(hp);
+		Console.WriteLine("Heal effect used...");
 	}
 }
 
-public class BombEffect(IGameScene scene) : IEffect
+public class KillAllEffect(IGameScene scene) : IEffect
 {
 	public void Use()
 	{
 		scene.KillThings();
+		Console.WriteLine("Kill all used...");
 	}
 }
