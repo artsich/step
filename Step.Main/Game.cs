@@ -12,9 +12,7 @@ using System.Drawing;
  * 3) guns - pistol, knife
  * 4) graphics
  *		shadows
- * 
  */
-
 
 // StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
 // DynamicDraw: This buffer will change frequently after being initially uploaded.
@@ -77,7 +75,7 @@ public class Game : GameWindow, IGameScene
 		base.OnLoad();
 		PrintOpenGLInfo();
 
-		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		GL.ClearColor(0.2f, 0.2f, 0.2f, 1f);
 
 		_vertexBufferObject = GL.GenBuffer();
 		GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -111,8 +109,8 @@ public class Game : GameWindow, IGameScene
 
 		GL.Clear(ClearBufferMask.ColorBufferBit);
 
-		Vector4 hpColor = (Vector4)Color4.Red;
-		float hpScaleFactor = (float)_player.Hp / (float)_player.MaxHp;
+		Vector4 hpColor = new(0.9f, 0.4f, 0.35f, 1f);
+		float hpScaleFactor = _player.Hp / (float)_player.MaxHp;
 		hpColor *= hpScaleFactor;
 		DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor);
 
@@ -127,7 +125,7 @@ public class Game : GameWindow, IGameScene
 	private void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color)
 	{
 		Vector2 shadowOffset = new(1, -1);
-		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.5f);
+		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.25f);
 
 		GL.Enable(EnableCap.Blend);
 		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);

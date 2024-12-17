@@ -15,6 +15,7 @@ public class Spawner(
 	public Thing? Get(float dt)
 	{
 		timeElapsed += dt;
+		Thing? result = null;
 
 		if (timeElapsed > timeInterval)
 		{
@@ -25,7 +26,7 @@ public class Spawner(
 			var thingId = Random.Next(3);
 			var can = false;
 
-			while(thingId != 0 && !can)
+			while (thingId != 0 && !can)
 			{
 				can = thingId != 1 || !gameScene.Player.IsFullHp;
 
@@ -35,15 +36,24 @@ public class Spawner(
 				}
 			}
 
-			return thingId switch
+			result = thingId switch
 			{
-				0 => new Thing(position, thingSize),
-				1 => new Thing(position, thingSize, new HealEffect(1, gameScene.Player)) { Color = Color4.Red },
-				2 => new Thing(position, thingSize, new BombEffect(gameScene)) { Color = Color4.Navy },
+				0 => new Thing(position, thingSize)
+				{
+					Color = new Color4<Rgba>(0.34f, 0.42f, 0.27f, 1f),
+				},
+				1 => new Thing(position, thingSize, new HealEffect(1, gameScene.Player))
+				{ 
+					Color = new Color4<Rgba>(0.45f, 0.29f, 0.27f, 1f) 
+				},
+				2 => new Thing(position, thingSize, new BombEffect(gameScene)) 
+				{ 
+					Color = new Color4<Rgba>(0.21f, 0.24f, 0.26f, 1f) 
+				},
 				_ => null
 			};
 		}
 
-		return null;
+		return result;
 	}
 }
