@@ -4,28 +4,18 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Step.Main.Audio;
-using System.Drawing;
 
 /*
  * Goals:
- *  guns - pistol, knife
+ *  Guns - pistol, knife - additional effects...
+ *  Camera shake.
+ *  Render player Stats
+ *  - inventory contains available effects of the user.
+ *  - current health
+ *
+ *  Helpers
+ *  - God mode...
  */
-
-// StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
-// DynamicDraw: This buffer will change frequently after being initially uploaded.
-// StreamDraw: This buffer will change on every frame.
-
-// To do this, we use the GL.VertexAttribPointer function
-// This function has two jobs, to tell opengl about the format of the data, but also to associate the current array buffer with the VAO.
-// This means that after this call, we have setup this attribute to source data from the current array buffer and interpret it in the way we specified.
-// Arguments:
-//   Location of the input variable in the shader. the layout(location = 0) line in the vertex shader explicitly sets it to 0.
-//   How many elements will be sent to the variable. In this case, 3 floats for every vertex.
-//   The data type of the elements set, in this case float.
-//   Whether or not the data should be converted to normalized device coordinates. In this case, false, because that's already done.
-//   The stride; this is how many bytes are between the last element of one vertex and the first element of the next. 3 * sizeof(float) in this case.
-//   The offset; this is how many bytes it should skip to find the first element of the first vertex. 0 as of right now.
-// Stride and Offset are just sort of glossed over for now, but when we get into texture coordinates they'll be shown in better detail.
 
 namespace Step.Main;
 
@@ -51,7 +41,7 @@ public class Game : GameWindow, IGameScene
 
 	private Shader _shader;
 
-	private Matrix4 _viewProj = Matrix4.CreateOrthographicOffCenter(-180f, 180f, -90f, 90f, -1f, 100f);
+	private Camera2d _camera = new(360, 180);
 
 	private readonly List<Thing> _fallingThings = [];
 
@@ -121,6 +111,7 @@ public class Game : GameWindow, IGameScene
 
 		Player.OnDamage += () =>
 		{
+			_camera.Shake(magnitude: 2f, duration: 1f);
 			AudioManager.Ins.PlaySound("player_take_damage");
 		};
 
@@ -166,7 +157,7 @@ public class Game : GameWindow, IGameScene
 	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color)
 	{
 		_shader.Use();
-		_shader.SetMatrix4("viewProj", _viewProj);
+		_shader.SetMatrix4("viewProj", _camera.ViewProj);
 
 		var model = Matrix4.CreateScale(size.To3(1f)) * Matrix4.CreateTranslation(position.To3());
 		_shader.SetMatrix4("model", model);
@@ -209,6 +200,7 @@ public class Game : GameWindow, IGameScene
 
 	private void GameUpdate(float dt)
 	{
+		_camera.Update(dt);
 		_player.Update(dt);
 
 		var spawnedThing = _spawner.Get(dt);
@@ -290,6 +282,7 @@ public class Game : GameWindow, IGameScene
 	{
 		_postActions.Enqueue(_fallingThings.Clear);
 		AudioManager.Ins.PlaySound("kill_all");
+		_camera.Shake(magnitude: 5f, duration: 2f);
 	}
 
 	static void PrintOpenGLInfo()

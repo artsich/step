@@ -31,11 +31,10 @@ public class Player(
 
 	public Box2 Box => new(Position - (Size / 2f), Position + (Size / 2f));
 
-
 	public int MaxHp = 5;
 	private List<IEffect> _effects = [];
 
-	public int Hp { get; private set; } = 1;
+	public int Hp { get; private set; } = 5;
 
 	public bool IsFullHp => Hp == MaxHp;
 
