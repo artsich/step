@@ -53,13 +53,17 @@ public class Game : GameWindow, IGameScene
 
 	public Player Player => _player;
 
-	private readonly Queue<Action> _postActions = [];
+	private readonly Queue<Action> _postUpdateActions = [];
 
 	private bool _paused = false;
 
 	private bool _showImGui = false;
 
 	private int _score = 0;
+
+	private bool _godModeEnabled = false;
+	private float _thingsSpeed = 60f;
+	private float _spawnTimeInterval = 1f;
 
 	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
@@ -69,7 +73,7 @@ public class Game : GameWindow, IGameScene
 	protected override void OnLoad()
 	{
 		base.OnLoad();
-		CenterWindow();
+		//CenterWindow();
 		Graphics.PrintOpenGLInfo();
 
 		GL.ClearColor(0.2f, 0.2f, 0.2f, 1f);
@@ -161,10 +165,15 @@ public class Game : GameWindow, IGameScene
 		{
 			// Enable Docking
 			//ImGui.DockSpaceOverViewport();
-			ImGui.Begin("Debug view");
-			ImGui.Text($"Score: {_score}");
-			ImGui.Text($"Health: {_player.Hp}");
-
+			ImGui.Begin("Debug");
+			{
+				ImGui.SeparatorText("Game info");
+				ImGui.Text($"Score: {_score}");
+				ImGui.Text($"Health: {_player.Hp}");
+				ImGui.SeparatorText("Game settings");
+				ImGui.Checkbox("God mode", ref _godModeEnabled);
+				ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
+			}
 			ImGui.End();
 			_controller.Render();
 			ImGuiController.CheckGLError("End of frame");
@@ -231,7 +240,7 @@ public class Game : GameWindow, IGameScene
 		}
 
 
-		while (_postActions.TryDequeue(out var action))
+		while (_postUpdateActions.TryDequeue(out var action))
 		{
 			action();
 		}
@@ -240,6 +249,9 @@ public class Game : GameWindow, IGameScene
 	private void GameUpdate(float dt)
 	{
 		_camera.Update(dt);
+		_spawner.Speed = _thingsSpeed;
+
+		_player.SetGodMode(_godModeEnabled);
 		_player.Update(dt);
 
 		var spawnedThing = _spawner.Get(dt);
@@ -281,7 +293,7 @@ public class Game : GameWindow, IGameScene
 		{
 			if (input.IsKeyPressed(Keys.Enter))
 			{
-				_postActions.Enqueue(() =>
+				_postUpdateActions.Enqueue(() =>
 				{
 					if (WindowState == WindowState.Fullscreen)
 					{
@@ -339,7 +351,7 @@ public class Game : GameWindow, IGameScene
 
 	public void KillThings()
 	{
-		_postActions.Enqueue(_fallingThings.Clear);
+		_postUpdateActions.Enqueue(_fallingThings.Clear);
 		AudioManager.Ins.PlaySound("kill_all");
 		_camera.Shake(magnitude: 5f, duration: 2f);
 	}

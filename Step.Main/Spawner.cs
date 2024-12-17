@@ -12,6 +12,10 @@ public class Spawner(
 
 	private float timeElapsed = 0f;
 
+	public float Speed { get; set; } = 60f;
+
+	public float TimeInterval { get; set; } = 1f;
+
 	public Thing? Get(float dt)
 	{
 		timeElapsed += dt;
@@ -41,14 +45,17 @@ public class Spawner(
 				0 => new Thing(position, thingSize)
 				{
 					Color = new Color4<Rgba>(0.34f, 0.42f, 0.27f, 1f),
+					Speed = Speed
 				},
 				1 => new Thing(position, thingSize, new HealEffect(1, gameScene.Player))
 				{ 
-					Color = new Color4<Rgba>(0.45f, 0.29f, 0.27f, 1f) 
+					Color = new Color4<Rgba>(0.45f, 0.29f, 0.27f, 1f),
+					Speed = Speed
 				},
 				2 => new Thing(position, thingSize, new KillAllEffect(gameScene))
 				{ 
-					Color = new Color4<Rgba>(0.21f, 0.24f, 0.26f, 1f) 
+					Color = new Color4<Rgba>(0.21f, 0.24f, 0.26f, 1f),
+					Speed = Speed
 				},
 				_ => null
 			};

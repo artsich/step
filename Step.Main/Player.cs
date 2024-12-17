@@ -90,6 +90,18 @@ public class Player(
 		OnThingTaken?.Invoke(thing);
 	}
 
+	public void SetGodMode(bool enabled)
+	{
+		if (enabled)
+		{
+			Hp = 999999;
+		}
+		else
+		{
+			Hp = MaxHp;
+		}
+	}
+
 	private void ResolveWorldCollision()
 	{
 		var box = Box;

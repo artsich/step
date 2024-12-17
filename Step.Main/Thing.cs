@@ -4,7 +4,7 @@ namespace Step.Main;
 
 public class Thing(Vector2 position, Vector2 size, IEffect? effect = null)
 {
-	public float Acceleration { get; set; } = 60f;
+	public float Speed { get; set; } = 60f;
 
 	public Vector2 Position { get; private set; } = position;
 
@@ -15,7 +15,7 @@ public class Thing(Vector2 position, Vector2 size, IEffect? effect = null)
 	public void Update(float dt)
 	{
 		var pos = Position;
-		pos.Y -= Acceleration * dt;
+		pos.Y -= Speed * dt;
 		Position = pos;
 	}
 
