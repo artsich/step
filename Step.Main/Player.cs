@@ -14,6 +14,8 @@ public class Player(
 
 	public event Action? OnPlayerHeal;
 	public event Action<Thing>? OnThingTaken;
+	public event Action? OnDead;
+	public event Action? OnDamage;
 
 	public float MaxSpeed { get; } = 200f;
 
@@ -45,10 +47,34 @@ public class Player(
 
 	public void AddHp(int hp)
 	{
+		if (hp < 0)
+		{
+			throw new ArithmeticException("Can't add negative HP...");
+		}
+
 		if (Hp + hp <= MaxHp)
 		{
 			Hp += hp;
 			OnPlayerHeal?.Invoke();
+		}
+	}
+
+	public void Damage(int damage)
+	{
+		if (Hp <= 0)
+		{
+			throw new InvalidOperationException("Player already Dead...");
+		}
+
+		Hp -= damage;
+
+		if (Hp <= 0)
+		{
+			OnDead?.Invoke();
+		}
+		else
+		{
+			OnDamage?.Invoke();
 		}
 	}
 

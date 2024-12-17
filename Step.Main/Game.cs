@@ -8,7 +8,7 @@ using System.Drawing;
 
 /*
  * Goals:
- *	guns - pistol, knife
+ *  guns - pistol, knife
  */
 
 // StaticDraw: This buffer will rarely, if ever, update after being initially uploaded.
@@ -105,6 +105,7 @@ public class Game : GameWindow, IGameScene
 		AudioManager.Ins.LoadSound("player_heal", "Music/player_heal.mp3");
 		AudioManager.Ins.LoadSound("thing_taken", "Music/thing_taken.wav");
 		AudioManager.Ins.LoadSound("kill_all", "Music/kill_all.mp3");
+		AudioManager.Ins.LoadSound("player_take_damage", "Music/player_take_damage.mp3");
 
 		AudioManager.Ins.PlaySound("start");
 
@@ -116,6 +117,17 @@ public class Game : GameWindow, IGameScene
 		Player.OnThingTaken += (_) =>
 		{
 			AudioManager.Ins.PlaySound("thing_taken");
+		};
+
+		Player.OnDamage += () =>
+		{
+			AudioManager.Ins.PlaySound("player_take_damage");
+		};
+
+		Player.OnDead += () =>
+		{
+			Console.WriteLine("Game over...");
+			Close();
 		};
 	}
 
@@ -222,6 +234,7 @@ public class Game : GameWindow, IGameScene
 			else if (thing.BoundingBox.Max.Y < -90f)
 			{
 				toRemove.Add(thing);
+				Player.Damage(1);
 			}
 		}
 
