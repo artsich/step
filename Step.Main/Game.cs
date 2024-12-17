@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Drawing;
 
 /*
  * Goals:
@@ -113,14 +114,27 @@ public class Game : GameWindow, IGameScene
 		Vector4 hpColor = (Vector4)Color4.Red;
 		float hpScaleFactor = (float)_player.Hp / (float)_player.MaxHp;
 		hpColor *= hpScaleFactor;
-		DrawRect(_player.Position, _player.Size, (Color4<Rgba>)hpColor);
+		DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor);
 
 		foreach(var thing in _fallingThings)
 		{
-			DrawRect(thing.Position, thing.Size, thing.Color);
+			DrawObject(thing.Position, thing.Size, thing.Color);
 		}
 
 		SwapBuffers();
+	}
+
+	private void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color)
+	{
+		Vector2 shadowOffset = new(1, -1);
+		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.5f);
+
+		GL.Enable(EnableCap.Blend);
+		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+		DrawRect(position + shadowOffset, size, shadowColor);
+		GL.Disable(EnableCap.Blend);
+
+		DrawRect(position, size, color);
 	}
 
 	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color)
