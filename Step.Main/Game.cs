@@ -52,11 +52,13 @@ public class Game : GameWindow, IGameScene
 
 	public Player Player => _player;
 
-	private Queue<Action> _postActions = [];
+	private readonly Queue<Action> _postActions = [];
 
-	private bool paused = false;
+	private bool _paused = false;
 
-	private bool showImgui = false;
+	private bool _showImGui = false;
+
+	private int _score = 0;
 
 	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
@@ -84,8 +86,10 @@ public class Game : GameWindow, IGameScene
 		_shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
 		_player = new Player(new(0f, -75f), new(50f, 20f), this.KeyboardState, new Box2(-180f, -90f, 177f, 90f));
 
-		_controller = new ImGuiController(ClientSize.X, ClientSize.Y);
-		_controller.FontGlobalScale = 2f;
+		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
+		{
+			FontGlobalScale = 2f
+		};
 
 		_spawner = new Spawner(
 		[
@@ -113,6 +117,7 @@ public class Game : GameWindow, IGameScene
 
 		Player.OnThingTaken += (_) =>
 		{
+			_score++;
 			AudioManager.Ins.PlaySound("thing_taken");
 		};
 
@@ -146,11 +151,15 @@ public class Game : GameWindow, IGameScene
 			DrawObject(thing.Position, thing.Size, thing.Color);
 		}
 
-		if (showImgui)
+		if (_showImGui)
 		{
 			// Enable Docking
 			//ImGui.DockSpaceOverViewport();
-			ImGui.ShowDemoWindow();
+			ImGui.Begin("Debug view");
+			ImGui.Text($"Score: {_score}");
+			ImGui.Text($"Health: {_player.Hp}");
+
+			ImGui.End();
 			_controller.Render();
 			ImGuiController.CheckGLError("End of frame");
 		}
@@ -200,17 +209,17 @@ public class Game : GameWindow, IGameScene
 
 		if (input.IsKeyPressed(Keys.P))
 		{
-			paused = !paused;
+			_paused = !_paused;
 		}
 
 		if (input.IsKeyPressed(Keys.GraveAccent))
 		{
-			showImgui = !showImgui;
+			_showImGui = !_showImGui;
 		}
 
 		CheckWindowStateToggle(input);
 
-		if (!paused)
+		if (!_paused)
 		{
 			GameUpdate(dt);
 		}
@@ -285,7 +294,7 @@ public class Game : GameWindow, IGameScene
 	{
 		base.OnTextInput(e);
 
-		if (showImgui)
+		if (_showImGui)
 		{
 			_controller.PressChar((char)e.Unicode);
 		}
@@ -294,7 +303,7 @@ public class Game : GameWindow, IGameScene
 	protected override void OnMouseWheel(MouseWheelEventArgs e)
 	{
 		base.OnMouseWheel(e);
-		if (showImgui)
+		if (_showImGui)
 		{
 			_controller.MouseScroll(e.Offset);
 		}
