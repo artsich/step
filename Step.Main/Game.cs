@@ -74,6 +74,7 @@ public class Game : GameWindow, IGameScene
 	protected override void OnLoad()
 	{
 		base.OnLoad();
+		PrintOpenGLInfo();
 
 		GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -209,5 +210,21 @@ public class Game : GameWindow, IGameScene
 	public void KillThings()
 	{
 		_postActions.Enqueue(_fallingThings.Clear);
+	}
+
+	static void PrintOpenGLInfo()
+	{
+		string vendor = GL.GetString(StringName.Vendor) ?? "Vendor not found...";
+		string renderer = GL.GetString(StringName.Renderer) ?? "Renderer not found...";
+		string version = GL.GetString(StringName.Version) ?? "Opengl version is not found...";
+		string glslVersion = GL.GetString(StringName.ShadingLanguageVersion) ?? "GLSL version not found...";
+
+		Console.WriteLine("---------------------------------------");
+		Console.WriteLine("OpenGL Information:");
+		Console.WriteLine($"Vendor: {vendor}");
+		Console.WriteLine($"Renderer: {renderer}");
+		Console.WriteLine($"OpenGL Version: {version}");
+		Console.WriteLine($"GLSL Version: {glslVersion}");
+		Console.WriteLine("---------------------------------------");
 	}
 }

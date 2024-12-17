@@ -1,6 +1,7 @@
 ﻿using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using System.Runtime.InteropServices;
 
 namespace Step.Main;
 
@@ -11,11 +12,17 @@ internal static class Program
 		var nativeWindowSettings = new NativeWindowSettings()
 		{
 			ClientSize = new Vector2i(1920, 1080),
-			Title = "Step",
+			Title = "Borderline",
+			Vsync = VSyncMode.Adaptive,
 			Flags = ContextFlags.Default | ContextFlags.Debug,
+			WindowState = WindowState.Maximized,
 		};
 
-		using var window = new Game(GameWindowSettings.Default, nativeWindowSettings);
+		var gameSettings = GameWindowSettings.Default;
+		gameSettings.UpdateFrequency = 144;
+
+		using var window = new Game(gameSettings, nativeWindowSettings);
+
 		window.Run();
 	}
 }
