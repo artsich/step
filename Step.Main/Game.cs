@@ -4,7 +4,11 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using StbImageSharp;
 using Step.Main.Audio;
+using System.Drawing;
+using System;
+using System.IO;
 
 /*
  * Goals:
@@ -33,10 +37,11 @@ public class Game : GameWindow, IGameScene
 {
 	private readonly float[] _rectVertices =
 	{
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.5f,  0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f
+		// Position          // Texture Coordinates
+		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,  // Bottom-left corner
+		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // Bottom-right corner
+		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // Top-right corner
+		-0.5f,  0.5f, 0.0f,  0.0f, 1.0f   // Top-left corner
 	};
 
 	ImGuiController _controller;
@@ -54,6 +59,7 @@ public class Game : GameWindow, IGameScene
 	private Player _player;
 
 	public Player Player => _player;
+	private Texture2d _playerTexture;
 
 	private readonly Queue<Action> _postUpdateActions = [];
 
@@ -75,10 +81,12 @@ public class Game : GameWindow, IGameScene
 	protected override void OnLoad()
 	{
 		base.OnLoad();
+		StbImage.stbi_set_flip_vertically_on_load(1);
+
 		//CenterWindow();
 		Graphics.PrintOpenGLInfo();
 
-		GL.ClearColor(0.2f, 0.2f, 0.2f, 1f);
+		GL.ClearColor(0.737f, 0.718f, 0.647f, 1.0f);
 
 		_vertexBufferObject = GL.GenBuffer();
 		GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -88,13 +96,18 @@ public class Game : GameWindow, IGameScene
 		_vertexArrayObject = GL.GenVertexArray();
 		GL.BindVertexArray(_vertexArrayObject);
 
-		GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+		// Position attribute
+		GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
 		GL.EnableVertexAttribArray(0);
 
-		_shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+		// Texture coordinate attribute
+		GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+		GL.EnableVertexAttribArray(1);
+
+		_shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
 		_player = new Player(
 			new(0f, -75f),
-			new(50f, 20f),
+			new(40f, 20f),
 			KeyboardState,
 			new Box2(-180f, -90f, 177f, 90f));
 
@@ -114,12 +127,12 @@ public class Game : GameWindow, IGameScene
 		1f,
 		this);
 
-		AudioManager.Ins.LoadSound("start", "Music/ok_lets_go.mp3");
-		AudioManager.Ins.LoadSound("player_heal", "Music/player_heal.mp3");
-		AudioManager.Ins.LoadSound("thing_taken", "Music/thing_taken.wav");
-		AudioManager.Ins.LoadSound("kill_all", "Music/kill_all.mp3");
-		AudioManager.Ins.LoadSound("player_take_damage", "Music/player_take_damage.mp3");
-		AudioManager.Ins.LoadSound("main_theme", "Music/main_theme.mp3");
+		AudioManager.Ins.LoadSound("start", "Assets/Music/ok_lets_go.mp3");
+		AudioManager.Ins.LoadSound("player_heal", "Assets/Music/player_heal.mp3");
+		AudioManager.Ins.LoadSound("thing_taken", "Assets/Music/thing_taken.wav");
+		AudioManager.Ins.LoadSound("kill_all", "Assets/Music/kill_all.mp3");
+		AudioManager.Ins.LoadSound("player_take_damage", "Assets/Music/player_take_damage.mp3");
+		AudioManager.Ins.LoadSound("main_theme", "Assets/Music/main_theme.mp3");
 
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
@@ -146,6 +159,8 @@ public class Game : GameWindow, IGameScene
 			Console.WriteLine("Game over...");
 			Close();
 		};
+
+		_playerTexture = new Texture2d("Assets/Textures/player.png").Load();
 	}
 
 	protected override void OnRenderFrame(FrameEventArgs e)
@@ -158,11 +173,11 @@ public class Game : GameWindow, IGameScene
 		Vector4 hpColor = new(0.9f, 0.4f, 0.35f, 1f);
 		float hpScaleFactor = _player.Hp / (float)_player.MaxHp;
 		hpColor *= hpScaleFactor;
-		DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor);
+		DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor, _playerTexture);
 
 		foreach(var thing in _fallingThings)
 		{
-			DrawObject(thing.Position, thing.Size, thing.Color);
+			DrawObject(thing.Position, thing.Size, Color4.White, thing.Texture);
 		}
 
 		if (_showImGui)
@@ -188,22 +203,21 @@ public class Game : GameWindow, IGameScene
 		SwapBuffers();
 	}
 
-	private void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color)
+	private void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
 	{
 		Vector2 shadowOffset = new(1, -1);
 		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.25f);
 
 		GL.Enable(EnableCap.Blend);
 		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-		DrawRect(position + shadowOffset, size, shadowColor);
-		GL.Disable(EnableCap.Blend);
+		DrawRect(position + shadowOffset, size, shadowColor, texture);
 
-		DrawRect(position, size, color);
+		DrawRect(position, size, color, texture);
 
 		GL.Disable(EnableCap.Blend);
 	}
 
-	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color)
+	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
 	{
 		_shader.Use();
 		_shader.SetMatrix4("viewProj", _camera.ViewProj);
@@ -212,8 +226,16 @@ public class Game : GameWindow, IGameScene
 		_shader.SetMatrix4("model", model);
 		_shader.SetColor("color", color);
 
+		if (texture != null)
+		{
+			texture?.BindAsSampler(0);
+			_shader.SetInt("diffuseTexture", 0);
+		}
+
 		GL.BindVertexArray(_vertexArrayObject);
 		GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
+
+		texture?.Unbind();
 	}
 
 	protected override void OnUpdateFrame(FrameEventArgs e)

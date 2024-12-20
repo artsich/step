@@ -12,6 +12,8 @@ public class Thing(Vector2 position, Vector2 size, IEffect? effect = null)
 
 	public Color4<Rgba> Color { get; init; } = Color4.Green;
 
+	public Texture2d? Texture { get; init; }
+
 	public void Update(float dt)
 	{
 		var pos = Position;
