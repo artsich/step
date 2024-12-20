@@ -119,8 +119,10 @@ public class Game : GameWindow, IGameScene
 		AudioManager.Ins.LoadSound("thing_taken", "Music/thing_taken.wav");
 		AudioManager.Ins.LoadSound("kill_all", "Music/kill_all.mp3");
 		AudioManager.Ins.LoadSound("player_take_damage", "Music/player_take_damage.mp3");
+		AudioManager.Ins.LoadSound("main_theme", "Music/main_theme.mp3");
 
 		AudioManager.Ins.PlaySound("start");
+		AudioManager.Ins.PlaySound("main_theme", true);
 
 		Player.OnPlayerHeal += () =>
 		{
@@ -257,7 +259,7 @@ public class Game : GameWindow, IGameScene
 		_spawner.Speed = _thingsSpeed;
 		_spawner.TimeInterval = _spawnTimeInterval;
 
-		_player.SetGodMode(_godModeEnabled);
+		//_player.SetGodMode(_godModeEnabled);
 		_player.Update(dt);
 
 		var spawnedThing = _spawner.Get(dt);

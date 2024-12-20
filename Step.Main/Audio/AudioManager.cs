@@ -38,11 +38,11 @@ public class AudioManager : IDisposable
 		_loadedSounds[key] = sound;
 	}
 
-	public void PlaySound(string key)
+	public void PlaySound(string key, bool loop = false)
 	{
 		if (_loadedSounds.TryGetValue(key, out var sound))
 		{
-			sound.Play();
+			sound.Play(loop);
 		}
 		else
 		{

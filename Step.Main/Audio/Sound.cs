@@ -21,9 +21,11 @@ internal class Sound : IDisposable
 	/// <summary>
 	/// Plays the sound.
 	/// </summary>
-	public void Play()
+	public void Play(bool loop = false)
 	{
 		if (_isDisposed) return;
+
+		AL.Source(_sourceId, ALSourceb.Looping, loop);
 		AL.SourcePlay(_sourceId);
 	}
 
