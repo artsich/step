@@ -27,7 +27,7 @@ public class Player(
 
 	public Vector2 Position => _position;
 
-	public Vector2 Size { get; } = size;
+	public Vector2 Size { get; private set; } = size;
 
 	public Box2 Box => new(Position - (Size / 2f), Position + (Size / 2f));
 
@@ -38,10 +38,17 @@ public class Player(
 
 	public bool IsFullHp => Hp >= MaxHp;
 
+	private bool godMode = false;
+
 	public void Update(float dt)
 	{
 		Move(input, dt);
 		ResolveWorldCollision();
+	}
+
+	public void Resize(Vector2 newSize)
+	{
+		Size = newSize;
 	}
 
 	public void AddHp(int hp)
@@ -60,6 +67,12 @@ public class Player(
 
 	public void Damage(int damage)
 	{
+		if (godMode)
+		{
+			OnDamage?.Invoke();
+			return;
+		}
+
 		if (Hp <= 0)
 		{
 			throw new InvalidOperationException("Player already Dead...");
@@ -92,14 +105,7 @@ public class Player(
 
 	public void SetGodMode(bool enabled)
 	{
-		if (enabled)
-		{
-			Hp = int.MaxValue;
-		}
-		else
-		{
-			Hp = MaxHp;
-		}
+		godMode = enabled;
 	}
 
 	private void ResolveWorldCollision()

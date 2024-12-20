@@ -2,86 +2,101 @@
 
 namespace Step.Main;
 
-public class Spawner
+public abstract class SpawnEntity(
+	float probability,
+	Func<IGameScene, bool> condition,
+	Func<Vector2, IGameScene, Thing> createEntity)
 {
+	public float Probability { get; } = probability;
+
+	public Func<IGameScene, bool> Condition { get; } = condition;
+
+	public Func<Vector2, IGameScene, Thing> CreateEntity { get; } = createEntity;
+}
+
+public sealed class SpawnSimpleEntity(Texture2d texture) : SpawnEntity(
+		0.9f,
+		(gs) => true,
+		(pos, gs) => new Thing(pos, new Vector2(20, 20))
+		{
+			Texture = texture
+		}
+	)
+{
+}
+
+public sealed class SpanwHealthEntity(Texture2d texture) : SpawnEntity(
+		0.2f,
+		(gs) => !gs.Player.IsFullHp,
+		(pos, gs) => new Thing(pos, new Vector2(20, 20), new HealEffect(1, gs.Player))
+		{
+			Texture = texture
+		}
+	)
+{
+}
+
+public sealed class SpawnKillAllEntity(Texture2d texture) : SpawnEntity(
+	0.1f,
+	(_) => true,
+	(pos, gs) => new Thing(pos, new Vector2(20, 20), new KillAllEffect(gs))
+	{
+		Texture = texture
+	}
+)
+{
+}
+
+public class Spawner(
+	IReadOnlyList<Vector2> spawnPoints,
+	IGameScene gameScene,
+	float timeInterval,
+	params SpawnEntity[] spawnEntities
+) {
 	private static readonly Random Random = new(25512);
-	private readonly IReadOnlyList<Vector2> spawnPoints;
-	private readonly Vector2 thingSize;
-	private readonly IGameScene gameScene;
+	private readonly List<SpawnEntity> spawnEntities = [.. spawnEntities.OrderBy(x => x.Probability)];
 	private float timeElapsed = 0f;
 
 	public float Speed { get; set; } = 60f;
 
-	public float TimeInterval { get; set; }
-
-	private Texture2d _healthEffect;
-	private Texture2d _bombEffect;
-	private Texture2d _justThing;
-
-	public Spawner(
-		IReadOnlyList<Vector2> spawnPoints,
-		Vector2 thingSize,
-		float timeInterval,
-		IGameScene gameScene)
-	{
-		this.spawnPoints = spawnPoints;
-		this.thingSize = thingSize;
-		this.gameScene = gameScene;
-		TimeInterval = timeInterval;
-
-		_healthEffect = new Texture2d("Assets/Textures/effect_health.png").Load();
-		_bombEffect = new Texture2d("Assets/Textures/effect_bomb.png").Load();
-		_justThing  = new Texture2d("Assets/Textures/thing.png").Load();
-	}
+	public float TimeInterval { get; set; } = timeInterval;
 
 	public Thing? Get(float dt)
 	{
 		timeElapsed += dt;
-		Thing? result = null;
 
 		if (timeElapsed > TimeInterval)
 		{
 			timeElapsed = 0f;
-			var index = Random.Next(spawnPoints.Count);
-			var position = spawnPoints[index];
+			Vector2 position = GetSpawnPoint();
 
-			var thingId = Random.Next(3);
-			var can = false;
+			var validEntities = spawnEntities
+				.Where(e => e.Condition(gameScene))
+				.ToList();
 
-			while (thingId != 0 && !can)
+			if (validEntities.Count == 0) return null;
+
+			var totalProbability = validEntities.Sum(e => e.Probability);
+			var roll = Random.NextDouble() * totalProbability;
+
+			float cumulative = 0f;
+			foreach (var entity in validEntities)
 			{
-				can = thingId != 1 || !gameScene.Player.IsFullHp;
-
-				if (!can)
+				cumulative += entity.Probability;
+				if (roll < cumulative)
 				{
-					thingId = Random.Next(3);
+					return entity.CreateEntity(position, gameScene);
 				}
 			}
-
-			result = thingId switch
-			{
-				0 => new Thing(position, thingSize)
-				{
-					Color = new Color4<Rgba>(0.34f, 0.42f, 0.27f, 1f),
-					Speed = Speed,
-					Texture = _justThing,
-				},
-				1 => new Thing(position, thingSize, new HealEffect(1, gameScene.Player))
-				{ 
-					Color = new Color4<Rgba>(0.45f, 0.29f, 0.27f, 1f),
-					Speed = Speed,
-					Texture = _healthEffect,
-				},
-				2 => new Thing(position, thingSize, new KillAllEffect(gameScene))
-				{ 
-					Color = new Color4<Rgba>(0.21f, 0.24f, 0.26f, 1f),
-					Speed = Speed,
-					Texture = _bombEffect,
-				},
-				_ => null
-			};
 		}
 
-		return result;
+		return null;
+	}
+
+	private Vector2 GetSpawnPoint()
+	{
+		var index = Random.Next(spawnPoints.Count);
+		var position = spawnPoints[index];
+		return position;
 	}
 }

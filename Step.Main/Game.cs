@@ -6,21 +6,20 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using StbImageSharp;
 using Step.Main.Audio;
-using System.Drawing;
-using System;
-using System.IO;
 
 /*
  * Goals:
  *  Add score
- *  Effects 
+ *  Effects
+ *    - speed
+ *		- buf
+ *		- debuff
  *    - split platform on two but smaller size and move it simultaneously
  *  Render player Stats
  *  - inventory contains available effects of the user.
  *  - current health
- *  Helpers
- *  - God mode...
- *  
+ *
+ *  Additional automatic platforms, that can collect things
  *  Guns - pistol, knife - additional effects...
  */
 
@@ -72,6 +71,12 @@ public class Game : GameWindow, IGameScene
 	private bool _godModeEnabled = false;
 	private float _thingsSpeed = 60f;
 	private float _spawnTimeInterval = 1f;
+	private System.Numerics.Vector2 _playerSize;
+	private float _lastUpdateTime;
+
+	private Texture2d _healthEffect;
+	private Texture2d _bombEffect;
+	private Texture2d _justThing;
 
 	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
@@ -104,12 +109,17 @@ public class Game : GameWindow, IGameScene
 		GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
 		GL.EnableVertexAttribArray(1);
 
+		_healthEffect = new Texture2d("Assets/Textures/effect_health.png").Load();
+		_bombEffect = new Texture2d("Assets/Textures/effect_bomb.png").Load();
+		_justThing  = new Texture2d("Assets/Textures/thing.png").Load();
+
 		_shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
 		_player = new Player(
 			new(0f, -75f),
 			new(40f, 20f),
 			KeyboardState,
 			new Box2(-180f, -90f, 177f, 90f));
+		_playerSize = new System.Numerics.Vector2(_player.Size.X, _player.Size.Y);
 
 		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
 		{
@@ -123,9 +133,13 @@ public class Game : GameWindow, IGameScene
 			new(-150f, 95f),
 			new(-110f, 110f)
 		],
-		new Vector2(20, 20),
+		this,
 		1f,
-		this);
+		[
+			new SpawnSimpleEntity(_justThing),
+			new SpanwHealthEntity(_healthEffect),
+			new SpawnKillAllEntity(_bombEffect),
+		]);
 
 		AudioManager.Ins.LoadSound("start", "Assets/Music/ok_lets_go.mp3");
 		AudioManager.Ins.LoadSound("player_heal", "Assets/Music/player_heal.mp3");
@@ -190,10 +204,18 @@ public class Game : GameWindow, IGameScene
 				ImGui.Text($"Score: {_score}");
 				ImGui.Text($"Health: {_player.Hp}");
 				ImGui.Text($"Falling things: {_fallingThings.Count}");
-				ImGui.SeparatorText("Game settings");
+
+				ImGui.SeparatorText("Player settings");
 				ImGui.Checkbox("God mode", ref _godModeEnabled);
+				ImGui.SliderFloat2("Player Size ", ref _playerSize, 1f, 200f);
+
+				ImGui.SeparatorText("Spawner settings");
 				ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
 				ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
+
+				ImGui.SeparatorText("Performance");
+				ImGui.Text($"Render time: {e.Time}");
+				ImGui.Text($"Update time: {_lastUpdateTime}");
 			}
 			ImGui.End();
 			_controller.Render();
@@ -242,6 +264,7 @@ public class Game : GameWindow, IGameScene
 	{
 		base.OnUpdateFrame(e);
 		float dt = (float)e.Time;
+		_lastUpdateTime = dt;
 
 		var input = KeyboardState;
 
@@ -281,7 +304,8 @@ public class Game : GameWindow, IGameScene
 		_spawner.Speed = _thingsSpeed;
 		_spawner.TimeInterval = _spawnTimeInterval;
 
-		//_player.SetGodMode(_godModeEnabled);
+		_player.SetGodMode(_godModeEnabled);
+		_player.Resize(new (_playerSize.X, _playerSize.Y));
 		_player.Update(dt);
 
 		var spawnedThing = _spawner.Get(dt);
