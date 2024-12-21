@@ -34,21 +34,7 @@ public interface IGameScene
 
 public class Game : GameWindow, IGameScene
 {
-	private readonly float[] _rectVertices =
-	{
-		// Position          // Texture Coordinates
-		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,  // Bottom-left corner
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // Bottom-right corner
-		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // Top-right corner
-		-0.5f,  0.5f, 0.0f,  0.0f, 1.0f   // Top-left corner
-	};
-
 	ImGuiController _controller;
-
-	private int _vertexBufferObject;
-	private int _vertexArrayObject;
-
-	private Shader _shader;
 
 	private readonly Camera2d _camera = new(360, 180);
 
@@ -77,8 +63,11 @@ public class Game : GameWindow, IGameScene
 	private Texture2d _healthEffect;
 	private Texture2d _bombEffect;
 	private Texture2d _justThing;
+	private Renderer _renderer;
 
-	public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
+	public Game(
+		GameWindowSettings gameWindowSettings, 
+		NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
 	{
 	}
@@ -89,31 +78,15 @@ public class Game : GameWindow, IGameScene
 		StbImage.stbi_set_flip_vertically_on_load(1);
 
 		//CenterWindow();
-		Graphics.PrintOpenGLInfo();
+		_renderer = new Renderer();
+		_renderer.Load();
 
-		GL.ClearColor(0.737f, 0.718f, 0.647f, 1.0f);
-
-		_vertexBufferObject = GL.GenBuffer();
-		GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-
-		GL.BufferData(BufferTarget.ArrayBuffer, _rectVertices.Length * sizeof(float), _rectVertices, BufferUsage.StaticDraw);
-
-		_vertexArrayObject = GL.GenVertexArray();
-		GL.BindVertexArray(_vertexArrayObject);
-
-		// Position attribute
-		GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-		GL.EnableVertexAttribArray(0);
-
-		// Texture coordinate attribute
-		GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-		GL.EnableVertexAttribArray(1);
+		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 
 		_healthEffect = new Texture2d("Assets/Textures/effect_health.png").Load();
 		_bombEffect = new Texture2d("Assets/Textures/effect_bomb.png").Load();
-		_justThing  = new Texture2d("Assets/Textures/thing.png").Load();
+		_justThing = new Texture2d("Assets/Textures/thing.png").Load();
 
-		_shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
 		_player = new Player(
 			new(0f, -75f),
 			new(40f, 20f),
@@ -130,6 +103,7 @@ public class Game : GameWindow, IGameScene
 		[
 			new(150f, 100f),
 			new(110f, 105f),
+			new(0f, 90f),
 			new(-150f, 95f),
 			new(-110f, 110f)
 		],
@@ -183,15 +157,16 @@ public class Game : GameWindow, IGameScene
 		_controller.Update(this, (float)e.Time);
 
 		GL.Clear(ClearBufferMask.ColorBufferBit);
+		_renderer.SetCamera(_camera);
 
 		Vector4 hpColor = new(0.9f, 0.4f, 0.35f, 1f);
 		float hpScaleFactor = _player.Hp / (float)_player.MaxHp;
 		hpColor *= hpScaleFactor;
-		DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor, _playerTexture);
+		_renderer.DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor, _playerTexture);
 
 		foreach(var thing in _fallingThings)
 		{
-			DrawObject(thing.Position, thing.Size, Color4.White, thing.Texture);
+			_renderer.DrawObject(thing.Position, thing.Size, Color4.White, thing.Texture);
 		}
 
 		if (_showImGui)
@@ -223,41 +198,6 @@ public class Game : GameWindow, IGameScene
 		}
 
 		SwapBuffers();
-	}
-
-	private void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
-	{
-		Vector2 shadowOffset = new(1, -1);
-		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.25f);
-
-		GL.Enable(EnableCap.Blend);
-		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-		DrawRect(position + shadowOffset, size, shadowColor, texture);
-
-		DrawRect(position, size, color, texture);
-
-		GL.Disable(EnableCap.Blend);
-	}
-
-	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
-	{
-		_shader.Use();
-		_shader.SetMatrix4("viewProj", _camera.ViewProj);
-
-		var model = Matrix4.CreateScale(size.To3(1f)) * Matrix4.CreateTranslation(position.To3());
-		_shader.SetMatrix4("model", model);
-		_shader.SetColor("color", color);
-
-		if (texture != null)
-		{
-			texture?.BindAsSampler(0);
-			_shader.SetInt("diffuseTexture", 0);
-		}
-
-		GL.BindVertexArray(_vertexArrayObject);
-		GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-
-		texture?.Unbind();
 	}
 
 	protected override void OnUpdateFrame(FrameEventArgs e)
@@ -391,15 +331,7 @@ public class Game : GameWindow, IGameScene
 	protected override void OnUnload()
 	{
 		AudioManager.Ins.Dispose();
-		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-		GL.BindVertexArray(0);
-		GL.UseProgram(0);
-
-		GL.DeleteBuffer(_vertexBufferObject);
-		GL.DeleteVertexArray(_vertexArrayObject);
-
-		GL.DeleteProgram(_shader.Handle);
-
+		_renderer.Unload();
 		base.OnUnload();
 	}
 
