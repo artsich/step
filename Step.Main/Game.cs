@@ -177,12 +177,9 @@ public class Game : GameWindow, IGameScene
 			{
 				ImGui.SeparatorText("Game info");
 				ImGui.Text($"Score: {_score}");
-				ImGui.Text($"Health: {_player.Hp}");
 				ImGui.Text($"Falling things: {_fallingThings.Count}");
 
-				ImGui.SeparatorText("Player settings");
-				ImGui.Checkbox("God mode", ref _godModeEnabled);
-				ImGui.SliderFloat2("Player Size ", ref _playerSize, 1f, 200f);
+				_player.DrawDebug();
 
 				ImGui.SeparatorText("Spawner settings");
 				ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
@@ -244,7 +241,6 @@ public class Game : GameWindow, IGameScene
 		_spawner.Speed = _thingsSpeed;
 		_spawner.TimeInterval = _spawnTimeInterval;
 
-		_player.SetGodMode(_godModeEnabled);
 		_player.Resize(new (_playerSize.X, _playerSize.Y));
 		_player.Update(dt);
 

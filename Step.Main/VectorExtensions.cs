@@ -8,4 +8,14 @@ public static class VectorExtensions
 	{
 		return new Vector3(vec.X, vec.Y, z);
 	}
+
+	public static Vector2 FromSystem(this System.Numerics.Vector2 vector)
+	{
+		return new (vector.X, vector.Y);
+	}
+
+	public static System.Numerics.Vector2 ToSystem(this Vector2 vector)
+	{
+		return new (vector.X, vector.Y);
+	}
 }

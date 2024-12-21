@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ImGuiNET;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Step.Main;
@@ -11,6 +12,7 @@ public class Player(
 {
 	private float _velocity;
 	private Vector2 _position = position;
+	private Vector2 _size = size;
 
 	public event Action? OnPlayerHeal;
 	public event Action<Thing>? OnThingTaken;
@@ -27,7 +29,14 @@ public class Player(
 
 	public Vector2 Position => _position;
 
-	public Vector2 Size { get; private set; } = size;
+	public Vector2 Size
+	{ 
+		get => _size;
+		private set
+		{
+			_size = value;
+		}
+	}
 
 	public Box2 Box => new(Position - (Size / 2f), Position + (Size / 2f));
 
@@ -103,9 +112,22 @@ public class Player(
 		OnThingTaken?.Invoke(thing);
 	}
 
-	public void SetGodMode(bool enabled)
+	public void DrawDebug()
 	{
-		godMode = enabled;
+		ImGui.SeparatorText("Player stats");
+
+		ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Health: {Hp}");
+		foreach (var effect in _effects.GroupBy(x => x.GetType().Name))
+		{
+			ImGui.BulletText($"{effect.Key}: {effect.Count()}");
+		}
+
+		ImGui.SeparatorText("Player settings");
+		ImGui.Checkbox("God mode", ref godMode);
+
+		var systemVectorSize = _size.ToSystem();
+		ImGui.SliderFloat2("Player Size", ref systemVectorSize, 1f, 200f);
+		Resize(systemVectorSize.FromSystem());
 	}
 
 	private void ResolveWorldCollision()
