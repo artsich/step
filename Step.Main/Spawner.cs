@@ -27,7 +27,7 @@ public sealed class SpawnSimpleEntity(Texture2d texture) : SpawnEntity(
 
 public sealed class SpanwHealthEntity(Texture2d texture) : SpawnEntity(
 		0.2f,
-		(gs) => !gs.Player.IsFullHp,
+		(gs) => !gs.Player.IsFullHp && gs.Player.EffectsCount<HealEffect>() <= gs.Player.MaxHp,
 		(pos, gs) => new Thing(pos, new Vector2(20, 20), new HealEffect(1, gs.Player))
 		{
 			Texture = texture

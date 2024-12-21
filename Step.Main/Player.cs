@@ -60,6 +60,11 @@ public class Player(
 		Size = newSize;
 	}
 
+	public int EffectsCount<T>() where T : IEffect
+	{
+		return _effects.OfType<T>().Count();
+	}
+
 	public void AddHp(int hp)
 	{
 		if (hp < 0)
