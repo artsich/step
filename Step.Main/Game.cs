@@ -113,9 +113,9 @@ public class Game : GameWindow, IGameScene
 		this,
 		1f,
 		[
-			new SpawnSimpleEntity(_justThing),
+			//new SpawnSimpleEntity(_justThing),
 			new SpanwHealthEntity(_healthEffect),
-			new SpawnKillAllEntity(_bombEffect),
+			//new SpawnKillAllEntity(_bombEffect),
 			new SpawnSpeedEntity(_speedEffect),
 		]);
 
@@ -200,6 +200,16 @@ public class Game : GameWindow, IGameScene
 			ImGui.SeparatorText("Performance");
 			ImGui.Text($"Render time: {e.Time}");
 			ImGui.Text($"Update time: {_lastUpdateTime}");
+
+			if (ImGui.Button("Clear console"))
+			{
+				Console.Clear();
+			}
+
+			if (ImGui.Button("Damage"))
+			{
+				_player.Damage(1);
+			}
 		}
 		ImGui.End();
 		_controller.Render();
