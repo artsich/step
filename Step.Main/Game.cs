@@ -63,6 +63,7 @@ public class Game : GameWindow, IGameScene
 	private Texture2d _healthEffect;
 	private Texture2d _bombEffect;
 	private Texture2d _justThing;
+	private Texture2d _speedEffect;
 	private Renderer _renderer;
 
 	public Game(
@@ -86,6 +87,7 @@ public class Game : GameWindow, IGameScene
 		_healthEffect = new Texture2d("Assets/Textures/effect_health.png").Load();
 		_bombEffect = new Texture2d("Assets/Textures/effect_bomb.png").Load();
 		_justThing = new Texture2d("Assets/Textures/thing.png").Load();
+		_speedEffect = new Texture2d("Assets/Textures/effect_speed.png").Load();
 
 		_player = new Player(
 			new(0f, -75f),
@@ -113,6 +115,7 @@ public class Game : GameWindow, IGameScene
 			new SpawnSimpleEntity(_justThing),
 			new SpanwHealthEntity(_healthEffect),
 			new SpawnKillAllEntity(_bombEffect),
+			new SpawnSpeedEntity(_speedEffect),
 		]);
 
 		AudioManager.Ins.LoadSound("start", "Assets/Music/ok_lets_go.mp3");

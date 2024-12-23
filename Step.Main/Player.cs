@@ -27,6 +27,20 @@ public class Player(
 
 	public float Acceleration { get; } = 10f;
 
+	// todo: not good solution as it hard to scale from different sources.
+	public float SpeedScale { get => _speedScale; set
+		{
+			_speedScale = Math.Clamp(value, 0f, float.MaxValue);
+		}
+	}
+	private static readonly float DefaultSpeedScale = 1f;
+	private float _speedScale = DefaultSpeedScale;
+
+	public void ResetSpeedScale()
+	{
+		_speedScale = DefaultSpeedScale;
+	}
+
 	public Vector2 Position => _position;
 
 	public Vector2 Size
@@ -51,6 +65,7 @@ public class Player(
 
 	public void Update(float dt)
 	{
+		UpdateEffects(dt);
 		Move(input, dt);
 		ResolveWorldCollision();
 	}
@@ -106,7 +121,7 @@ public class Player(
 
 	public void AddEffect(IEffect effect)
 	{
-		Console.WriteLine($"Effect added {effect.GetType().Name}");
+		Console.WriteLine($"Effect `{effect.GetType().Name}` taken");
 		_effects.Add(effect);
 	}
 
@@ -133,6 +148,31 @@ public class Player(
 		var systemVectorSize = _size.ToSystem();
 		ImGui.SliderFloat2("Player Size", ref systemVectorSize, 1f, 200f);
 		Resize(systemVectorSize.FromSystem());
+	}
+
+	private void UpdateEffects(float dt)
+	{
+		if (input.IsKeyPressed(Keys.Space))
+		{
+			UseNextEffect();
+		}
+
+		foreach (var effect in _effects)
+		{
+			effect.Update(dt);
+		}
+
+		_effects.RemoveAll(x =>
+		{
+			bool isCompleted = x.IsCompleted;
+
+			if (isCompleted)
+			{
+				Console.WriteLine($"Effect completed {x.GetType().Name}");
+			}
+
+			return isCompleted;
+		});
 	}
 
 	private void ResolveWorldCollision()
@@ -165,11 +205,6 @@ public class Player(
 			targetSpeed = MaxSpeed;
 		}
 
-		if (input.IsKeyPressed(Keys.Up))
-		{
-			UseNextEffect();
-		}
-
 		dashCdEllapsed += dt;
 		if (input.IsKeyDown(Keys.LeftShift) && dashCdEllapsed > DashCd)
 		{
@@ -180,8 +215,7 @@ public class Player(
 			}
 		}
 
-		_velocity = MathHelper.Lerp(_velocity, targetSpeed, Acceleration * dt);
-
+		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
 		_position.X += _velocity * dt;
 	}
 
@@ -189,8 +223,10 @@ public class Player(
 	{
 		if (_effects.Count > 0)
 		{
-			_effects.Last().Use();
-			_effects.RemoveAt(_effects.Count - 1);
+			var effect = _effects.Last();
+			effect.Use();
+
+			Console.WriteLine($"Effect `{effect.GetType().Name}` used");
 		}
 	}
 }

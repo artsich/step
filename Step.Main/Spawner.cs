@@ -14,6 +14,17 @@ public abstract class SpawnEntity(
 	public Func<Vector2, IGameScene, Thing> CreateEntity { get; } = createEntity;
 }
 
+public sealed class SpawnSpeedEntity(Texture2d texture) : SpawnEntity(
+		0.5f,
+		(gs) => true,
+		(pos, gs) => new Thing(pos, new Vector2(20), new SpeedEffect(gs.Player))
+		{
+			Texture = texture
+		}
+	)
+{
+}
+
 public sealed class SpawnSimpleEntity(Texture2d texture) : SpawnEntity(
 		0.9f,
 		(gs) => true,
