@@ -54,7 +54,6 @@ public class Game : GameWindow, IGameScene
 
 	private int _score = 0;
 
-	private bool _godModeEnabled = false;
 	private float _thingsSpeed = 60f;
 	private float _spawnTimeInterval = 1f;
 	private System.Numerics.Vector2 _playerSize;
@@ -174,30 +173,35 @@ public class Game : GameWindow, IGameScene
 
 		if (_showImGui)
 		{
-			// Enable Docking
-			//ImGui.DockSpaceOverViewport();
-			ImGui.Begin("Debug");
-			{
-				ImGui.SeparatorText("Game info");
-				ImGui.Text($"Score: {_score}");
-				ImGui.Text($"Falling things: {_fallingThings.Count}");
-
-				_player.DrawDebug();
-
-				ImGui.SeparatorText("Spawner settings");
-				ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
-				ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
-
-				ImGui.SeparatorText("Performance");
-				ImGui.Text($"Render time: {e.Time}");
-				ImGui.Text($"Update time: {_lastUpdateTime}");
-			}
-			ImGui.End();
-			_controller.Render();
-			ImGuiController.CheckGLError("End of frame");
+			ImguiRender(e);
 		}
 
 		SwapBuffers();
+	}
+
+	private void ImguiRender(FrameEventArgs e)
+	{
+		// Enable Docking
+		//ImGui.DockSpaceOverViewport();
+		ImGui.Begin("Debug");
+		{
+			ImGui.SeparatorText("Game info");
+			ImGui.Text($"Score: {_score}");
+			ImGui.Text($"Falling things: {_fallingThings.Count}");
+
+			_player.DrawDebug();
+
+			ImGui.SeparatorText("Spawner settings");
+			ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
+			ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
+
+			ImGui.SeparatorText("Performance");
+			ImGui.Text($"Render time: {e.Time}");
+			ImGui.Text($"Update time: {_lastUpdateTime}");
+		}
+		ImGui.End();
+		_controller.Render();
+		ImGuiController.CheckGLError("End of frame");
 	}
 
 	protected override void OnUpdateFrame(FrameEventArgs e)
