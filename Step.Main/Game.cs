@@ -203,8 +203,8 @@ public class Game : GameWindow, IGameScene
 					ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
 
 					ImGui.SeparatorText("Performance");
-					ImGui.Text($"Render time: {e.Time}");
-					ImGui.Text($"Update time: {_lastUpdateTime}");
+					ImGui.Text($"Render time: {e.Time * 1000:F2}");
+					ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}");
 
 					if (ImGui.Button("Clear console"))
 					{
