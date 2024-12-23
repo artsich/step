@@ -1,8 +1,6 @@
 ﻿using ImGuiNET;
-using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Collections.Generic;
 
 namespace Step.Main;
 
@@ -30,7 +28,9 @@ public class Player(
 	public float Acceleration { get; } = 10f;
 
 	// todo: not good solution as it hard to scale from different sources.
-	public float SpeedScale { get => _speedScale; set
+	public float SpeedScale
+	{
+		get => _speedScale; set
 		{
 			_speedScale = Math.Clamp(value, 0f, float.MaxValue);
 		}
@@ -38,15 +38,12 @@ public class Player(
 	private static readonly float DefaultSpeedScale = 1f;
 	private float _speedScale = DefaultSpeedScale;
 
-	public void ResetSpeedScale()
-	{
-		_speedScale = DefaultSpeedScale;
-	}
+	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
 
 	public Vector2 Position => _position;
 
 	public Vector2 Size
-	{ 
+	{
 		get => _size;
 		private set
 		{
@@ -58,6 +55,7 @@ public class Player(
 
 	public int MaxHp { get; set; } = 5;
 	private readonly List<IEffect> _effects = [];
+	private int _selectedEffectId = 0;
 	private readonly Dictionary<Type, IEffect> _activatedEffects = [];
 
 	public int Hp { get; private set; } = 5;
@@ -140,13 +138,7 @@ public class Player(
 	public void DrawDebug()
 	{
 		ImGui.SeparatorText("Player stats");
-
 		ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Health: {Hp}");
-		foreach (var effect in Enumerable.Reverse(_effects))
-		{
-			var name = effect.GetType().Name;
-			ImGui.BulletText($"{name}");
-		}
 
 		ImGui.SeparatorText("Player settings");
 		ImGui.Checkbox("God mode", ref godMode);
@@ -154,6 +146,39 @@ public class Player(
 		var systemVectorSize = _size.ToSystem();
 		ImGui.SliderFloat2("Player Size", ref systemVectorSize, 1f, 200f);
 		Resize(systemVectorSize.FromSystem());
+
+		if (_activatedEffects.Count > 0)
+		{
+			ImGui.SeparatorText("Active effects");
+			ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.0f, 0.7f, 0.0f, 1.0f));
+			foreach (var effectType in _activatedEffects.Keys)
+			{
+				ImGui.BulletText($"{effectType.Name}");
+			}
+			ImGui.PopStyleColor();
+		}
+
+		if (_effects.Count > 0)
+		{
+			ImGui.SeparatorText("Effects");
+
+			for (int i = 0; i < _effects.Count; i++)
+			{
+				var effect = _effects[i];
+				var name = effect.GetType().Name;
+
+				if (i == _selectedEffectId)
+				{
+					ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+					ImGui.BulletText($"{name}");
+					ImGui.PopStyleColor();
+				}
+				else
+				{
+					ImGui.BulletText($"{name}");
+				}
+			}
+		}
 	}
 
 	private void UpdateEffects(float dt)
@@ -163,23 +188,53 @@ public class Player(
 			UseNextEffect();
 		}
 
-		foreach (var effect in _effects)
+		_selectedEffectId = Math.Clamp(_selectedEffectId, 0, Math.Max(0, _effects.Count - 1));
+
+		if (input.IsKeyPressed(Keys.Up))
 		{
-			effect.Update(dt);
+			RotateEffects(-1);
 		}
 
-		_effects.RemoveAll(effect =>
+		if (input.IsKeyPressed(Keys.Down))
 		{
-			bool isCompleted = effect.IsCompleted;
+			RotateEffects(1);
+		}
 
-			if (isCompleted)
-			{
-				_activatedEffects.Remove(effect.GetType());
-				Console.WriteLine($"Effect completed {effect.GetType().Name}");
-			}
+		if (input.IsKeyPressed(Keys.D))
+		{
+			DropEffect();
+		}
 
-			return isCompleted;
-		});
+		foreach (var effect in _activatedEffects)
+		{
+			effect.Value.Update(dt);
+		}
+
+		var completed = _activatedEffects.Where(effect => effect.Value.IsCompleted).ToList();
+		foreach (var kv in completed)
+		{
+			var (type, _) = kv;
+			Console.WriteLine($"Effect completed {type.Name}");
+			_activatedEffects.Remove(type);
+		}
+	}
+
+	private void DropEffect()
+	{
+		if (_effects.Count > 0)
+		{
+			var name = _effects[_selectedEffectId].GetType().Name;
+			_effects.RemoveAt(_selectedEffectId);
+			Console.WriteLine($"{name} dropped...");
+		}
+	}
+
+	private void RotateEffects(int dir)
+	{
+		if (_effects.Count == 0)
+			return;
+
+		_selectedEffectId = (_selectedEffectId + dir) % _effects.Count;
 	}
 
 	private void ResolveWorldCollision()
@@ -234,20 +289,22 @@ public class Player(
 
 	private void UseNextEffect()
 	{
-		if (_effects.Count > 0)
-		{
-			var effect = _effects.Last();
+		if (_effects.Count == 0)
+			return;
 
-			if (effect.CanApply())
-			{
-				effect.Use();
-				AddActivatedEffect(effect);
-				Console.WriteLine($"Effect `{effect.GetType().Name}` used");
-			}
-			else
-			{
-				Console.WriteLine($"Effect `{effect.GetType().Name}` can't be used...");
-			}
+		var effect = _effects[_selectedEffectId];
+
+		if (effect.CanApply())
+		{
+			effect.Use();
+			_effects.RemoveAt(_selectedEffectId);
+			AddActivatedEffect(effect);
+
+			Console.WriteLine($"Effect `{effect.GetType().Name}` used");
+		}
+		else
+		{
+			Console.WriteLine($"Effect `{effect.GetType().Name}` can't be used...");
 		}
 	}
 }
