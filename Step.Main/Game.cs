@@ -59,6 +59,7 @@ public class Game : GameWindow, IGameScene
 	private float _spawnTimeInterval = 1f;
 	private System.Numerics.Vector2 _playerSize;
 	private float _lastUpdateTime;
+	private float _audioMasterVolume = 0.5f;
 
 	private Texture2d _healthEffect;
 	private Texture2d _bombEffect;
@@ -125,6 +126,8 @@ public class Game : GameWindow, IGameScene
 		AudioManager.Ins.LoadSound("player_take_damage", "Assets/Music/player_take_damage.mp3");
 		AudioManager.Ins.LoadSound("main_theme", "Assets/Music/main_theme.mp3");
 
+		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
+
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
 
@@ -182,35 +185,51 @@ public class Game : GameWindow, IGameScene
 
 	private void ImguiRender(FrameEventArgs e)
 	{
-		// Enable Docking
-		//ImGui.DockSpaceOverViewport();
-		ImGui.Begin("Debug");
+		if (ImGui.Begin("Main Window"))
 		{
-			ImGui.SeparatorText("Game info");
-			ImGui.Text($"Score: {_score}");
-			ImGui.Text($"Falling things: {_fallingThings.Count}");
-
-			_player.DrawDebug();
-
-			ImGui.SeparatorText("Spawner settings");
-			ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
-			ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
-
-			ImGui.SeparatorText("Performance");
-			ImGui.Text($"Render time: {e.Time}");
-			ImGui.Text($"Update time: {_lastUpdateTime}");
-
-			if (ImGui.Button("Clear console"))
+			if (ImGui.BeginTabBar("Main Tabs"))
 			{
-				Console.Clear();
+				if (ImGui.BeginTabItem("Game"))
+				{
+					ImGui.SeparatorText("Game info");
+					ImGui.Text($"Score: {_score}");
+					ImGui.Text($"Falling things: {_fallingThings.Count}");
+
+					_player.DrawDebug();
+
+					ImGui.SeparatorText("Spawner settings");
+					ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
+					ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
+
+					ImGui.SeparatorText("Performance");
+					ImGui.Text($"Render time: {e.Time}");
+					ImGui.Text($"Update time: {_lastUpdateTime}");
+
+					if (ImGui.Button("Clear console"))
+					{
+						Console.Clear();
+					}
+
+					if (ImGui.Button("Damage"))
+					{
+						_player.Damage(1);
+					}
+
+					ImGui.EndTabItem();
+				}
+
+				if (ImGui.BeginTabItem("Audio Settings"))
+				{
+					ImGui.SliderFloat("Master volume", ref _audioMasterVolume, 0f, 1f);
+					ImGui.EndTabItem();
+				}
+
+				ImGui.EndTabBar();
 			}
 
-			if (ImGui.Button("Damage"))
-			{
-				_player.Damage(1);
-			}
+			ImGui.End();
 		}
-		ImGui.End();
+
 		_controller.Render();
 		ImGuiController.CheckGLError("End of frame");
 	}
@@ -240,11 +259,12 @@ public class Game : GameWindow, IGameScene
 
 		CheckWindowStateToggle(input);
 
+		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
+
 		if (!_paused)
 		{
 			GameUpdate(dt);
 		}
-
 
 		while (_postUpdateActions.TryDequeue(out var action))
 		{

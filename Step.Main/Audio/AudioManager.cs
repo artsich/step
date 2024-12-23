@@ -27,6 +27,12 @@ public class AudioManager : IDisposable
 		PrintOpenALInfo();
 	}
 
+	public void SetMasterVolume(float volume)
+	{
+		volume = Math.Clamp(volume, 0.0f, 1.0f);
+		AL.Listener(ALListenerf.Gain, volume);
+	}
+
 	public void LoadSound(string key, string filePath)
 	{
 		if (_loadedSounds.ContainsKey(key))
