@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Collections.Generic;
 
 namespace Step.Main;
 
@@ -56,6 +57,7 @@ public class Player(
 
 	public int MaxHp { get; set; } = 5;
 	private readonly List<IEffect> _effects = [];
+	private readonly Dictionary<Type, IEffect> activeEffects = [];
 
 	public int Hp { get; private set; } = 5;
 
@@ -162,13 +164,14 @@ public class Player(
 			effect.Update(dt);
 		}
 
-		_effects.RemoveAll(x =>
+		_effects.RemoveAll(effect =>
 		{
-			bool isCompleted = x.IsCompleted;
+			bool isCompleted = effect.IsCompleted;
 
 			if (isCompleted)
 			{
-				Console.WriteLine($"Effect completed {x.GetType().Name}");
+				activeEffects.Remove(effect.GetType());
+				Console.WriteLine($"Effect completed {effect.GetType().Name}");
 			}
 
 			return isCompleted;
@@ -224,9 +227,18 @@ public class Player(
 		if (_effects.Count > 0)
 		{
 			var effect = _effects.Last();
-			effect.Use();
+			var effectType = effect.GetType();
 
-			Console.WriteLine($"Effect `{effect.GetType().Name}` used");
+			if (!activeEffects.ContainsKey(effectType)) 
+			{
+				effect.Use();
+				activeEffects.Add(effectType, effect);
+				Console.WriteLine($"Effect `{effect.GetType().Name}` used");
+			}
+			else
+			{
+				Console.WriteLine($"Effect `{effect.GetType().Name}` already in use...");
+			}
 		}
 	}
 }
