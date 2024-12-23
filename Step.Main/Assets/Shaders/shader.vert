@@ -1,7 +1,18 @@
-#version 330 core
+#version 460 core
 
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec2 aTexCoord;
+vec2 positions[4] = vec2[4](
+    vec2(-0.5, -0.5), // Bottom-left
+    vec2( 0.5, -0.5), // Bottom-right
+    vec2( 0.5,  0.5), // Top-right
+    vec2(-0.5,  0.5)  // Top-left
+);
+
+vec2 texCoords[4] = vec2[4](
+    vec2(0.0, 0.0), // Bottom-left
+    vec2(1.0, 0.0), // Bottom-right
+    vec2(1.0, 1.0), // Top-right
+    vec2(0.0, 1.0)  // Top-left
+);
 
 out vec2 TexCoord;
 
@@ -10,6 +21,7 @@ uniform mat4 model = mat4(1.0);
 
 void main(void)
 {
-	TexCoord = aTexCoord;
-	gl_Position = viewProj * model * vec4(aPosition, 1.0);
+    vec4 pos = vec4(positions[gl_VertexID], 0.0, 1.0);
+    TexCoord = texCoords[gl_VertexID];
+    gl_Position = viewProj * model * pos;
 }

@@ -5,16 +5,7 @@ namespace Step.Main;
 
 public class Renderer
 {
-	private readonly float[] _rectVertices =
-	{
-		// Position          // Texture Coordinates
-		-0.5f, -0.5f, 0.0f,  0.0f, 0.0f,  // Bottom-left corner
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  // Bottom-right corner
-		 0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  // Top-right corner
-		-0.5f,  0.5f, 0.0f,  0.0f, 1.0f   // Top-left corner
-	};
-	private int _vertexBufferObject;
-	private int _vertexArrayObject;
+	private int _vao;
 	private Shader _shader;
 	private Camera2d _camera;
 
@@ -31,24 +22,13 @@ public class Renderer
 	public void Load()
 	{
 		PrintOpenGLInfo();
-
-		_vertexBufferObject = GL.GenBuffer();
-		GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-
-		GL.BufferData(BufferTarget.ArrayBuffer, _rectVertices.Length * sizeof(float), _rectVertices, BufferUsage.StaticDraw);
-
-		_vertexArrayObject = GL.GenVertexArray();
-		GL.BindVertexArray(_vertexArrayObject);
-
-		// Position attribute
-		GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
-		GL.EnableVertexAttribArray(0);
-
-		// Texture coordinate attribute
-		GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
-		GL.EnableVertexAttribArray(1);
+		_vao = GL.GenVertexArray();
 
 		_shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
+
+		GL.Disable(EnableCap.CullFace);
+		GL.Enable(EnableCap.Blend);
+		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 	}
 
 	public void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
@@ -56,13 +36,8 @@ public class Renderer
 		Vector2 shadowOffset = new(1, -1);
 		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.25f);
 
-		GL.Enable(EnableCap.Blend);
-		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 		DrawRect(position + shadowOffset, size, shadowColor, texture);
-
 		DrawRect(position, size, color, texture);
-
-		GL.Disable(EnableCap.Blend);
 	}
 
 	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
@@ -80,9 +55,8 @@ public class Renderer
 			_shader.SetInt("diffuseTexture", 0);
 		}
 
-		GL.BindVertexArray(_vertexArrayObject);
+		GL.BindVertexArray(_vao);
 		GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-
 		texture?.Unbind();
 	}
 
@@ -91,9 +65,6 @@ public class Renderer
 		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 		GL.BindVertexArray(0);
 		GL.UseProgram(0);
-
-		GL.DeleteBuffer(_vertexBufferObject);
-		GL.DeleteVertexArray(_vertexArrayObject);
 
 		GL.DeleteProgram(_shader.Handle);
 	}
