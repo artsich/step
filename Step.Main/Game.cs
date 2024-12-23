@@ -125,6 +125,7 @@ public class Game : GameWindow, IGameScene
 		AudioManager.Ins.LoadSound("kill_all", "Assets/Music/kill_all.mp3");
 		AudioManager.Ins.LoadSound("player_take_damage", "Assets/Music/player_take_damage.mp3");
 		AudioManager.Ins.LoadSound("main_theme", "Assets/Music/main_theme.mp3");
+		AudioManager.Ins.LoadSound("player_dash", "Assets/Music/dash.wav");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 

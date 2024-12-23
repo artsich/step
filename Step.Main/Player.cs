@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Step.Main.Audio;
 
 namespace Step.Main;
 
@@ -277,6 +278,7 @@ public class Player(
 			{
 				_velocity *= DashScale;
 				dashCdEllapsed = 0f;
+				AudioManager.Ins.PlaySound("player_dash");
 			}
 		}
 

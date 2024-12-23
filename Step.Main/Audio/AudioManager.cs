@@ -4,13 +4,14 @@ namespace Step.Main.Audio;
 
 public class AudioManager : IDisposable
 {
-	private static AudioManager? _instance;
-	public static AudioManager Ins => _instance ??= new AudioManager();
-
 	private ALDevice _device;
 	private ALContext _context;
 
-	private Dictionary<string, Sound> _loadedSounds = new();
+	private readonly Dictionary<string, Sound> _loadedSounds = [];
+
+	private static AudioManager? _instance;
+
+	public static AudioManager Ins => _instance ??= new AudioManager();
 
 	private AudioManager()
 	{
