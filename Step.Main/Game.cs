@@ -6,13 +6,12 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using StbImageSharp;
 using Step.Main.Audio;
+using Step.Main.Spawn;
 
 /*
  * Goals:
- *  Add score
  *  Effects
  *    - speed
- *		- buf
  *		- debuff
  *    - split platform on two but smaller size and move it simultaneously
  *  Render player Stats
@@ -113,9 +112,9 @@ public class Game : GameWindow, IGameScene
 		this,
 		1f,
 		[
-			//new SpawnSimpleEntity(_justThing),
+			new SpawnSimpleEntity(_justThing),
 			new SpanwHealthEntity(_healthEffect),
-			//new SpawnKillAllEntity(_bombEffect),
+			new SpawnKillAllEntity(_bombEffect),
 			new SpawnSpeedEntity(_speedEffect),
 		]);
 

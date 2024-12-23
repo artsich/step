@@ -210,12 +210,15 @@ public class Player(
 			effect.Value.Update(dt);
 		}
 
-		var completed = _activatedEffects.Where(effect => effect.Value.IsCompleted).ToList();
-		foreach (var kv in completed)
+		var completed = _activatedEffects
+			.Where(e => e.Value.IsCompleted)
+			.Select(e => e.Key)
+			.ToList();
+
+		foreach (var key in completed)
 		{
-			var (type, _) = kv;
-			Console.WriteLine($"Effect completed {type.Name}");
-			_activatedEffects.Remove(type);
+			Console.WriteLine($"Effect completed {key.Name}");
+			_activatedEffects.Remove(key);
 		}
 	}
 

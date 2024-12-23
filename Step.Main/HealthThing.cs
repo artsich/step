@@ -1,6 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-namespace Step.Main;
+﻿namespace Step.Main;
 
 public interface IEffect
 {
