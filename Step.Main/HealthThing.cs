@@ -1,10 +1,14 @@
-﻿namespace Step.Main;
+﻿using System.Reflection.Metadata.Ecma335;
+
+namespace Step.Main;
 
 public interface IEffect
 {
 	bool IsCompleted { get; }
 
 	void Use();
+
+	bool CanApply() => true;
 
 	void Update(float dt) { }
 }
@@ -22,6 +26,11 @@ public class SpeedEffect(
 
 	public void Use()
 	{
+		if (!CanApply())
+		{
+			throw new InvalidOperationException("Speed already active...");
+		}
+
 		_started = true;
 		player.SpeedScale = speedScale;
 	}
@@ -45,14 +54,27 @@ public class SpeedEffect(
 		player.ResetSpeedScale();
 		IsCompleted = true;
 	}
+
+	public bool CanApply()
+	{
+		var hasActiveSpeed = player.HasActiveEffect<SpeedEffect>();
+		return !hasActiveSpeed;
+	}
 }
 
 public class HealEffect(int hp, Player player) : IEffect
 {
 	public bool IsCompleted { get; private set; }
 
+	public bool CanApply() => !player.IsFullHp;
+
 	public void Use()
 	{
+		if (!CanApply())
+		{
+			throw new InvalidOperationException("Health if full...");
+		}
+
 		player.AddHp(hp);
 		Console.WriteLine("Heal effect used...");
 		IsCompleted = true;

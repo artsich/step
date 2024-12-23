@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using OpenTK.Audio.OpenAL;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Collections.Generic;
@@ -57,7 +58,7 @@ public class Player(
 
 	public int MaxHp { get; set; } = 5;
 	private readonly List<IEffect> _effects = [];
-	private readonly Dictionary<Type, IEffect> activeEffects = [];
+	private readonly Dictionary<Type, IEffect> _activatedEffects = [];
 
 	public int Hp { get; private set; } = 5;
 
@@ -81,6 +82,8 @@ public class Player(
 	{
 		return _effects.OfType<T>().Count();
 	}
+
+	public bool HasActiveEffect<T>() => _activatedEffects.ContainsKey(typeof(T));
 
 	public void AddHp(int hp)
 	{
@@ -139,9 +142,10 @@ public class Player(
 		ImGui.SeparatorText("Player stats");
 
 		ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Health: {Hp}");
-		foreach (var effect in _effects.GroupBy(x => x.GetType().Name))
+		foreach (var effect in Enumerable.Reverse(_effects))
 		{
-			ImGui.BulletText($"{effect.Key}: {effect.Count()}");
+			var name = effect.GetType().Name;
+			ImGui.BulletText($"{name}");
 		}
 
 		ImGui.SeparatorText("Player settings");
@@ -170,7 +174,7 @@ public class Player(
 
 			if (isCompleted)
 			{
-				activeEffects.Remove(effect.GetType());
+				_activatedEffects.Remove(effect.GetType());
 				Console.WriteLine($"Effect completed {effect.GetType().Name}");
 			}
 
@@ -222,22 +226,27 @@ public class Player(
 		_position.X += _velocity * dt;
 	}
 
+	private void AddActivatedEffect(IEffect effect)
+	{
+		var effectType = effect.GetType();
+		_activatedEffects.Add(effectType, effect);
+	}
+
 	private void UseNextEffect()
 	{
 		if (_effects.Count > 0)
 		{
 			var effect = _effects.Last();
-			var effectType = effect.GetType();
 
-			if (!activeEffects.ContainsKey(effectType)) 
+			if (effect.CanApply())
 			{
 				effect.Use();
-				activeEffects.Add(effectType, effect);
+				AddActivatedEffect(effect);
 				Console.WriteLine($"Effect `{effect.GetType().Name}` used");
 			}
 			else
 			{
-				Console.WriteLine($"Effect `{effect.GetType().Name}` already in use...");
+				Console.WriteLine($"Effect `{effect.GetType().Name}` can't be used...");
 			}
 		}
 	}
