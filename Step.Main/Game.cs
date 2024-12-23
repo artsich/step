@@ -30,6 +30,8 @@ public interface IGameScene
 	Player Player { get; }
 
 	void KillThings();
+
+	int EffectsCount<T>() where T : IEffect;
 }
 
 public class Game : GameWindow, IGameScene
@@ -348,5 +350,11 @@ public class Game : GameWindow, IGameScene
 
 		AudioManager.Ins.PlaySound("kill_all");
 		_camera.Shake(magnitude: 5f, duration: 2f);
+	}
+
+	public int EffectsCount<T>() where T : IEffect
+	{
+		var fallingEffects = _fallingThings.Where(x => x.HasEffect<T>()).Count();
+		return _player.EffectsCount<T>() + fallingEffects;
 	}
 }

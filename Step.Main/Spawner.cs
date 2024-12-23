@@ -16,7 +16,7 @@ public abstract class SpawnEntity(
 
 public sealed class SpawnSpeedEntity(Texture2d texture) : SpawnEntity(
 		0.5f,
-		(gs) => true,
+		(gs) => gs.EffectsCount<SpeedEffect>() < 2,
 		(pos, gs) => new Thing(pos, new Vector2(20), new SpeedEffect(gs.Player))
 		{
 			Texture = texture
@@ -38,7 +38,7 @@ public sealed class SpawnSimpleEntity(Texture2d texture) : SpawnEntity(
 
 public sealed class SpanwHealthEntity(Texture2d texture) : SpawnEntity(
 		0.2f,
-		(gs) => !gs.Player.IsFullHp && gs.Player.EffectsCount<HealEffect>() <= gs.Player.MaxHp,
+		(gs) => !gs.Player.IsFullHp && gs.EffectsCount<HealEffect>() < gs.Player.MaxHp,
 		(pos, gs) => new Thing(pos, new Vector2(20, 20), new HealEffect(1, gs.Player))
 		{
 			Texture = texture
@@ -49,7 +49,7 @@ public sealed class SpanwHealthEntity(Texture2d texture) : SpawnEntity(
 
 public sealed class SpawnKillAllEntity(Texture2d texture) : SpawnEntity(
 	0.1f,
-	(_) => true,
+	(gs) => gs.EffectsCount<KillAllEffect>() < 1,
 	(pos, gs) => new Thing(pos, new Vector2(20, 20), new KillAllEffect(gs))
 	{
 		Texture = texture
