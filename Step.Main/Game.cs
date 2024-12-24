@@ -77,8 +77,9 @@ public class Game : GameWindow, IGameScene
 	protected override void OnLoad()
 	{
 		base.OnLoad();
-		StbImage.stbi_set_flip_vertically_on_load(1);
+		MouseWheel += GameMouseWheel;
 
+		StbImage.stbi_set_flip_vertically_on_load(1);
 		//CenterWindow();
 		_renderer = new Renderer();
 		_renderer.Load();
@@ -262,6 +263,8 @@ public class Game : GameWindow, IGameScene
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
+		_camera.Update(dt);
+
 		if (!_paused)
 		{
 			GameUpdate(dt);
@@ -275,8 +278,6 @@ public class Game : GameWindow, IGameScene
 
 	private void GameUpdate(float dt)
 	{
-		_camera.Update(dt);
-
 		_spawner.Speed = _thingsSpeed;
 		_spawner.TimeInterval = _spawnTimeInterval;
 
@@ -386,5 +387,15 @@ public class Game : GameWindow, IGameScene
 	{
 		var fallingEffects = _fallingThings.Where(x => x.HasEffect<T>()).Count();
 		return _player.EffectsCount<T>() + fallingEffects;
+	}
+
+	private void GameMouseWheel(MouseWheelEventArgs obj)
+	{
+		var scale = 0.1f;
+		if (obj.OffsetY != 0f)
+		{
+			scale *= Math.Sign(obj.OffsetY);
+			_camera.Zoom(scale);
+		}
 	}
 }
