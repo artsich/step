@@ -15,9 +15,15 @@ public class Spawner(
 	public float Speed { get; set; } = 60f;
 
 	public float TimeInterval { get; set; } = timeInterval;
+	public bool Enabled { get; set; }
 
 	public Thing? Get(float dt)
 	{
+		if (!Enabled)
+		{
+			return null;
+		}
+
 		timeElapsed += dt;
 
 		if (timeElapsed > TimeInterval)

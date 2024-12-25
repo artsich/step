@@ -50,7 +50,7 @@ public class Game : GameWindow, IGameScene
 	private readonly Queue<Action> _postUpdateActions = [];
 
 	private bool _paused = false;
-
+	private bool _spawnEnabled = false;
 	private bool _showImGui = false;
 
 	private int _score = 0;
@@ -210,6 +210,11 @@ public class Game : GameWindow, IGameScene
 					if (ImGui.Button("Clear console"))
 					{
 						Console.Clear();
+					}
+
+					if (ImGui.Button(_spawnEnabled ? "Disable spawn" : "Enable spawn"))
+					{
+						_spawner.Enabled = _spawnEnabled = !_spawnEnabled;
 					}
 
 					if (ImGui.Button("Damage"))
