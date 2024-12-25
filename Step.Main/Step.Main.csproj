@@ -16,10 +16,4 @@
       <PackageReference Include="StbImageSharp" Version="2.30.15" />
     </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Assets\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>

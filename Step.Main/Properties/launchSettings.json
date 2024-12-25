@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Step.Main": {
+      "commandName": "Project",
+      "workingDirectory": "."
+    }
+  }
+}
