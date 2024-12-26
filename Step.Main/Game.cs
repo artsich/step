@@ -81,7 +81,7 @@ public class Game : GameWindow, IGameScene
 
 		StbImage.stbi_set_flip_vertically_on_load(1);
 		//CenterWindow();
-		_renderer = new Renderer();
+		_renderer = new Renderer(ClientSize.X, ClientSize.Y);
 		_renderer.Load();
 
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));

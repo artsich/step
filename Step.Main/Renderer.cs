@@ -3,11 +3,16 @@ using OpenTK.Mathematics;
 
 namespace Step.Main;
 
-public class Renderer
+public class Renderer(int screenWidth, int screenHeight)
 {
 	private int _vao;
-	private Shader _shader;
-	private Camera2d _camera;
+	private Shader? _shader;
+	private Camera2d? _camera;
+
+	private int _screenWidth = screenWidth;
+	private int _screenHeight = screenHeight;
+
+	private readonly Stack<RenderTarget2d> _renderTargets = [];
 
 	public void SetBackground(Color4<Rgba> color)
 	{
@@ -31,6 +36,27 @@ public class Renderer
 		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 	}
 
+	public void PushRenderTarget(RenderTarget2d renderTarget)
+	{
+		renderTarget.Begin();
+		_renderTargets.Push(renderTarget);
+	}
+
+	public void PopRenderTarget()
+	{
+		if (_renderTargets.Count == 0)
+		{
+			return;
+		}
+
+		_renderTargets.Pop().End(_screenWidth, _screenHeight);
+
+		if (_renderTargets.Count > 0)
+		{
+			_renderTargets.Peek().Begin();
+		}
+	}
+
 	public void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
 	{
 		Vector2 shadowOffset = new(1, -1);
@@ -40,7 +66,7 @@ public class Renderer
 		DrawRect(position, size, color, texture);
 	}
 
-	private void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
+	public void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
 	{
 		_shader.Use();
 		_shader.SetMatrix4("viewProj", _camera.ViewProj);
