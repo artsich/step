@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 
-namespace Step.Main;
+namespace Step.Main.Graphics;
 
 public class Texture2d(string path) : IDisposable
 {
@@ -35,7 +35,13 @@ public class Texture2d(string path) : IDisposable
 		return this;
 	}
 
-	private unsafe void SetImageData(int width, int height, InternalFormat internalFormat = InternalFormat.Rgba, PixelFormat sourceFormat = PixelFormat.Rgba, Span<byte> data = default, bool mipmap = true)
+	private unsafe void SetImageData(
+		int width,
+		int height,
+		InternalFormat internalFormat = InternalFormat.Rgba,
+		PixelFormat sourceFormat = PixelFormat.Rgba,
+		Span<byte> data = default,
+		bool mipmap = true)
 	{
 		GL.BindTexture(TextureTarget.Texture2d, Handle);
 

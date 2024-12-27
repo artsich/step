@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Step.Main.Spawn;
+namespace Step.Main.Gameplay.Spawn;
 
 public abstract class SpawnEntity(
 	float probability,

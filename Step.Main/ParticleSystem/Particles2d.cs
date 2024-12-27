@@ -1,5 +1,6 @@
 ﻿using OpenTK.Mathematics;
 using Step.Main.Gameplay;
+using Step.Main.Graphics;
 
 namespace Step.Main.ParticleSystem;
 
@@ -27,7 +28,7 @@ public class Emitter
 	public float DirectionAngle;
 	public float Spread;
 
-	public ParticlesMaterial Material;
+	public ParticlesMaterial? Material;
 }
 
 public class ParticlesMaterial

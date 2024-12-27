@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
-namespace Step.Main;
+namespace Step.Main.Graphics;
 
 public class Renderer(int screenWidth, int screenHeight)
 {
@@ -85,6 +85,7 @@ public class Renderer(int screenWidth, int screenHeight)
 		}
 		else
 		{
+			_defaultWhiteTexture?.BindAsSampler(0);
 			_shader.SetInt("diffuseTexture", 0);
 		}
 

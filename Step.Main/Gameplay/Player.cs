@@ -2,6 +2,7 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Step.Main.Audio;
+using Step.Main.Graphics;
 using Step.Main.ParticleSystem;
 
 namespace Step.Main.Gameplay;

@@ -1,7 +1,7 @@
 ﻿using OpenTK.Mathematics;
-using Step.Main.Gameplay;
+using Step.Main.Graphics;
 
-namespace Step.Main;
+namespace Step.Main.Gameplay;
 
 public class Thing(Vector2 position, Vector2 size, IEffect? effect = null)
 {
@@ -32,5 +32,5 @@ public class Thing(Vector2 position, Vector2 size, IEffect? effect = null)
 
 	public bool HasEffect<T>() where T : IEffect => effect is T;
 
-	public Box2 BoundingBox => new(Position - (Size / 2f), Position + (Size / 2f));
+	public Box2 BoundingBox => new(Position - Size / 2f, Position + Size / 2f);
 }

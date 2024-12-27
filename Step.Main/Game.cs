@@ -8,8 +8,9 @@ using StbImageSharp;
 using Step.Main.Audio;
 using Step.Main.Editor;
 using Step.Main.Gameplay;
+using Step.Main.Gameplay.Spawn;
+using Step.Main.Graphics;
 using Step.Main.ParticleSystem;
-using Step.Main.Spawn;
 using System.Text.Json;
 
 /*
@@ -27,15 +28,6 @@ using System.Text.Json;
  */
 
 namespace Step.Main;
-
-public interface IGameScene
-{
-	Player Player { get; }
-
-	void KillThings();
-
-	int EffectsCount<T>() where T : IEffect;
-}
 
 public class Game : GameWindow, IGameScene
 {
@@ -60,7 +52,6 @@ public class Game : GameWindow, IGameScene
 
 	private float _thingsSpeed = 60f;
 	private float _spawnTimeInterval = 1f;
-	private System.Numerics.Vector2 _playerSize;
 	private float _lastUpdateTime;
 	private float _audioMasterVolume = 0.5f;
 
@@ -71,7 +62,12 @@ public class Game : GameWindow, IGameScene
 
 	private Renderer _renderer;
 
-	private JsonSerializerOptions _jsonOptions = new() { IncludeFields = true, PropertyNameCaseInsensitive = true, WriteIndented = true };
+	private readonly JsonSerializerOptions _jsonOptions = new()
+	{
+		IncludeFields = true,
+		PropertyNameCaseInsensitive = true,
+		WriteIndented = true
+	};
 
 	public Game(
 		GameWindowSettings gameWindowSettings, 
@@ -105,7 +101,6 @@ public class Game : GameWindow, IGameScene
 			new Box2(-180f, -90f, 177f, 90f),
 			playerTexture,
 			_renderer);
-		_playerSize = new System.Numerics.Vector2(_player.Size.X, _player.Size.Y);
 
 		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
 		{
@@ -124,7 +119,7 @@ public class Game : GameWindow, IGameScene
 		1f,
 		[
 			new SpawnSimpleEntity(_justThing),
-			new SpanwHealthEntity(_healthEffect),
+			new SpawnHealthEntity(_healthEffect),
 			new SpawnKillAllEntity(_bombEffect),
 			new SpawnSpeedEntity(_speedEffect),
 		]);
@@ -300,7 +295,6 @@ public class Game : GameWindow, IGameScene
 		_spawner.Speed = _thingsSpeed;
 		_spawner.TimeInterval = _spawnTimeInterval;
 
-		_player.Resize(new (_playerSize.X, _playerSize.Y));
 		_player.Update(dt);
 
 		var spawnedThing = _spawner.Get(dt);

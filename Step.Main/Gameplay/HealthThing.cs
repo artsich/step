@@ -1,6 +1,4 @@
-﻿using Step.Main.Gameplay;
-
-namespace Step.Main;
+﻿namespace Step.Main.Gameplay;
 
 public interface IEffect
 {

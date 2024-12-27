@@ -1,6 +1,7 @@
 ﻿using OpenTK.Mathematics;
+using Step.Main.Graphics;
 
-namespace Step.Main.Spawn;
+namespace Step.Main.Gameplay.Spawn;
 
 public sealed class SpawnKillAllEntity(Texture2d texture) : SpawnEntity(
 	0.1f,

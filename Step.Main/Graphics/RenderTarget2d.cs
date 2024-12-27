@@ -1,6 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 
-namespace Step.Main;
+namespace Step.Main.Graphics;
 
 public class RenderTarget2d : IDisposable
 {

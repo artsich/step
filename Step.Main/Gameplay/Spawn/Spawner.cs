@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Step.Main.Spawn;
+namespace Step.Main.Gameplay.Spawn;
 
 public class Spawner(
 	IReadOnlyList<Vector2> spawnPoints,

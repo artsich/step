@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
 
-namespace Step.Main;
+namespace Step.Main.Graphics;
 
 public class Shader
 {
