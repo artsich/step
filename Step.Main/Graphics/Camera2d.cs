@@ -47,7 +47,7 @@ public class Camera2d
 			shakeOffset.X = (float)(Random.NextDouble() * 2 - 1) * shakeMagnitude;
 			shakeOffset.Y = (float)(Random.NextDouble() * 2 - 1) * shakeMagnitude;
 
-			shakeMagnitude *= 0.9f;
+			shakeMagnitude = MathHelper.Lerp(shakeMagnitude, 0.0f, 5f*dt);
 			shakeDuration -= dt;
 
 			if (shakeDuration <= 0f)

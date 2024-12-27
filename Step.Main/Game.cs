@@ -150,7 +150,7 @@ public class Game : GameWindow, IGameScene
 
 		Player.OnDamage += () =>
 		{
-			_camera.Shake(magnitude: 2f, duration: 1f);
+			_camera.Shake(magnitude: 2f, duration: 0.5f);
 			AudioManager.Ins.PlaySound("player_take_damage");
 		};
 
@@ -393,7 +393,7 @@ public class Game : GameWindow, IGameScene
 		});
 
 		AudioManager.Ins.PlaySound("kill_all");
-		_camera.Shake(magnitude: 5f, duration: 2f);
+		_camera.Shake(magnitude: 5f, duration: 1f);
 	}
 
 	public int EffectsCount<T>() where T : IEffect
