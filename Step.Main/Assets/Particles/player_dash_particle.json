@@ -1,0 +1,10 @@
+{
+  "Amount": 7,
+  "Lifetime": 0.2,
+  "Explosiveness": 0,
+  "OneShot": true,
+  "MinSpeed": 45.23,
+  "MaxSpeed": 45.23,
+  "DirectionAngle": 0,
+  "Spread": 0.06335543
+}

@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using Step.Main.Gameplay;
 
 namespace Step.Main.ParticleSystem;
 
@@ -27,11 +28,14 @@ public class Emitter
 	public float Spread;
 }
 
-public class Particles
+public class Particles2d : GameObject
 {
-	private readonly Random _rand = new();
+	private readonly Renderer _renderer;
 
-	private readonly Emitter _emitter;
+	private readonly Random _rand = new();
+	private readonly Texture2d _whiteTexture;
+
+	public Emitter Emitter { get; private set; }
 
 	private int _activeParticles;
 	private Particle[] _particles;
@@ -51,13 +55,16 @@ public class Particles
 		}
 	}
 
-	public Particles(Emitter emitter)
+	public Particles2d(Emitter emitter, Renderer renderer)
 	{
-		_emitter = emitter;
-		_particles = new Particle[_emitter.Amount];
+		Emitter = emitter;
+		_particles = new Particle[Emitter.Amount];
+		// TODO: Make default texture and bind to 0 slot...
+		_whiteTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
+		_renderer = renderer;
 	}
 
-	public void Update(float deltaTime)
+	protected override void OnUpdate(float deltaTime)
 	{
 		if (!_emitting)
 			return;
@@ -75,9 +82,9 @@ public class Particles
 				continue;
 			}
 
-			if (_particles[i].Age > _emitter.Lifetime)
+			if (_particles[i].Age > Emitter.Lifetime)
 			{
-				if (_emitter.OneShot)
+				if (Emitter.OneShot)
 				{
 					_particles[i].Active = false;
 					_particles[i] = _particles[_activeParticles - 1];
@@ -95,6 +102,26 @@ public class Particles
 		}
 	}
 
+	protected override void OnRender()
+	{
+		Matrix4 globalMatrix = GetGlobalMatrix();
+
+		var particles = GetParticles();
+		for (int i = 0; i < particles.Length; i++)
+		{
+			var p = particles[i];
+			if (!p.Active)
+				continue;
+
+			var colorMin = new Vector4(1f, 1f, 1f, 1f);
+			var colorMax = new Vector4(1f, 1f, 1f, 0.3f);
+			var color = Vector4.Lerp(colorMin, colorMax, p.Age / Emitter.Lifetime);
+
+			var finalPos = new Vector4(p.Position, 0f, 1f) * globalMatrix;
+			_renderer.DrawRect(finalPos.Xy, new(40f, 20f), (Color4<Rgba>)color, _whiteTexture);
+		}
+	}
+
 	public Span<Particle> GetParticles()
 	{
 		var last = Math.Max(0, _activeParticles);
@@ -103,9 +130,9 @@ public class Particles
 
 	private void Restart()
 	{
-		if (_particles == null || _particles.Length != _emitter.Amount)
+		if (_particles == null || _particles.Length != Emitter.Amount)
 		{
-			_particles = new Particle[_emitter.Amount];
+			_particles = new Particle[Emitter.Amount];
 		}
 
 		_activeParticles = _particles.Length;
@@ -119,7 +146,7 @@ public class Particles
 	private Particle GenerateParticle(int i)
 	{
 		float ratio = (float)i / Math.Max(1, _particles.Length - 1);
-		float startT = _emitter.Lifetime * (1f - _emitter.Explosiveness) * ratio;
+		float startT = Emitter.Lifetime * (1f - Emitter.Explosiveness) * ratio;
 		return new Particle()
 		{
 			Active = true,
@@ -132,9 +159,9 @@ public class Particles
 
 	private Vector2 RandomVelocity()
 	{
-		float offset = ((float)_rand.NextDouble() * 2f - 1f) * _emitter.Spread;
-		float angle = _emitter.DirectionAngle + offset;
-		float speed = _emitter.MinSpeed + (float)_rand.NextDouble() * (_emitter.MaxSpeed - _emitter.MinSpeed);
+		float offset = ((float)_rand.NextDouble() * 2f - 1f) * Emitter.Spread;
+		float angle = Emitter.DirectionAngle + offset;
+		float speed = Emitter.MinSpeed + (float)_rand.NextDouble() * (Emitter.MaxSpeed - Emitter.MinSpeed);
 
 		return new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * speed;
 	}

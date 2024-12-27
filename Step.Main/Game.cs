@@ -6,7 +6,11 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using StbImageSharp;
 using Step.Main.Audio;
+using Step.Main.Editor;
+using Step.Main.Gameplay;
+using Step.Main.ParticleSystem;
 using Step.Main.Spawn;
+using System.Text.Json;
 
 /*
  * Goals:
@@ -45,7 +49,6 @@ public class Game : GameWindow, IGameScene
 	private Player _player;
 
 	public Player Player => _player;
-	private Texture2d _playerTexture;
 
 	private readonly Queue<Action> _postUpdateActions = [];
 
@@ -65,7 +68,10 @@ public class Game : GameWindow, IGameScene
 	private Texture2d _bombEffect;
 	private Texture2d _justThing;
 	private Texture2d _speedEffect;
+
 	private Renderer _renderer;
+
+	private JsonSerializerOptions _jsonOptions = new() { IncludeFields = true, PropertyNameCaseInsensitive = true, WriteIndented = true };
 
 	public Game(
 		GameWindowSettings gameWindowSettings, 
@@ -95,7 +101,9 @@ public class Game : GameWindow, IGameScene
 			new(0f, -75f),
 			new(40f, 20f),
 			KeyboardState,
-			new Box2(-180f, -90f, 177f, 90f));
+			new Box2(-180f, -90f, 177f, 90f),
+			new Texture2d(".\\Assets\\Textures\\player.png").Load(),
+			_renderer);
 		_playerSize = new System.Numerics.Vector2(_player.Size.X, _player.Size.Y);
 
 		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
@@ -156,7 +164,13 @@ public class Game : GameWindow, IGameScene
 			Close();
 		};
 
-		_playerTexture = new Texture2d("Assets/Textures/player.png").Load();
+		var loadedEmitter = JsonSerializer.Deserialize<Emitter>(
+			File.ReadAllText("Assets/Particles/player_dash_particle.json"),
+			_jsonOptions);
+
+		_player.AddChild(new Particles2d(loadedEmitter!, _renderer));
+
+		_player.OnStart();
 	}
 
 	protected override void OnRenderFrame(FrameEventArgs e)
@@ -167,25 +181,23 @@ public class Game : GameWindow, IGameScene
 		GL.Clear(ClearBufferMask.ColorBufferBit);
 		_renderer.SetCamera(_camera);
 
-		Vector4 hpColor = new(0.9f, 0.4f, 0.35f, 1f);
-		float hpScaleFactor = _player.Hp / (float)_player.MaxHp;
-		hpColor *= hpScaleFactor;
-		_renderer.DrawObject(_player.Position, _player.Size, (Color4<Rgba>)hpColor, _playerTexture);
+		
+		_player.Draw();
 
-		foreach(var thing in _fallingThings)
+		foreach (var thing in _fallingThings)
 		{
 			_renderer.DrawObject(thing.Position, thing.Size, Color4.White, thing.Texture);
 		}
 
 		if (_showImGui)
 		{
-			ImguiRender(e);
+			ImGuiRender(e);
 		}
 
 		SwapBuffers();
 	}
 
-	private void ImguiRender(FrameEventArgs e)
+	private void ImGuiRender(FrameEventArgs e)
 	{
 		if (ImGui.Begin("Main Window"))
 		{
@@ -197,7 +209,7 @@ public class Game : GameWindow, IGameScene
 					ImGui.Text($"Score: {_score}");
 					ImGui.Text($"Falling things: {_fallingThings.Count}");
 
-					_player.DrawDebug();
+					_player.DebugRender();
 
 					ImGui.SeparatorText("Spawner settings");
 					ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);

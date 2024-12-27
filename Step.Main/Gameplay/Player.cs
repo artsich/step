@@ -2,18 +2,15 @@
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Step.Main.Audio;
+using Step.Main.ParticleSystem;
 
-namespace Step.Main;
+namespace Step.Main.Gameplay;
 
-public class Player(
-	Vector2 position,
-	Vector2 size,
-	KeyboardState input,
-	Box2 worldBb)
+public class Player : GameObject
 {
 	private float _velocity;
-	private Vector2 _position = position;
-	private Vector2 _size = size;
+	private Box2 _worldBb;
+	private readonly KeyboardState _input;
 
 	public event Action? OnPlayerHeal;
 	public event Action<Thing>? OnThingTaken;
@@ -28,53 +25,68 @@ public class Player(
 
 	public float Acceleration { get; } = 10f;
 
-	// todo: not good solution as it hard to scale from different sources.
-	public float SpeedScale
-	{
-		get => _speedScale; set
-		{
-			_speedScale = Math.Clamp(value, 0f, float.MaxValue);
-		}
-	}
 	private static readonly float DefaultSpeedScale = 1f;
 	private float _speedScale = DefaultSpeedScale;
 
-	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
-
-	public Vector2 Position => _position;
-
-	public Vector2 Size
-	{
-		get => _size;
-		private set
-		{
-			_size = value;
-		}
-	}
-
-	public Box2 Box => new(Position - (Size / 2f), Position + (Size / 2f));
-
-	public int MaxHp { get; set; } = 5;
 	private readonly List<IEffect> _effects = [];
 	private int _selectedEffectId = 0;
 	private readonly Dictionary<Type, IEffect> _activatedEffects = [];
 
-	public int Hp { get; private set; } = 5;
+	public int MaxHp { get; set; } = 5;
 
-	public bool IsFullHp => Hp >= MaxHp;
+	public int Hp { get; private set; } = 5;
 
 	private bool godMode = false;
 
-	public void Update(float dt)
+	public bool IsFullHp => Hp >= MaxHp;
+
+	public Vector2 Position => localTransform.Position;
+
+	private Vector2 _size;
+
+	public Vector2 Size => _size;
+
+	public Box2 Box => new(Position - Size / 2f, Position + Size / 2f);
+
+	public float SpeedScale
 	{
-		UpdateEffects(dt);
-		Move(input, dt);
-		ResolveWorldCollision();
+		get => _speedScale;
+		set => _speedScale = Math.Clamp(value, 0f, float.MaxValue);
 	}
+
+	private Texture2d _playerTexture;
+	private Renderer _renderer;
+
+	private Particles2d _particles;
+
+	public Player(
+		Vector2 position,
+		Vector2 size,
+		KeyboardState input,
+		Box2 worldBb,
+		Texture2d playerTexture,
+		Renderer renderer,
+		string name = "Player") : base(name)
+	{
+		_input = input;
+		_worldBb = worldBb;
+		_size = size;
+		localTransform.Position = position;
+		localTransform.Scale = Vector2.One;
+		_playerTexture = playerTexture;
+		_renderer = renderer;
+	}
+
+	public override void OnStart()
+	{
+		_particles = GetChildOf<Particles2d>();
+	}
+
+	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
 
 	public void Resize(Vector2 newSize)
 	{
-		Size = newSize;
+		_size = newSize;
 	}
 
 	public int EffectsCount<T>() where T : IEffect
@@ -86,11 +98,7 @@ public class Player(
 
 	public void AddHp(int hp)
 	{
-		if (hp < 0)
-		{
-			throw new ArithmeticException("Can't add negative HP...");
-		}
-
+		if (hp < 0) throw new ArithmeticException("Can't add negative HP...");
 		if (Hp + hp <= MaxHp)
 		{
 			Hp += hp;
@@ -136,7 +144,19 @@ public class Player(
 		OnThingTaken?.Invoke(thing);
 	}
 
-	public void DrawDebug()
+	protected override void OnUpdate(float deltaTime)
+	{
+		UpdateEffects(deltaTime);
+		Move(_input, deltaTime);
+		ResolveWorldCollision();
+	}
+
+	protected override void OnRender()
+	{
+		_renderer.DrawObject(Position, Size, Color4.White, _playerTexture);
+	}
+
+	public override void DebugRender()
 	{
 		ImGui.SeparatorText("Player stats");
 		ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Health: {Hp}");
@@ -153,21 +173,17 @@ public class Player(
 			ImGui.SeparatorText("Active effects");
 			ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.0f, 0.7f, 0.0f, 1.0f));
 			foreach (var effectType in _activatedEffects.Keys)
-			{
 				ImGui.BulletText($"{effectType.Name}");
-			}
 			ImGui.PopStyleColor();
 		}
 
 		if (_effects.Count > 0)
 		{
 			ImGui.SeparatorText("Effects");
-
 			for (int i = 0; i < _effects.Count; i++)
 			{
 				var effect = _effects[i];
 				var name = effect.GetType().Name;
-
 				if (i == _selectedEffectId)
 				{
 					ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -184,32 +200,29 @@ public class Player(
 
 	private void UpdateEffects(float dt)
 	{
-		if (input.IsKeyPressed(Keys.Space))
+		if (_input.IsKeyPressed(Keys.Space))
 		{
 			UseNextEffect();
 		}
 
 		_selectedEffectId = Math.Clamp(_selectedEffectId, 0, Math.Max(0, _effects.Count - 1));
 
-		if (input.IsKeyPressed(Keys.Up))
+		if (_input.IsKeyPressed(Keys.Up))
 		{
 			RotateEffects(-1);
 		}
 
-		if (input.IsKeyPressed(Keys.Down))
+		if (_input.IsKeyPressed(Keys.Down))
 		{
 			RotateEffects(1);
 		}
 
-		if (input.IsKeyPressed(Keys.D))
+		if (_input.IsKeyPressed(Keys.D))
 		{
 			DropEffect();
 		}
 
-		foreach (var effect in _activatedEffects)
-		{
-			effect.Value.Update(dt);
-		}
+		foreach (var effect in _activatedEffects) effect.Value.Update(dt);
 
 		var completed = _activatedEffects
 			.Where(e => e.Value.IsCompleted)
@@ -235,41 +248,31 @@ public class Player(
 
 	private void RotateEffects(int dir)
 	{
-		if (_effects.Count == 0)
-			return;
-
+		if (_effects.Count == 0) return;
 		_selectedEffectId = (_selectedEffectId + dir) % _effects.Count;
 	}
 
 	private void ResolveWorldCollision()
 	{
 		var box = Box;
+		var halfSizeX = _size.X / 2f;
 
-		var halfSizeX = Size.X / 2f;
-
-		if (!worldBb.ContainsInclusive(box.Min))
+		if (!_worldBb.ContainsInclusive(box.Min))
 		{
-			_position.X = worldBb.Min.X + halfSizeX;
+			localTransform.Position = new Vector2(_worldBb.Min.X + halfSizeX, localTransform.Position.Y);
 		}
 
-		if (!worldBb.ContainsInclusive(box.Max))
+		if (!_worldBb.ContainsInclusive(box.Max))
 		{
-			_position.X = worldBb.Max.X - halfSizeX;
+			localTransform.Position = new Vector2(_worldBb.Max.X - halfSizeX, localTransform.Position.Y);
 		}
 	}
 
 	private void Move(KeyboardState input, float dt)
 	{
 		float targetSpeed = 0f;
-
-		if (input.IsKeyDown(Keys.Left))
-		{
-			targetSpeed = -MaxSpeed;
-		}
-		else if (input.IsKeyDown(Keys.Right))
-		{
-			targetSpeed = MaxSpeed;
-		}
+		if (input.IsKeyDown(Keys.Left)) targetSpeed = -MaxSpeed;
+		else if (input.IsKeyDown(Keys.Right)) targetSpeed = MaxSpeed;
 
 		dashCdEllapsed += dt;
 		if (input.IsKeyDown(Keys.LeftShift) && dashCdEllapsed > DashCd)
@@ -278,12 +281,26 @@ public class Player(
 			{
 				_velocity *= DashScale;
 				dashCdEllapsed = 0f;
+
+				float dir = Math.Sign(_velocity);
+				if (dir == -1)
+				{
+					dir = 0f;
+				}
+				else
+				{
+					dir = 3.14f;
+				}
+				_particles.Emitter.DirectionAngle = dir;
+
+				_particles.Emitting = true;
+
 				AudioManager.Ins.PlaySound("player_dash");
 			}
 		}
 
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
-		_position.X += _velocity * dt;
+		localTransform.Position = new Vector2(localTransform.Position.X + _velocity * dt, localTransform.Position.Y);
 	}
 
 	private void AddActivatedEffect(IEffect effect)
@@ -298,13 +315,11 @@ public class Player(
 			return;
 
 		var effect = _effects[_selectedEffectId];
-
 		if (effect.CanApply())
 		{
 			effect.Use();
 			_effects.RemoveAt(_selectedEffectId);
 			AddActivatedEffect(effect);
-
 			Console.WriteLine($"Effect `{effect.GetType().Name}` used");
 		}
 		else
