@@ -26,22 +26,36 @@ public class Emitter
 
 	public float DirectionAngle;
 	public float Spread;
+
+	public ParticlesMaterial Material;
+}
+
+public class ParticlesMaterial
+{
+	public Vector4 ColorMin;
+	public Vector4 ColorMax;
+	public Texture2d? Texture;
+
+	public static ParticlesMaterial Default = new()
+	{
+		ColorMin = Vector4.One,
+		ColorMax = Vector4.One,
+		Texture = null,
+	};
 }
 
 public class Particles2d : GameObject
 {
-	private readonly Renderer _renderer;
-
 	private readonly Random _rand = new();
-	private readonly Texture2d _whiteTexture;
 
-	public Emitter Emitter { get; private set; }
+	private readonly Renderer _renderer;
 
 	private int _activeParticles;
 	private Particle[] _particles;
 
-	private bool _emitting;
+	public Emitter Emitter { get; private set; }
 
+	private bool _emitting;
 	public bool Emitting
 	{
 		get => _emitting;
@@ -59,8 +73,6 @@ public class Particles2d : GameObject
 	{
 		Emitter = emitter;
 		_particles = new Particle[Emitter.Amount];
-		// TODO: Make default texture and bind to 0 slot...
-		_whiteTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
 		_renderer = renderer;
 	}
 
@@ -106,6 +118,9 @@ public class Particles2d : GameObject
 	{
 		Matrix4 globalMatrix = GetGlobalMatrix();
 
+		var colorMin = Emitter.Material?.ColorMin ?? Vector4.One;
+		var colorMax = Emitter.Material?.ColorMax ?? Vector4.One;
+
 		var particles = GetParticles();
 		for (int i = 0; i < particles.Length; i++)
 		{
@@ -113,12 +128,9 @@ public class Particles2d : GameObject
 			if (!p.Active)
 				continue;
 
-			var colorMin = new Vector4(1f, 1f, 1f, 1f);
-			var colorMax = new Vector4(1f, 1f, 1f, 0.3f);
 			var color = Vector4.Lerp(colorMin, colorMax, p.Age / Emitter.Lifetime);
-
 			var finalPos = new Vector4(p.Position, 0f, 1f) * globalMatrix;
-			_renderer.DrawRect(finalPos.Xy, new(40f, 20f), (Color4<Rgba>)color, _whiteTexture);
+			_renderer.DrawRect(finalPos.Xy, new(40f, 20f), (Color4<Rgba>)color, Emitter.Material?.Texture);
 		}
 	}
 

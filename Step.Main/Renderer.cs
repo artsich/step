@@ -8,6 +8,7 @@ public class Renderer(int screenWidth, int screenHeight)
 	private int _vao;
 	private Shader? _shader;
 	private Camera2d? _camera;
+	private Texture2d _defaultWhiteTexture;
 
 	private int _screenWidth = screenWidth;
 	private int _screenHeight = screenHeight;
@@ -30,6 +31,8 @@ public class Renderer(int screenWidth, int screenHeight)
 		_vao = GL.GenVertexArray();
 
 		_shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
+		_defaultWhiteTexture = new Texture2d(".\\Assets\\Textures\\white.png").Load();
+		_defaultWhiteTexture.BindAsSampler(0);
 
 		GL.Disable(EnableCap.CullFace);
 		GL.Enable(EnableCap.Blend);
@@ -68,8 +71,8 @@ public class Renderer(int screenWidth, int screenHeight)
 
 	public void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
 	{
-		_shader.Use();
-		_shader.SetMatrix4("viewProj", _camera.ViewProj);
+		_shader!.Use();
+		_shader.SetMatrix4("viewProj", _camera!.ViewProj);
 
 		var model = Matrix4.CreateScale(size.To3(1f)) * Matrix4.CreateTranslation(position.To3());
 		_shader.SetMatrix4("model", model);
@@ -77,7 +80,11 @@ public class Renderer(int screenWidth, int screenHeight)
 
 		if (texture != null)
 		{
-			texture?.BindAsSampler(0);
+			texture?.BindAsSampler(1);
+			_shader.SetInt("diffuseTexture", 1);
+		}
+		else
+		{
 			_shader.SetInt("diffuseTexture", 0);
 		}
 

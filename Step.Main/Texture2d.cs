@@ -95,7 +95,7 @@ public class Texture2d(string path) : IDisposable
 		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, (int)t);
 	}
 
-	public void BindAsSampler(uint slot = 0)
+	public void BindAsSampler(uint slot = 1)
 	{
 		GL.ActiveTexture(TextureUnit.Texture0 + slot);
 		GL.BindTexture(TextureTarget.Texture2d, Handle);

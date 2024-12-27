@@ -6,5 +6,19 @@
   "MinSpeed": 45.23,
   "MaxSpeed": 45.23,
   "DirectionAngle": 0,
-  "Spread": 0.06335543
+  "Spread": 0.06335543,
+  "Material": {
+    "ColorMin": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 1.0
+    },
+    "ColorMax": {
+      "X": 1.0,
+      "Y": 1.0,
+      "Z": 1.0,
+      "W": 0.3
+    }
+  }
 }

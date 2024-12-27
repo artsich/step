@@ -97,12 +97,13 @@ public class Game : GameWindow, IGameScene
 		_justThing = new Texture2d("Assets/Textures/thing.png").Load();
 		_speedEffect = new Texture2d("Assets/Textures/effect_speed.png").Load();
 
+		var playerTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
 		_player = new Player(
 			new(0f, -75f),
 			new(40f, 20f),
 			KeyboardState,
 			new Box2(-180f, -90f, 177f, 90f),
-			new Texture2d(".\\Assets\\Textures\\player.png").Load(),
+			playerTexture,
 			_renderer);
 		_playerSize = new System.Numerics.Vector2(_player.Size.X, _player.Size.Y);
 
@@ -168,8 +169,9 @@ public class Game : GameWindow, IGameScene
 			File.ReadAllText("Assets/Particles/player_dash_particle.json"),
 			_jsonOptions);
 
-		_player.AddChild(new Particles2d(loadedEmitter!, _renderer));
+		loadedEmitter!.Material.Texture = playerTexture;
 
+		_player.AddChild(new Particles2d(loadedEmitter!, _renderer));
 		_player.OnStart();
 	}
 
