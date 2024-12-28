@@ -33,4 +33,14 @@ public static class VectorExtensions
 	{
 		return new (vector.X, vector.Y);
 	}
+
+	public static Vector4 FromSystem(this System.Numerics.Vector4 vector)
+	{
+		return new(vector.X, vector.Y, vector.Z, vector.W);
+	}
+
+	public static System.Numerics.Vector4 ToSystem(this Vector4 vector)
+	{
+		return new(vector.X, vector.Y, vector.Z, vector.W);
+	}
 }

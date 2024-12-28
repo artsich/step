@@ -66,11 +66,29 @@ public class GameObject(string name = "GameObject")
 		return result;
 	}
 
-	public virtual void OnStart() { }
+	public void Start()
+	{
+		OnStart();
+		foreach (var child in children)
+		{
+			child.Start();
+		}
+	}
 
-	public virtual void OnEnd() { }
+	public void End()
+	{
+		OnEnd();
+		foreach (var child in children)
+		{
+			child.End();
+		}
+	}
 
 	public virtual void DebugRender() { }
+
+	protected virtual void OnStart() { }
+
+	protected virtual void OnEnd() { }
 
 	protected virtual void OnUpdate(float deltaTime) { }
 

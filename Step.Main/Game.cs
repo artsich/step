@@ -10,8 +10,8 @@ using Step.Main.Editor;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Spawn;
 using Step.Main.Graphics;
-using Step.Main.ParticleSystem;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 /*
  * Goals:
@@ -64,9 +64,13 @@ public class Game : GameWindow, IGameScene
 
 	private readonly JsonSerializerOptions _jsonOptions = new()
 	{
-		IncludeFields = true,
 		PropertyNameCaseInsensitive = true,
-		WriteIndented = true
+		WriteIndented = true,
+		Converters =
+		{
+			new Vector2JsonConverter(),
+			new Vector4JsonConverter()
+		}
 	};
 
 	public Game(
@@ -167,7 +171,7 @@ public class Game : GameWindow, IGameScene
 		loadedEmitter!.Material.Texture = playerTexture;
 
 		_player.AddChild(new Particles2d(loadedEmitter!, _renderer));
-		_player.OnStart();
+		_player.Start();
 	}
 
 	protected override void OnRenderFrame(FrameEventArgs e)
@@ -373,8 +377,8 @@ public class Game : GameWindow, IGameScene
 	protected override void OnResize(ResizeEventArgs e)
 	{
 		base.OnResize(e);
-		GL.Viewport(0, 0, ClientSize.X, ClientSize.Y);
-		_controller.WindowResized(ClientSize.X, ClientSize.Y);
+		GL.Viewport(0, 0, e.Width, e.Height);
+		_controller.WindowResized(e.Width, e.Height);
 	}
 
 	protected override void OnUnload()

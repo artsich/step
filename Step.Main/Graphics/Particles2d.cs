@@ -1,8 +1,9 @@
 ﻿using OpenTK.Mathematics;
 using Step.Main.Gameplay;
-using Step.Main.Graphics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-namespace Step.Main.ParticleSystem;
+namespace Step.Main.Graphics;
 
 public struct Particle
 {
@@ -15,34 +16,71 @@ public struct Particle
 
 public class Emitter
 {
-	public int Amount;
+	public int Amount { get; set; }
+	public Vector2 Size { get; set; } = Vector2.One;
+	public float Lifetime { get; set; }
+	public float Explosiveness { get; set; }
+	public bool OneShot { get; set; }
+	public float MinSpeed { get; set; }
+	public float MaxSpeed { get; set; }
+	public float DirectionAngle { get; set; }
+	public float Spread { get; set; }
 
-	public float Lifetime;
-	public float Explosiveness;
-
-	public bool OneShot;
-
-	public float MinSpeed;
-	public float MaxSpeed;
-
-	public float DirectionAngle;
-	public float Spread;
-
-	public ParticlesMaterial? Material;
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public ParticlesMaterial? Material { get; set; } = ParticlesMaterial.Default;
 }
 
 public class ParticlesMaterial
 {
-	public Vector4 ColorMin;
-	public Vector4 ColorMax;
-	public Texture2d? Texture;
+	public Vector4 ColorMin { get; set; }
 
-	public static ParticlesMaterial Default = new()
+	public Vector4 ColorMax { get; set; }
+
+	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+	public Texture2d? Texture { get; set; }
+
+	public static readonly ParticlesMaterial Default = new()
 	{
 		ColorMin = Vector4.One,
 		ColorMax = Vector4.One,
-		Texture = null,
+		Texture = null
 	};
+}
+
+public class Vector2JsonConverter : JsonConverter<Vector2>
+{
+	public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+	{
+		var array = JsonSerializer.Deserialize<float[]>(ref reader, options);
+		return new Vector2(array[0], array[1]);
+	}
+
+	public override void Write(Utf8JsonWriter writer, Vector2 value, JsonSerializerOptions options)
+	{
+		writer.WriteStartArray();
+		writer.WriteNumberValue(value.X);
+		writer.WriteNumberValue(value.Y);
+		writer.WriteEndArray();
+	}
+}
+
+public class Vector4JsonConverter : JsonConverter<Vector4>
+{
+	public override Vector4 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+	{
+		var array = JsonSerializer.Deserialize<float[]>(ref reader, options);
+		return new Vector4(array[0], array[1], array[2], array[3]);
+	}
+
+	public override void Write(Utf8JsonWriter writer, Vector4 value, JsonSerializerOptions options)
+	{
+		writer.WriteStartArray();
+		writer.WriteNumberValue(value.X);
+		writer.WriteNumberValue(value.Y);
+		writer.WriteNumberValue(value.Z);
+		writer.WriteNumberValue(value.W);
+		writer.WriteEndArray();
+	}
 }
 
 public class Particles2d : GameObject
@@ -131,7 +169,11 @@ public class Particles2d : GameObject
 
 			var color = Vector4.Lerp(colorMin, colorMax, p.Age / Emitter.Lifetime);
 			var finalPos = new Vector4(p.Position, 0f, 1f) * globalMatrix;
-			_renderer.DrawRect(finalPos.Xy, new(40f, 20f), (Color4<Rgba>)color, Emitter.Material?.Texture);
+			_renderer.DrawRect(
+				finalPos.Xy,
+				Emitter.Size,
+				(Color4<Rgba>)color,
+				Emitter.Material?.Texture);
 		}
 	}
 

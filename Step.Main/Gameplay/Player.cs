@@ -3,7 +3,6 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Step.Main.Audio;
 using Step.Main.Graphics;
-using Step.Main.ParticleSystem;
 
 namespace Step.Main.Gameplay;
 
@@ -78,7 +77,7 @@ public class Player : GameObject
 		_renderer = renderer;
 	}
 
-	public override void OnStart()
+	protected override void OnStart()
 	{
 		_particles = GetChildOf<Particles2d>();
 	}
