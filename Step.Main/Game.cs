@@ -6,10 +6,12 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using StbImageSharp;
 using Step.Main.Audio;
+using Step.Main.Converters;
 using Step.Main.Editor;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Spawn;
 using Step.Main.Graphics;
+using Step.Main.Graphics.Particles;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -73,6 +75,7 @@ public class Game : GameWindow, IGameScene
 		}
 	};
 
+	private readonly List<IEditorView> _editors = [];
 	public Game(
 		GameWindowSettings gameWindowSettings, 
 		NativeWindowSettings nativeWindowSettings)
@@ -89,6 +92,8 @@ public class Game : GameWindow, IGameScene
 		//CenterWindow();
 		_renderer = new Renderer(ClientSize.X, ClientSize.Y);
 		_renderer.Load();
+
+		_editors.Add(new ParticlesEditor(_renderer));
 
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 
@@ -244,6 +249,15 @@ public class Game : GameWindow, IGameScene
 					ImGui.EndTabItem();
 				}
 
+				foreach (var editor in _editors)
+				{
+					if (ImGui.BeginTabItem(editor.Name))
+					{
+						editor.Draw();
+						ImGui.EndTabItem();
+					}
+				}
+
 				ImGui.EndTabBar();
 			}
 
@@ -280,6 +294,14 @@ public class Game : GameWindow, IGameScene
 		CheckWindowStateToggle(input);
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
+
+		if (_showImGui)
+		{
+			foreach (var editor in _editors)
+			{
+				editor.Update(dt);
+			}
+		}
 
 		_camera.Update(dt);
 

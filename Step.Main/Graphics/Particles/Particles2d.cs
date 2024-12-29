@@ -1,90 +1,19 @@
 ﻿using OpenTK.Mathematics;
 using Step.Main.Gameplay;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
-namespace Step.Main.Graphics;
-
-public struct Particle
-{
-	public bool Active;
-	public float StartTime;
-	public float Age;
-	public Vector2 Position;
-	public Vector2 Velocity;
-}
-
-public class Emitter
-{
-	public int Amount { get; set; }
-	public Vector2 Size { get; set; } = Vector2.One;
-	public float Lifetime { get; set; }
-	public float Explosiveness { get; set; }
-	public bool OneShot { get; set; }
-	public float MinSpeed { get; set; }
-	public float MaxSpeed { get; set; }
-	public float DirectionAngle { get; set; }
-	public float Spread { get; set; }
-
-	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	public ParticlesMaterial? Material { get; set; } = ParticlesMaterial.Default;
-}
-
-public class ParticlesMaterial
-{
-	public Vector4 ColorMin { get; set; }
-
-	public Vector4 ColorMax { get; set; }
-
-	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-	public Texture2d? Texture { get; set; }
-
-	public static readonly ParticlesMaterial Default = new()
-	{
-		ColorMin = Vector4.One,
-		ColorMax = Vector4.One,
-		Texture = null
-	};
-}
-
-public class Vector2JsonConverter : JsonConverter<Vector2>
-{
-	public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-	{
-		var array = JsonSerializer.Deserialize<float[]>(ref reader, options);
-		return new Vector2(array[0], array[1]);
-	}
-
-	public override void Write(Utf8JsonWriter writer, Vector2 value, JsonSerializerOptions options)
-	{
-		writer.WriteStartArray();
-		writer.WriteNumberValue(value.X);
-		writer.WriteNumberValue(value.Y);
-		writer.WriteEndArray();
-	}
-}
-
-public class Vector4JsonConverter : JsonConverter<Vector4>
-{
-	public override Vector4 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-	{
-		var array = JsonSerializer.Deserialize<float[]>(ref reader, options);
-		return new Vector4(array[0], array[1], array[2], array[3]);
-	}
-
-	public override void Write(Utf8JsonWriter writer, Vector4 value, JsonSerializerOptions options)
-	{
-		writer.WriteStartArray();
-		writer.WriteNumberValue(value.X);
-		writer.WriteNumberValue(value.Y);
-		writer.WriteNumberValue(value.Z);
-		writer.WriteNumberValue(value.W);
-		writer.WriteEndArray();
-	}
-}
+namespace Step.Main.Graphics.Particles;
 
 public class Particles2d : GameObject
 {
+	struct Particle
+	{
+		public bool Active;
+		public float StartTime;
+		public float Age;
+		public Vector2 Position;
+		public Vector2 Velocity;
+	}
+
 	private readonly Random _rand = new();
 
 	private readonly Renderer _renderer;
@@ -177,7 +106,7 @@ public class Particles2d : GameObject
 		}
 	}
 
-	public Span<Particle> GetParticles()
+	private Span<Particle> GetParticles()
 	{
 		var last = Math.Max(0, _activeParticles);
 		return _particles.AsSpan()[0..last];

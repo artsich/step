@@ -1,0 +1,28 @@
+{
+  "Amount": 7,
+  "Size": [
+    1,
+    1
+  ],
+  "Lifetime": 0.24,
+  "Explosiveness": 0.19,
+  "OneShot": true,
+  "MinSpeed": 17.31,
+  "MaxSpeed": 17.31,
+  "DirectionAngle": 0,
+  "Spread": 0.930435,
+  "Material": {
+    "ColorMin": [
+      0.30980393,
+      0.07058824,
+      0.07058824,
+      0
+    ],
+    "ColorMax": [
+      0.9250721,
+      0.44376323,
+      0.05065235,
+      1
+    ]
+  }
+}
