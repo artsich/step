@@ -221,10 +221,6 @@ public class Game : GameWindow, IGameScene
 					ImGui.SliderFloat("Things speed", ref _thingsSpeed, 1f, 200f);
 					ImGui.SliderFloat("Spawn time", ref _spawnTimeInterval, 0.01f, 1f);
 
-					ImGui.SeparatorText("Performance");
-					ImGui.Text($"Render time: {e.Time * 1000:F2}");
-					ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}");
-
 					if (ImGui.Button("Clear console"))
 					{
 						Console.Clear();
@@ -260,6 +256,14 @@ public class Game : GameWindow, IGameScene
 
 				ImGui.EndTabBar();
 			}
+
+			ImGui.End();
+		}
+
+		if (ImGui.Begin("Performance"))
+		{
+			ImGui.Text($"Render time: {e.Time * 1000:F2}ms");
+			ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}ms");
 
 			ImGui.End();
 		}
