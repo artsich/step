@@ -223,12 +223,15 @@ public class Player : GameObject
 			DropEffect();
 		}
 
-		foreach (var effect in _activatedEffects) effect.Value.Update(dt);
+		foreach (var effect in _activatedEffects)
+		{
+			effect.Value.Update(dt);
+		}
 
 		var completed = _activatedEffects
 			.Where(e => e.Value.IsCompleted)
 			.Select(e => e.Key)
-			.ToList();
+			.ToArray();
 
 		foreach (var key in completed)
 		{
@@ -272,33 +275,30 @@ public class Player : GameObject
 	private void Move(KeyboardState input, float dt)
 	{
 		float targetSpeed = 0f;
-		if (input.IsKeyDown(Keys.Left)) targetSpeed = -MaxSpeed;
-		else if (input.IsKeyDown(Keys.Right)) targetSpeed = MaxSpeed;
+		if (input.IsKeyDown(Keys.Left))
+		{
+			targetSpeed = -MaxSpeed;
+		}
+		else if (input.IsKeyDown(Keys.Right))
+		{
+			targetSpeed = MaxSpeed;
+		}
 
 		dashCdEllapsed += dt;
-		if (input.IsKeyDown(Keys.LeftShift) && dashCdEllapsed > DashCd)
+		if (input.IsKeyDown(Keys.LeftControl) && dashCdEllapsed > DashCd)
 		{
 			if (targetSpeed != 0f)
 			{
 				_velocity *= DashScale;
 				dashCdEllapsed = 0f;
 
-				float dir = Math.Sign(_velocity);
-				if (dir == -1)
-				{
-					dir = 0f;
-				}
-				else
-				{
-					dir = 3.14f;
-				}
-				_particles.Emitter.DirectionAngle = dir;
-
 				_particles.Emitting = true;
-
 				AudioManager.Ins.PlaySound("player_dash");
 			}
 		}
+
+		float dir = -Math.Sign(targetSpeed);
+		_particles.Emitter.DirectionSign = new Vector2(dir, _particles.Emitter.DirectionSign.Y);
 
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
 		localTransform.Position = new Vector2(localTransform.Position.X + _velocity * dt, localTransform.Position.Y);

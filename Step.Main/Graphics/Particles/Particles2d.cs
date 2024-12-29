@@ -78,7 +78,7 @@ public class Particles2d : GameObject
 			}
 
 			_particles[i].Age += deltaTime;
-			_particles[i].Position += _particles[i].Velocity * deltaTime;
+			_particles[i].Position += (_particles[i].Velocity * Emitter.DirectionSign) * deltaTime;
 		}
 	}
 

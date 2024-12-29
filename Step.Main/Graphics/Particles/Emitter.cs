@@ -30,6 +30,9 @@ public class Emitter
 	[EditorProperty(0f, 6.28f)]
 	public float DirectionAngle { get; set; }
 
+	[JsonIgnore]
+	public Vector2 DirectionSign { get; set; } = Vector2.One;
+
 	[EditorProperty(0f, 3.14f)]
 	public float Spread { get; set; }
 
