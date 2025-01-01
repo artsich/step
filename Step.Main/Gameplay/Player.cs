@@ -41,7 +41,7 @@ public class Player : GameObject
 
 	public bool IsFullHp => Hp >= MaxHp;
 
-	public Vector2 Position => localTransform.Position;
+	public Vector2 Position => LocalTransform.Position;
 
 	private Vector2 _size;
 
@@ -72,8 +72,8 @@ public class Player : GameObject
 		_input = input;
 		_worldBb = worldBb;
 		_size = size;
-		localTransform.Position = position;
-		localTransform.Scale = Vector2.One;
+		LocalTransform.Position = position;
+		LocalTransform.Scale = Vector2.One;
 		_playerTexture = playerTexture;
 		_renderer = renderer;
 	}
@@ -99,7 +99,11 @@ public class Player : GameObject
 
 	public void AddHp(int hp)
 	{
-		if (hp < 0) throw new ArithmeticException("Can't add negative HP...");
+		if (hp < 0)
+		{
+			throw new ArithmeticException("Can't add negative HP...");
+		}
+
 		if (Hp + hp <= MaxHp)
 		{
 			Hp += hp;
@@ -157,12 +161,10 @@ public class Player : GameObject
 		_renderer.DrawObject(Position, Size, Color4.White, _playerTexture);
 	}
 
-	public override void DebugRender()
+	protected override void OnDebugDraw()
 	{
-		ImGui.SeparatorText("Player stats");
 		ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Health: {Hp}");
 
-		ImGui.SeparatorText("Player settings");
 		ImGui.Checkbox("God mode", ref godMode);
 
 		var systemVectorSize = _size.ToSystem();
@@ -263,12 +265,16 @@ public class Player : GameObject
 
 		if (!_worldBb.ContainsInclusive(box.Min))
 		{
-			localTransform.Position = new Vector2(_worldBb.Min.X + halfSizeX, localTransform.Position.Y);
+			LocalTransform.Position = new Vector2(
+				_worldBb.Min.X + halfSizeX,
+				LocalTransform.Position.Y);
 		}
 
 		if (!_worldBb.ContainsInclusive(box.Max))
 		{
-			localTransform.Position = new Vector2(_worldBb.Max.X - halfSizeX, localTransform.Position.Y);
+			LocalTransform.Position = new Vector2(
+				_worldBb.Max.X - halfSizeX,
+				LocalTransform.Position.Y);
 		}
 	}
 
@@ -301,7 +307,7 @@ public class Player : GameObject
 		_particles.Emitter.DirectionSign = new Vector2(dir, _particles.Emitter.DirectionSign.Y);
 
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
-		localTransform.Position = new Vector2(localTransform.Position.X + _velocity * dt, localTransform.Position.Y);
+		LocalTransform.Position = new Vector2(LocalTransform.Position.X + _velocity * dt, LocalTransform.Position.Y);
 	}
 
 	private void AddActivatedEffect(IEffect effect)

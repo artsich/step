@@ -1,14 +1,22 @@
-﻿using OpenTK.Mathematics;
+﻿using ImGuiNET;
+using OpenTK.Mathematics;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main;
 
-public class GameObject(string name = "GameObject")
+public class GameObject(string name = nameof(GameObject))
 {
 	public string Name = name;
-	public Transform localTransform = new();
+	public Transform LocalTransform = new();
 
 	protected GameObject? _parent;
 	protected List<GameObject> children = [];
+
+	private readonly Queue<Action> _deferredActions = [];
+
+	public void Defer(Action action)
+	{
+		_deferredActions.Enqueue(action);
+	}
 
 	public void AddChild(GameObject child)
 	{
@@ -30,7 +38,7 @@ public class GameObject(string name = "GameObject")
 
 	public Matrix4 GetGlobalMatrix()
 	{
-		Matrix4 localMat = localTransform.GetLocalMatrix();
+		Matrix4 localMat = LocalTransform.GetLocalMatrix();
 
 		if (_parent == null)
 		{
@@ -49,6 +57,8 @@ public class GameObject(string name = "GameObject")
 		{
 			child.Update(deltaTime);
 		}
+
+		ProcessDeferred();
 	}
 
 	public void Draw()
@@ -60,10 +70,28 @@ public class GameObject(string name = "GameObject")
 		}
 	}
 
+	public void DebugDraw()
+	{
+		OnDebugDraw();
+		foreach (var child in children)
+		{
+			if (ImGui.TreeNodeEx(child.Name, ImGuiTreeNodeFlags.DefaultOpen))
+			{
+				child.DebugDraw();
+				ImGui.TreePop();
+			}
+		}
+	}
+
 	public T GetChildOf<T>() where T : GameObject
 	{
 		var result = children.OfType<T>().FirstOrDefault() ?? throw new ArgumentException($"{typeof(T).Name} not found...");
 		return result;
+	}
+
+	public IEnumerable<T> GetChildsOf<T>() where T : GameObject
+	{
+		return children.OfType<T>();
 	}
 
 	public void Start()
@@ -84,7 +112,7 @@ public class GameObject(string name = "GameObject")
 		}
 	}
 
-	public virtual void DebugRender() { }
+	protected virtual void OnDebugDraw() { }
 
 	protected virtual void OnStart() { }
 
@@ -93,4 +121,12 @@ public class GameObject(string name = "GameObject")
 	protected virtual void OnUpdate(float deltaTime) { }
 
 	protected virtual void OnRender() { }
+
+	private void ProcessDeferred()
+	{
+		while (_deferredActions.TryDequeue(out var action))
+		{
+			action();
+		}
+	}
 }

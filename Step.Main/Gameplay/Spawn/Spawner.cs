@@ -4,7 +4,6 @@ namespace Step.Main.Gameplay.Spawn;
 
 public class Spawner(
 	IReadOnlyList<Vector2> spawnPoints,
-	IGameScene gameScene,
 	float timeInterval,
 	params SpawnEntity[] spawnEntities)
 {
@@ -17,7 +16,7 @@ public class Spawner(
 	public float TimeInterval { get; set; } = timeInterval;
 	public bool Enabled { get; set; }
 
-	public Thing? Get(float dt)
+	public Thing? Get(float dt, IGameScene gameScene)
 	{
 		if (!Enabled)
 		{

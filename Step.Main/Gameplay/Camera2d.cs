@@ -16,7 +16,7 @@ public class Camera2d : GameObject, ICamera2d
 	private float shakeMagnitude = 0f;
 
 	public Camera2d(int width, int height)
-		: base("Camera")
+		: base(nameof(Camera2d))
 	{
 		proj = Matrix4.CreateOrthographicOffCenter(
 			-width / 2f, width / 2f,
@@ -24,7 +24,7 @@ public class Camera2d : GameObject, ICamera2d
 			-1f, 100f
 		);
 
-		localTransform.Position = Vector2.Zero;
+		LocalTransform.Position = Vector2.Zero;
 		UpdateViewProj();
 	}
 
@@ -36,12 +36,12 @@ public class Camera2d : GameObject, ICamera2d
 
 	public void Zoom(float scale)
 	{
-		var zoom = localTransform.Scale;
+		var zoom = LocalTransform.Scale;
 
 		zoom.X = Math.Clamp(zoom.X + scale, 0.1f, 3f);
 		zoom.Y = Math.Clamp(zoom.Y + scale, 0.1f, 3f);
 
-		localTransform.Scale = zoom;
+		LocalTransform.Scale = zoom;
 	}
 
 	protected override void OnUpdate(float dt)

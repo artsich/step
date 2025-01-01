@@ -1,5 +1,4 @@
 ﻿using OpenTK.Mathematics;
-using Step.Main.Gameplay;
 
 namespace Step.Main.Graphics.Particles;
 
@@ -38,6 +37,7 @@ public class Particles2d : GameObject
 	}
 
 	public Particles2d(Emitter emitter, Renderer renderer)
+		: base(nameof(Particles2d))
 	{
 		Emitter = emitter;
 		_particles = new Particle[Emitter.Amount];
