@@ -129,7 +129,8 @@ public class GameCompose : GameWindow
 			],
 			1f,
 			[
-				new SpawnSimpleEntity(_justThing, _renderer),
+				new SpawnSimpleEntity(_justThing, _renderer, true),
+				new SpawnSimpleEntity(_justThing, _renderer, false),
 				new SpawnHealthEntity(_healthEffect, _renderer),
 				new SpawnKillAllEntity(_bombEffect, _renderer),
 				new SpawnSpeedEntity(_speedEffect, _renderer),

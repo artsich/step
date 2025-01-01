@@ -85,7 +85,7 @@ public class KillAllEffect(IGameScene scene) : IEffect
 
 	public void Use()
 	{
-		scene.KillThings();
+		scene.KillEnemies();
 		Console.WriteLine("Kill all used...");
 		IsCompleted = true;
 	}

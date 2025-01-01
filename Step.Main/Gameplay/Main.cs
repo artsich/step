@@ -31,11 +31,11 @@ public class Main(Spawner spawner, Renderer renderer)
 		return Player.EffectsCount<T>() + fallingEffects;
 	}
 
-	public void KillThings()
+	public void KillEnemies()
 	{
 		Defer(() =>
 		{
-			var things = GetChildsOf<Thing>().ToArray();
+			var things = GetChildsOf<Thing>().Where(t => !t.IsFriend).ToArray();
 			_score += things.Length;
 			foreach (var thing in things)
 			{
@@ -64,14 +64,25 @@ public class Main(Spawner spawner, Renderer renderer)
 		{
 			if (thing.BoundingBox.Contains(playerBox))
 			{
-				_player.Take(thing);
+				if (thing.IsFriend)
+				{
+					Player.Damage(1);
+				}
+				else
+				{
+					Player.Take(thing);
+				}
 
 				Defer(() => RemoveChild(thing));
 			}
 			else if (thing.BoundingBox.Max.Y < -90f)
 			{
+				if (!thing.IsFriend)
+				{
+					Player.Damage(1);
+				}
+
 				Defer(() => RemoveChild(thing));
-				Player.Damage(1);
 			}
 		}
 	}

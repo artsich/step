@@ -12,11 +12,17 @@ public class Thing : GameObject
 
 	public Vector2 Size { get; }
 
-	public Color4<Rgba> Color { get; init; } = Color4.Green;
+	public Color4<Rgba> Color { get; init; } = Color4.White;
 
 	public Texture2d? Texture { get; init; }
 
-	public Thing(Vector2 position, Vector2 size, Renderer renderer, IEffect? effect = null)
+	public bool IsFriend { get; init; }
+
+	public Thing(
+		Vector2 position,
+		Vector2 size,
+		Renderer renderer,
+		IEffect? effect = null)
 	{
 		this.effect = effect;
 		Size = size;
@@ -33,7 +39,7 @@ public class Thing : GameObject
 
 	protected override void OnRender()
 	{
-		_renderer.DrawObject(LocalTransform.Position, Size, Color4.White, Texture);
+		_renderer.DrawObject(LocalTransform.Position, Size, Color, Texture);
 	}
 
 	public void ApplyEffect(Player player)
