@@ -71,7 +71,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 		EmitterButtons();
 		ImGui.EndChild();
 
-		DrawParticles();
+		DrawParticlesPreview();
 	}
 
 	private void EmitterButtons()
@@ -100,7 +100,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 		}
 	}
 
-	private void DrawParticles()
+	private void DrawParticlesPreview()
 	{
 		if (_emitter == null)
 		{

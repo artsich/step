@@ -7,7 +7,7 @@ public class Renderer(int screenWidth, int screenHeight)
 {
 	private int _vao;
 	private Shader? _shader;
-	private Camera2d? _camera;
+	private ICamera2d? _camera;
 	private Texture2d _defaultWhiteTexture;
 
 	private int _screenWidth = screenWidth;
@@ -20,7 +20,7 @@ public class Renderer(int screenWidth, int screenHeight)
 		GL.ClearColor(color);
 	}
 
-	public void SetCamera(Camera2d camera)
+	public void SetCamera(ICamera2d camera)
 	{
 		_camera = camera;
 	}
