@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using ImGuiNET;
+using OpenTK.Mathematics;
 using Step.Main.Graphics;
 
 namespace Step.Main.Gameplay;
@@ -15,7 +16,7 @@ public class Camera2d : GameObject, ICamera2d
 	private float shakeDuration = 0f;
 	private float shakeMagnitude = 0f;
 
-	public Camera2d(int width, int height)
+	public Camera2d(float width, float height)
 		: base(nameof(Camera2d))
 	{
 		proj = Matrix4.CreateOrthographicOffCenter(
@@ -42,6 +43,11 @@ public class Camera2d : GameObject, ICamera2d
 		zoom.Y = Math.Clamp(zoom.Y + scale, 0.1f, 3f);
 
 		LocalTransform.Scale = zoom;
+	}
+
+	protected override void OnDebugDraw()
+	{
+		ImGui.Text($"Zoom: {LocalTransform.Scale.X}");
 	}
 
 	protected override void OnUpdate(float dt)

@@ -33,6 +33,8 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 
 	public string Name => "Particles";
 
+	private readonly float TargetAspectRatio = 16f / 9f;
+
 	public ParticlesEditor(Renderer renderer, string baseFolder = ".\\Assets\\Particles\\")
 	{
 		_renderer = renderer;
@@ -107,17 +109,22 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 			return;
 		}
 
-		ImGui.Begin("Particles render");
+		if (ImGui.Begin("Particles render", ImGuiWindowFlags.NoScrollbar))
+		{
+			_renderer.PushRenderTarget(_particlesRenderTarget);
+			GL.Clear(ClearBufferMask.ColorBufferBit);
+			_particles!.Draw();
+			_renderer.PopRenderTarget();
 
-		_renderer.PushRenderTarget(_particlesRenderTarget);
-		GL.Clear(ClearBufferMask.ColorBufferBit);
-		_particles!.Draw();
-		_renderer.PopRenderTarget();
+			var imgSize = StepMath.AdjustToAspect(
+				TargetAspectRatio,
+				ImGui.GetContentRegionAvail().FromSystem())
+			.ToSystem();
 
-		var (width, height) = (_particlesRenderTarget.Width, _particlesRenderTarget.Height);
-		ImGui.Image(_particlesRenderTarget.Color, new(width, height));
+			ImGui.Image(_particlesRenderTarget.Color, imgSize, new(0f, 1f), new(1f, 0f));
 
-		ImGui.End();
+			ImGui.End();
+		}
 	}
 
 	private void EditEmitter()

@@ -73,6 +73,11 @@ public class GameObject(string name = nameof(GameObject))
 	public void DebugDraw()
 	{
 		OnDebugDraw();
+		if (children.Count > 0)
+		{
+			ImGui.SeparatorText("Children");
+		}
+
 		foreach (var child in children)
 		{
 			if (ImGui.TreeNodeEx(child.Name, ImGuiTreeNodeFlags.DefaultOpen))

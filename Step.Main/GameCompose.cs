@@ -35,6 +35,8 @@ public class GameCompose : GameWindow
 {
 	ImGuiController _controller;
 
+	private readonly float TargetAspectRatio = 16f / 9f;
+
 	private bool _paused = false;
 	private bool _showImGui = false;
 
@@ -50,6 +52,8 @@ public class GameCompose : GameWindow
 
 	private GameObject _root;
 	private Camera2d _mainCamera;
+
+	private RenderTarget2d _gameRenderTarget;
 
 	private readonly JsonSerializerOptions _jsonOptions = new()
 	{
@@ -80,6 +84,8 @@ public class GameCompose : GameWindow
 		_renderer = new Renderer(ClientSize.X, ClientSize.Y);
 		_renderer.Load();
 
+		_gameRenderTarget = new RenderTarget2d(ClientSize.X, ClientSize.Y, true);
+
 		_editors.Add(new ParticlesEditor(_renderer));
 
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
@@ -90,7 +96,10 @@ public class GameCompose : GameWindow
 		_speedEffect = new Texture2d(".\\Assets\\Textures\\effect_speed.png").Load();
 		_playerTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
 
-		var camera = new Camera2d(360, 180);
+
+		var width = 320f;
+		var height = (width * 9f) / 16f;
+		var camera = new Camera2d(width, height);
 
 		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
 		{
@@ -112,10 +121,10 @@ public class GameCompose : GameWindow
 
 		var spawner = new Spawner(
 			[
-				new(150f, 100f),
+				new(140f, 100f),
 				new(110f, 105f),
 				new(0f, 90f),
-				new(-150f, 95f),
+				new(-140f, 95f),
 				new(-110f, 110f)
 			],
 			1f,
@@ -137,7 +146,7 @@ public class GameCompose : GameWindow
 			new(0f, -75f),
 			new(40f, 20f),
 			KeyboardState,
-			new Box2(-180f, -90f, 177f, 90f),
+			new Box2(-width/2f, -height/2f, width/2f, height/2f),
 			_playerTexture,
 			_renderer);
 
@@ -178,15 +187,16 @@ public class GameCompose : GameWindow
 	{
 		base.OnRenderFrame(e);
 		_controller.Update(this, (float)e.Time);
-
-		GL.Clear(ClearBufferMask.ColorBufferBit);
-		_renderer.SetCamera(_mainCamera);
-
-		_root.Draw();
+		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 		if (_showImGui)
 		{
 			ImGuiRender(e);
+		}
+		else
+		{
+			_renderer.SetCamera(_mainCamera);
+			_root.Draw();
 		}
 
 		SwapBuffers();
@@ -194,6 +204,8 @@ public class GameCompose : GameWindow
 
 	private void ImGuiRender(FrameEventArgs e)
 	{
+		ImGui.DockSpaceOverViewport();
+
 		if (ImGui.Begin("Some"))
 		{
 			if (ImGui.Button("Clear console"))
@@ -231,6 +243,23 @@ public class GameCompose : GameWindow
 		{
 			ImGui.Text($"Render time: {e.Time * 1000:F2}ms");
 			ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}ms");
+
+			ImGui.End();
+		}
+
+		if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
+		{
+			_renderer.PushRenderTarget(_gameRenderTarget);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			_root.Draw();
+			_renderer.PopRenderTarget();
+
+			var imgSize = StepMath.AdjustToAspect(
+				TargetAspectRatio,
+				ImGui.GetContentRegionAvail().FromSystem())
+			.ToSystem();
+
+			ImGui.Image(_gameRenderTarget.Color, imgSize, new (0f, 1f), new (1f, 0f));
 
 			ImGui.End();
 		}
