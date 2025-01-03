@@ -27,6 +27,9 @@ using System.Text.Json;
  *
  *  Additional automatic platforms, that can collect things
  *  Guns - pistol, knife - additional effects...
+ *  
+ *  [BUGS]
+ *  When reload happens, not all events are unsubscribed
  */
 
 namespace Step.Main;
@@ -90,21 +93,27 @@ public class GameCompose : GameWindow
 
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 
+		LoadAssets();
+
+		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
+		{
+			FontGlobalScale = 2f
+		};
+
+		ReloadGame();
+
+		AudioManager.Ins.PlaySound("start");
+		AudioManager.Ins.PlaySound("main_theme", true);
+	}
+
+	private void LoadAssets()
+	{
 		_healthEffect = new Texture2d(".\\Assets\\Textures\\effect_health.png").Load();
 		_bombEffect = new Texture2d(".\\Assets\\Textures\\effect_bomb.png").Load();
 		_justThing = new Texture2d(".\\Assets\\Textures\\thing.png").Load();
 		_speedEffect = new Texture2d(".\\Assets\\Textures\\effect_speed.png").Load();
 		_playerTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
 
-
-		var width = 320f;
-		var height = (width * 9f) / 16f;
-		var camera = new Camera2d(width, height);
-
-		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
-		{
-			FontGlobalScale = 2f
-		};
 
 		AudioManager.Ins.LoadSound("start", ".\\Assets.\\Music\\ok_lets_go.mp3");
 		AudioManager.Ins.LoadSound("player_heal", ".\\Assets\\Music\\player_heal.mp3");
@@ -115,26 +124,13 @@ public class GameCompose : GameWindow
 		AudioManager.Ins.LoadSound("player_dash", ".\\Assets\\Music\\dash.wav");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
+	}
 
-		AudioManager.Ins.PlaySound("start");
-		AudioManager.Ins.PlaySound("main_theme", true);
-
-		var spawner = new Spawner(
-			[
-				new(140f, 100f),
-				new(110f, 105f),
-				new(0f, 90f),
-				new(-140f, 95f),
-				new(-110f, 110f)
-			],
-			1f,
-			[
-				new SpawnSimpleEntity(_justThing, _renderer, true),
-				new SpawnSimpleEntity(_justThing, _renderer, false),
-				new SpawnHealthEntity(_healthEffect, _renderer),
-				new SpawnKillAllEntity(_bombEffect, _renderer),
-				new SpawnSpeedEntity(_speedEffect, _renderer),
-			]);
+	private void ReloadGame()
+	{
+		var width = 320f;
+		var height = (width * 9f) / 16f;
+		var camera = new Camera2d(width, height);
 
 		var loadedEmitter = JsonSerializer.Deserialize<Emitter>(
 			File.ReadAllText(".\\Assets\\Particles\\player_dash_particle.json"),
@@ -147,7 +143,7 @@ public class GameCompose : GameWindow
 			new(0f, -75f),
 			new(40f, 20f),
 			KeyboardState,
-			new Box2(-width/2f, -height/2f, width/2f, height/2f),
+			new Box2(-width / 2f, -height / 2f, width / 2f, height / 2f),
 			_playerTexture,
 			_renderer);
 
@@ -169,12 +165,34 @@ public class GameCompose : GameWindow
 
 		player.OnDead += () =>
 		{
+			Console.Clear();
 			Console.WriteLine("Game over...");
-			Close();
+			Console.WriteLine("Reloading...");
+			ReloadGame();
 		};
 
 		player.AddChild(playerParticles);
 		player.Start();
+
+		var spawner = new Spawner(
+			[
+				new(140f, 100f),
+				new(110f, 105f),
+				new(0f, 90f),
+				new(-140f, 95f),
+				new(-110f, 110f)
+			],
+			1f,
+			[
+				new SpawnSimpleEntity(_justThing, _renderer, true),
+				new SpawnSimpleEntity(_justThing, _renderer, false),
+				new SpawnHealthEntity(_healthEffect, _renderer),
+				new SpawnKillAllEntity(_bombEffect, _renderer),
+				new SpawnSpeedEntity(_speedEffect, _renderer),
+			])
+		{
+			Enabled = true
+		};
 
 		_root = new Gameplay.Main(spawner, _renderer);
 		_root.AddChild(player);
