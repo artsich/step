@@ -100,9 +100,6 @@ public class GameCompose : GameWindow
 		};
 
 		ReloadGame();
-
-		AudioManager.Ins.PlaySound("start");
-		AudioManager.Ins.PlaySound("main_theme", true);
 	}
 
 	private void LoadAssets()

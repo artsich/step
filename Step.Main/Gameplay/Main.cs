@@ -24,6 +24,9 @@ public class Main(Spawner spawner, Renderer renderer)
 		_camera = GetChildOf<Camera2d>();
 
 		_player.OnThingTaken += (_) => _score++;
+
+		AudioManager.Ins.PlaySound("start");
+		AudioManager.Ins.PlaySound("main_theme", true);
 	}
 
 	public int EffectsCount<T>() where T : IEffect
