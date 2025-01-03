@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Step.Main.Converters;
+namespace Step.Engine.Converters;
 
 public class Vector2JsonConverter : JsonConverter<Vector2>
 {

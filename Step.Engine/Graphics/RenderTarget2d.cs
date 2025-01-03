@@ -1,14 +1,14 @@
 ﻿using OpenTK.Graphics.OpenGL;
 
-namespace Step.Main.Graphics;
+namespace Step.Engine.Graphics;
 
 public class RenderTarget2d : IDisposable
 {
-	internal int Framebuffer { get; private set; }
+	public int Framebuffer { get; private set; }
 
-	internal int Color { get; private set; }
+	public int Color { get; private set; }
 
-	internal int DepthStencil { get; private set; }
+	public int DepthStencil { get; private set; }
 
 	public int Width { get; private set; }
 

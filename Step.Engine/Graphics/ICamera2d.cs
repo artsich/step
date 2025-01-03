@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Step.Main.Graphics;
+namespace Step.Engine.Graphics;
 
 public interface ICamera2d
 {

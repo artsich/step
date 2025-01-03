@@ -7,9 +7,9 @@ using System.Diagnostics;
 using ErrorCode = OpenTK.Graphics.OpenGL.ErrorCode;
 using OpenTK.Graphics.OpenGL;
 
-namespace Step.Main.Graphics;
+namespace Step.Engine.Graphics;
 
-internal class ImGuiController : IDisposable
+public class ImGuiController : IDisposable
 {
 	private bool _frameBegun;
 
@@ -281,12 +281,12 @@ void main()
 		io.KeySuper = KeyboardState.IsKeyDown(Keys.LeftSuper) || KeyboardState.IsKeyDown(Keys.RightSuper);
 	}
 
-	internal void PressChar(char keyChar)
+	public void PressChar(char keyChar)
 	{
 		PressedChars.Add(keyChar);
 	}
 
-	internal void MouseScroll(Vector2 offset)
+	public void MouseScroll(Vector2 offset)
 	{
 		ImGuiIOPtr io = ImGui.GetIO();
 

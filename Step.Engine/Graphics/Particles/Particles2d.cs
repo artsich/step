@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Step.Main.Graphics.Particles;
+namespace Step.Engine.Graphics.Particles;
 
 public class Particles2d : GameObject
 {

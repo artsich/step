@@ -1,4 +1,4 @@
-﻿namespace Step.Main.Editor;
+﻿namespace Step.Engine.Editor;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class EditorPropertyAttribute(float from, float to, bool isColor = false) : Attribute

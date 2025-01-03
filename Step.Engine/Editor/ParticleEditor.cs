@@ -1,11 +1,11 @@
 ﻿using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
-using Step.Main.Converters;
-using Step.Main.Graphics;
-using Step.Main.Graphics.Particles;
+using Step.Engine.Converters;
+using Step.Engine.Graphics;
+using Step.Engine.Graphics.Particles;
 using System.Text.Json;
 
-namespace Step.Main.Editor;
+namespace Step.Engine.Editor;
 
 public sealed class ParticlesEditor : IEditorView, IDisposable
 {

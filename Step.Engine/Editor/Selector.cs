@@ -1,6 +1,6 @@
 ﻿using ImGuiNET;
 
-namespace Step.Main.Editor;
+namespace Step.Engine.Editor;
 
 public class Selector(string label)
 {

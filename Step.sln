@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Step.Main", "Step.Main\Step.Main.csproj", "{910CEE69-C56F-4E46-B13D-2177B62654BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Step.Engine", "Step.Engine\Step.Engine.csproj", "{A7181465-A001-44BC-A128-4721AB8C220B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{910CEE69-C56F-4E46-B13D-2177B62654BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{910CEE69-C56F-4E46-B13D-2177B62654BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{910CEE69-C56F-4E46-B13D-2177B62654BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7181465-A001-44BC-A128-4721AB8C220B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7181465-A001-44BC-A128-4721AB8C220B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7181465-A001-44BC-A128-4721AB8C220B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7181465-A001-44BC-A128-4721AB8C220B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

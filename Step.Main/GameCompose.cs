@@ -5,13 +5,14 @@ using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using StbImageSharp;
-using Step.Main.Audio;
-using Step.Main.Converters;
-using Step.Main.Editor;
+using Step.Engine;
+using Step.Engine.Audio;
+using Step.Engine.Converters;
+using Step.Engine.Editor;
+using Step.Engine.Graphics;
+using Step.Engine.Graphics.Particles;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Spawn;
-using Step.Main.Graphics;
-using Step.Main.Graphics.Particles;
 using System.Text.Json;
 
 /*
@@ -29,15 +30,13 @@ using System.Text.Json;
  *  Guns - pistol, knife - additional effects...
  *  
  *  [BUGS]
- *  When reload happens, not all events are unsubscribed
+ *  When reload happens, not all events are unsubscribed, so memory leak
  */
 
 namespace Step.Main;
 
 public class GameCompose : GameWindow
 {
-	ImGuiController _controller;
-
 	private readonly float TargetAspectRatio = 16f / 9f;
 
 	private bool _paused = false;
@@ -52,11 +51,13 @@ public class GameCompose : GameWindow
 	private Texture2d _speedEffect;
 	private Texture2d _playerTexture;
 	private Renderer _renderer;
+	private ImGuiController _controller;
+	private RenderTarget2d _gameRenderTarget;
+
+	private readonly List<IEditorView> _editors = [];
 
 	private GameObject _root;
 	private Camera2d _mainCamera;
-
-	private RenderTarget2d _gameRenderTarget;
 
 	private readonly JsonSerializerOptions _jsonOptions = new()
 	{
@@ -69,10 +70,8 @@ public class GameCompose : GameWindow
 		}
 	};
 
-	private readonly List<IEditorView> _editors = [];
-
 	public GameCompose(
-		GameWindowSettings gameWindowSettings, 
+		GameWindowSettings gameWindowSettings,
 		NativeWindowSettings nativeWindowSettings)
 		: base(gameWindowSettings, nativeWindowSettings)
 	{
@@ -113,7 +112,6 @@ public class GameCompose : GameWindow
 		_justThing = new Texture2d(".\\Assets\\Textures\\thing.png").Load();
 		_speedEffect = new Texture2d(".\\Assets\\Textures\\effect_speed.png").Load();
 		_playerTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
-
 
 		AudioManager.Ins.LoadSound("start", ".\\Assets.\\Music\\ok_lets_go.mp3");
 		AudioManager.Ins.LoadSound("player_heal", ".\\Assets\\Music\\player_heal.mp3");
@@ -172,7 +170,6 @@ public class GameCompose : GameWindow
 		};
 
 		player.AddChild(playerParticles);
-		player.Start();
 
 		var spawner = new Spawner(
 			[
@@ -278,7 +275,7 @@ public class GameCompose : GameWindow
 				ImGui.GetContentRegionAvail().FromSystem())
 			.ToSystem();
 
-			ImGui.Image(_gameRenderTarget.Color, imgSize, new (0f, 1f), new (1f, 0f));
+			ImGui.Image(_gameRenderTarget.Color, imgSize, new(0f, 1f), new(1f, 0f));
 
 			ImGui.End();
 		}
@@ -299,24 +296,22 @@ public class GameCompose : GameWindow
 		float dt = (float)e.Time;
 		_lastUpdateTime = dt;
 
-		var input = KeyboardState;
-
-		if (input.IsKeyDown(Keys.Escape))
+		if (KeyboardState.IsKeyDown(Keys.Escape))
 		{
 			Close();
 		}
 
-		if (input.IsKeyPressed(Keys.P))
+		if (KeyboardState.IsKeyPressed(Keys.P))
 		{
 			_paused = !_paused;
 		}
 
-		if (input.IsKeyPressed(Keys.GraveAccent))
+		if (KeyboardState.IsKeyPressed(Keys.GraveAccent))
 		{
 			_showImGui = !_showImGui;
 		}
 
-		CheckWindowStateToggle(input);
+		CheckWindowStateToggle();
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
@@ -334,11 +329,11 @@ public class GameCompose : GameWindow
 		}
 	}
 
-	private void CheckWindowStateToggle(KeyboardState input)
+	private void CheckWindowStateToggle()
 	{
-		if (input.IsKeyDown(Keys.LeftAlt))
+		if (KeyboardState.IsKeyDown(Keys.LeftAlt))
 		{
-			if (input.IsKeyPressed(Keys.Enter))
+			if (KeyboardState.IsKeyPressed(Keys.Enter))
 			{
 				if (WindowState == WindowState.Fullscreen)
 				{

@@ -1,8 +1,9 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
-using Step.Main.Audio;
 using Step.Main.Gameplay.Spawn;
-using Step.Main.Graphics;
+using Step.Engine.Graphics;
+using Step.Engine;
+using Step.Engine.Audio;
 
 namespace Step.Main.Gameplay;
 

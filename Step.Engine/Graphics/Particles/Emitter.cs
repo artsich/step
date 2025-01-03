@@ -1,8 +1,8 @@
 ﻿using OpenTK.Mathematics;
-using Step.Main.Editor;
+using Step.Engine.Editor;
 using System.Text.Json.Serialization;
 
-namespace Step.Main.Graphics.Particles;
+namespace Step.Engine.Graphics.Particles;
 
 public class Emitter
 {

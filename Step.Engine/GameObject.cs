@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
 
-namespace Step.Main;
+namespace Step.Engine;
 
 public class GameObject(string name = nameof(GameObject))
 {

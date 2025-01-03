@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using StbImageSharp;
 
-namespace Step.Main.Graphics;
+namespace Step.Engine.Graphics;
 
 public class Texture2d(string path) : IDisposable
 {

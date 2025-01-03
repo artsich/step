@@ -2,7 +2,7 @@
 using NAudio.Wave.SampleProviders;
 using OpenTK.Audio.OpenAL;
 
-namespace Step.Main.Audio;
+namespace Step.Engine.Audio;
 
 internal static class NAudioLoader
 {

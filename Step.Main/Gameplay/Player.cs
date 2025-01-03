@@ -1,9 +1,10 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using Step.Main.Audio;
-using Step.Main.Graphics;
-using Step.Main.Graphics.Particles;
+using Step.Engine;
+using Step.Engine.Audio;
+using Step.Engine.Graphics;
+using Step.Engine.Graphics.Particles;
 
 namespace Step.Main.Gameplay;
 

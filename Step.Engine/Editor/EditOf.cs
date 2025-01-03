@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
 
-namespace Step.Main.Editor;
+namespace Step.Engine.Editor;
 
 public static class EditOf
 {

@@ -1,4 +1,4 @@
-﻿namespace Step.Main.Editor;
+﻿namespace Step.Engine.Editor;
 
 public interface IEditorView
 {

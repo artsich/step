@@ -9,11 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="ImGui.NET" Version="1.91.0.1" />
-      <PackageReference Include="NAudio" Version="2.2.1" />
-      <PackageReference Include="OpenAL.Soft" Version="1.23.1" />
-      <PackageReference Include="OpenTK" Version="5.0.0-pre.13" />
-      <PackageReference Include="StbImageSharp" Version="2.30.15" />
+      <ProjectReference Include="..\Step.Engine\Step.Engine.csproj" />
     </ItemGroup>
 
 </Project>
