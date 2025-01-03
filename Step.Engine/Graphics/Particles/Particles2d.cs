@@ -80,6 +80,8 @@ public class Particles2d : GameObject
 			_particles[i].Age += deltaTime;
 			_particles[i].Position += (_particles[i].Velocity * Emitter.DirectionSign) * deltaTime;
 		}
+
+		_emitting = _activeParticles > 0;
 	}
 
 	protected override void OnRender()
