@@ -41,7 +41,7 @@ public class AudioManager : IDisposable
 			Console.WriteLine($"AudioManager: Sound with key '{key}' already exists.");
 		}
 
-		Sound sound = NAudioLoader.LoadSound(filePath);
+		Sound sound = Assets.LoadSound(filePath);
 		_loadedSounds[key] = sound;
 	}
 

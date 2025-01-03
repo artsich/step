@@ -14,6 +14,8 @@ public class Main(Spawner spawner, Renderer renderer)
 	private Camera2d? _camera;
 	private int _score;
 
+	public Action? OnFinish;
+
 	public Player Player => _player!;
 
 	protected override void OnStart()
@@ -23,7 +25,21 @@ public class Main(Spawner spawner, Renderer renderer)
 		_player = GetChildOf<Player>();
 		_camera = GetChildOf<Camera2d>();
 
+		_player.OnPlayerHeal += () => AudioManager.Ins.PlaySound("player_heal");
+		_player.OnThingTaken += (_) => AudioManager.Ins.PlaySound("thing_taken");
 		_player.OnThingTaken += (_) => _score++;
+
+		_player.OnDamage += () =>
+		{
+			_camera.Shake(magnitude: 2f, duration: 0.5f);
+			AudioManager.Ins.PlaySound("player_take_damage");
+		};
+
+		_player.OnDead += () =>
+		{
+			Console.WriteLine("Game over...");
+			OnFinish?.Invoke();
+		};
 
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);

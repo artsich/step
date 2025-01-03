@@ -1,25 +1,13 @@
 ﻿using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
-using Step.Engine.Converters;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
-using System.Text.Json;
 
 namespace Step.Engine.Editor;
 
 public sealed class ParticlesEditor : IEditorView, IDisposable
 {
-	private readonly JsonSerializerOptions _jsonOptions = new()
-	{
-		PropertyNameCaseInsensitive = true,
-		WriteIndented = true,
-		Converters =
-		{
-			new Vector2JsonConverter(),
-			new Vector4JsonConverter()
-		}
-	};
-	private readonly string _baseFolder;
+	private readonly string _baseFolder = Path.Combine(Assets.AssetsFolder, "Particles");
 	private readonly RenderTarget2d _particlesRenderTarget = new(1280, 720);
 
 	private readonly Renderer _renderer;
@@ -35,11 +23,10 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 
 	private readonly float TargetAspectRatio = 16f / 9f;
 
-	public ParticlesEditor(Renderer renderer, string baseFolder = ".\\Assets\\Particles\\")
+	public ParticlesEditor(Renderer renderer)
 	{
 		_renderer = renderer;
-		_baseFolder = baseFolder;
-		_files = GetParticleFiles(baseFolder);
+		_files = GetParticleFiles(_baseFolder);
 
 		_fileSelector = new("Select an particles file");
 		_fileSelector.OnItemSelected += OnFileSelected;
@@ -83,9 +70,9 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 			ImGui.BeginChild("Emitter2");
 			if (ImGui.Button("Save"))
 			{
-				var selectedFile = FullPath(_selectedFilePath);
-				var emitterJson = JsonSerializer.Serialize(_emitter, _jsonOptions);
-				File.WriteAllText(selectedFile!, emitterJson);
+				Assets.SaveEmitter(
+					Path.Combine("Particles", _selectedFilePath),
+					_emitter);
 				Console.WriteLine($"Particle file changed - `{_selectedFilePath}`");
 			}
 
@@ -145,7 +132,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 			throw new ArgumentNullException(nameof(filePath));
 		}
 
-		_emitter = ReadEmitter(filePath);
+		_emitter = Assets.LoadEmitter(Path.Combine("Particles", filePath));
 		_selectedFilePath = filePath;
 
 		if (_emitter != null)
@@ -155,26 +142,6 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 				Emitting = true,
 			};
 		}
-	}
-
-	private Emitter? ReadEmitter(string file)
-	{
-		string path = FullPath(file);
-		var emitter = JsonSerializer.Deserialize<Emitter>(
-			File.ReadAllText(path),
-			_jsonOptions);
-
-		return emitter;
-	}
-
-	private string? FullPath(string? file)
-	{
-		if (file == null)
-		{
-			return null;
-		}
-
-		return Path.Combine(_baseFolder, file);
 	}
 
 	private static string[] GetParticleFiles(string baseFolder) =>

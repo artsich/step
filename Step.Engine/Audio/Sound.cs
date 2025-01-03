@@ -2,25 +2,21 @@
 
 namespace Step.Engine.Audio;
 
-internal class Sound : IDisposable
+public class Sound : IDisposable
 {
-	private int _bufferId;
-	private int _sourceId;
+	private readonly int _bufferId;
+	private readonly int _sourceId;
 
 	private bool _isDisposed;
 
-	internal Sound(int bufferId)
+	public Sound(int bufferId)
 	{
 		_bufferId = bufferId;
 
-		// Generate a source to play this buffer
 		_sourceId = AL.GenSource();
 		AL.Source(_sourceId, ALSourcei.Buffer, _bufferId);
 	}
 
-	/// <summary>
-	/// Plays the sound.
-	/// </summary>
 	public void Play(bool loop = false)
 	{
 		if (_isDisposed) return;
@@ -29,27 +25,18 @@ internal class Sound : IDisposable
 		AL.SourcePlay(_sourceId);
 	}
 
-	/// <summary>
-	/// Pauses the sound.
-	/// </summary>
 	public void Pause()
 	{
 		if (_isDisposed) return;
 		AL.SourcePause(_sourceId);
 	}
 
-	/// <summary>
-	/// Stops the sound.
-	/// </summary>
 	public void Stop()
 	{
 		if (_isDisposed) return;
 		AL.SourceStop(_sourceId);
 	}
 
-	/// <summary>
-	/// Cleans up the underlying OpenAL resources.
-	/// </summary>
 	public void Dispose()
 	{
 		if (_isDisposed) return;

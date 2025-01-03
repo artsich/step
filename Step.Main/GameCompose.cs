@@ -7,13 +7,11 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using StbImageSharp;
 using Step.Engine;
 using Step.Engine.Audio;
-using Step.Engine.Converters;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Spawn;
-using System.Text.Json;
 
 /*
  * Goals:
@@ -50,25 +48,15 @@ public class GameCompose : GameWindow
 	private Texture2d _justThing;
 	private Texture2d _speedEffect;
 	private Texture2d _playerTexture;
+	private Emitter _dashParticleEmitter;
 	private Renderer _renderer;
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
 
 	private readonly List<IEditorView> _editors = [];
 
-	private GameObject _root;
+	private Gameplay.Main _root;
 	private Camera2d _mainCamera;
-
-	private readonly JsonSerializerOptions _jsonOptions = new()
-	{
-		PropertyNameCaseInsensitive = true,
-		WriteIndented = true,
-		Converters =
-		{
-			new Vector2JsonConverter(),
-			new Vector4JsonConverter()
-		}
-	};
 
 	public GameCompose(
 		GameWindowSettings gameWindowSettings,
@@ -104,19 +92,22 @@ public class GameCompose : GameWindow
 
 	private void LoadAssets()
 	{
-		_healthEffect = new Texture2d(".\\Assets\\Textures\\effect_health.png").Load();
-		_bombEffect = new Texture2d(".\\Assets\\Textures\\effect_bomb.png").Load();
-		_justThing = new Texture2d(".\\Assets\\Textures\\thing.png").Load();
-		_speedEffect = new Texture2d(".\\Assets\\Textures\\effect_speed.png").Load();
-		_playerTexture = new Texture2d(".\\Assets\\Textures\\player.png").Load();
+		_healthEffect = Assets.LoadTexture2d("Textures\\effect_health.png");
+		_bombEffect = Assets.LoadTexture2d("Textures\\effect_bomb.png");
+		_justThing = Assets.LoadTexture2d("Textures\\thing.png");
+		_speedEffect = Assets.LoadTexture2d("Textures\\effect_speed.png");
+		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
 
-		AudioManager.Ins.LoadSound("start", ".\\Assets.\\Music\\ok_lets_go.mp3");
-		AudioManager.Ins.LoadSound("player_heal", ".\\Assets\\Music\\player_heal.mp3");
-		AudioManager.Ins.LoadSound("thing_taken", ".\\Assets\\Music\\thing_taken.wav");
-		AudioManager.Ins.LoadSound("kill_all", ".\\Assets\\Music\\kill_all.mp3");
-		AudioManager.Ins.LoadSound("player_take_damage", ".\\Assets\\Music\\player_take_damage.mp3");
-		AudioManager.Ins.LoadSound("main_theme", ".\\Assets\\Music\\main_theme.mp3");
-		AudioManager.Ins.LoadSound("player_dash", ".\\Assets\\Music\\dash.wav");
+		_dashParticleEmitter = Assets.LoadEmitter("Particles\\player_dash_particle.json");
+		_dashParticleEmitter!.Material!.Texture = _playerTexture;
+
+		AudioManager.Ins.LoadSound("start", "Music\\ok_lets_go.mp3");
+		AudioManager.Ins.LoadSound("player_heal", "Music\\player_heal.mp3");
+		AudioManager.Ins.LoadSound("thing_taken", "Music\\thing_taken.wav");
+		AudioManager.Ins.LoadSound("kill_all", "Music\\kill_all.mp3");
+		AudioManager.Ins.LoadSound("player_take_damage", "Music\\player_take_damage.mp3");
+		AudioManager.Ins.LoadSound("main_theme", "Music\\main_theme.mp3");
+		AudioManager.Ins.LoadSound("player_dash", "Music\\dash.wav");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
@@ -127,13 +118,6 @@ public class GameCompose : GameWindow
 		var height = (width * 9f) / 16f;
 		var camera = new Camera2d(width, height);
 
-		var loadedEmitter = JsonSerializer.Deserialize<Emitter>(
-			File.ReadAllText(".\\Assets\\Particles\\player_dash_particle.json"),
-			_jsonOptions);
-
-		loadedEmitter!.Material!.Texture = _playerTexture;
-		var playerParticles = new Particles2d(loadedEmitter!, _renderer);
-
 		var player = new Player(
 			new(0f, -75f),
 			new(40f, 20f),
@@ -142,31 +126,7 @@ public class GameCompose : GameWindow
 			_playerTexture,
 			_renderer);
 
-		player.OnPlayerHeal += () =>
-		{
-			AudioManager.Ins.PlaySound("player_heal");
-		};
-
-		player.OnThingTaken += (_) =>
-		{
-			AudioManager.Ins.PlaySound("thing_taken");
-		};
-
-		player.OnDamage += () =>
-		{
-			camera.Shake(magnitude: 2f, duration: 0.5f);
-			AudioManager.Ins.PlaySound("player_take_damage");
-		};
-
-		player.OnDead += () =>
-		{
-			Console.Clear();
-			Console.WriteLine("Game over...");
-			Console.WriteLine("Reloading...");
-			ReloadGame();
-		};
-
-		player.AddChild(playerParticles);
+		player.AddChild(new Particles2d(_dashParticleEmitter!, _renderer));
 
 		var spawner = new Spawner(
 			[
@@ -191,6 +151,14 @@ public class GameCompose : GameWindow
 		_root = new Gameplay.Main(spawner, _renderer);
 		_root.AddChild(player);
 		_root.AddChild(camera);
+
+		_root.OnFinish += () =>
+		{
+			Console.Clear();
+			Console.WriteLine("Reloading...");
+			ReloadGame();
+		};
+
 		_root.Start();
 
 		_mainCamera = _root.GetChildOf<Camera2d>();
