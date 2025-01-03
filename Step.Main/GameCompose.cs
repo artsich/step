@@ -176,7 +176,6 @@ public class GameCompose : GameWindow
 		}
 		else
 		{
-			_renderer.SetCamera(_mainCamera);
 			_root.Draw();
 		}
 
@@ -192,6 +191,20 @@ public class GameCompose : GameWindow
 			if (ImGui.Button("Clear console"))
 			{
 				Console.Clear();
+			}
+
+			if (ImGui.Button("Full reload"))
+			{
+				UnloadAssets();
+				LoadAssets();
+
+				//UnloadGame();
+				ReloadGame();
+			}
+
+			if (ImGui.Button( _paused ? "Paused" : "Un pause"))
+			{
+				_paused = !_paused;
 			}
 
 			ImGui.End();
@@ -235,10 +248,11 @@ public class GameCompose : GameWindow
 			_root.Draw();
 			_renderer.PopRenderTarget();
 
-			var imgSize = StepMath.AdjustToAspect(
-				TargetAspectRatio,
-				ImGui.GetContentRegionAvail().FromSystem())
-			.ToSystem();
+			var imgSize = StepMath
+				.AdjustToAspect(
+					TargetAspectRatio,
+					ImGui.GetContentRegionAvail().FromSystem())
+				.ToSystem();
 
 			ImGui.Image(_gameRenderTarget.Color, imgSize, new(0f, 1f), new(1f, 0f));
 
@@ -338,17 +352,21 @@ public class GameCompose : GameWindow
 		_controller.WindowResized(e.Width, e.Height);
 	}
 
-	protected override void OnUnload()
+	private void UnloadAssets()
 	{
 		_healthEffect.Dispose();
 		_bombEffect.Dispose();
 		_justThing.Dispose();
 		_speedEffect.Dispose();
 		_playerTexture.Dispose();
+		AudioManager.Ins.Dispose();
+	}
+
+	protected override void OnUnload()
+	{
+		UnloadAssets();
 
 		_renderer.Unload();
-
-		AudioManager.Ins.Dispose();
 		base.OnUnload();
 	}
 

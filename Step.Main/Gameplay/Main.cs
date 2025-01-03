@@ -41,6 +41,8 @@ public class Main(Spawner spawner, Renderer renderer)
 			OnFinish?.Invoke();
 		};
 
+		renderer.SetCamera(_camera);
+
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
 	}
