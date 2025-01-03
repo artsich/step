@@ -1,12 +1,18 @@
 ﻿using OpenTK.Mathematics;
+using Step.Engine.Editor;
 
 namespace Step.Engine;
 
 public class Transform
 {
-	public Vector2 Position;
-	public float Rotation;
-	public Vector2 Scale;
+	[EditorProperty(speed: 0.1f)]
+	public Vector2 Position { get; set; }
+
+	[EditorProperty(-MathF.PI, MathF.PI)]
+	public float Rotation { get; set; }
+
+	[EditorProperty(speed: 0.1f)]
+	public Vector2 Scale { get; set; }
 
 	public Transform()
 	{

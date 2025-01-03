@@ -1,11 +1,13 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
+using Step.Engine.Editor;
 
 namespace Step.Engine;
 
 public class GameObject(string name = nameof(GameObject))
 {
-	public string Name = name;
+	public string Name { get; init; } = name;
+
 	public Transform LocalTransform = new();
 
 	protected GameObject? _parent;
@@ -73,6 +75,12 @@ public class GameObject(string name = nameof(GameObject))
 	public void DebugDraw()
 	{
 		OnDebugDraw();
+
+		if (ImGui.CollapsingHeader("Transform"))
+		{
+			EditOf.Render(LocalTransform);
+		}
+
 		if (children.Count > 0)
 		{
 			ImGui.SeparatorText("Children");
@@ -91,6 +99,12 @@ public class GameObject(string name = nameof(GameObject))
 	public T GetChildOf<T>() where T : GameObject
 	{
 		var result = children.OfType<T>().FirstOrDefault() ?? throw new ArgumentException($"{typeof(T).Name} not found...");
+		return result;
+	}
+
+	public T GetChildOf<T>(string name) where T : GameObject
+	{
+		var result = children.OfType<T>().FirstOrDefault(x => x.Name == name) ?? throw new ArgumentException($"{typeof(T).Name} not found...");
 		return result;
 	}
 

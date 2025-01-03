@@ -38,7 +38,7 @@ public class GameCompose : GameWindow
 	private readonly float TargetAspectRatio = 16f / 9f;
 
 	private bool _paused = false;
-	private bool _showImGui = false;
+	private bool _showImGui = true;
 
 	private float _lastUpdateTime;
 	private float _audioMasterVolume = 0.1f;
@@ -57,6 +57,7 @@ public class GameCompose : GameWindow
 
 	private Gameplay.Main _root;
 	private Camera2d _mainCamera;
+	private Emitter _wallCollisionParticleEmitter;
 
 	public GameCompose(
 		GameWindowSettings gameWindowSettings,
@@ -101,6 +102,8 @@ public class GameCompose : GameWindow
 		_dashParticleEmitter = Assets.LoadEmitter("Particles\\player_dash_particle.json");
 		_dashParticleEmitter!.Material!.Texture = _playerTexture;
 
+		_wallCollisionParticleEmitter = Assets.LoadEmitter("Particles\\wall_collision.json");
+
 		AudioManager.Ins.LoadSound("start", "Music\\ok_lets_go.mp3");
 		AudioManager.Ins.LoadSound("player_heal", "Music\\player_heal.mp3");
 		AudioManager.Ins.LoadSound("thing_taken", "Music\\thing_taken.wav");
@@ -108,6 +111,7 @@ public class GameCompose : GameWindow
 		AudioManager.Ins.LoadSound("player_take_damage", "Music\\player_take_damage.mp3");
 		AudioManager.Ins.LoadSound("main_theme", "Music\\main_theme.mp3");
 		AudioManager.Ins.LoadSound("player_dash", "Music\\dash.wav");
+		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
@@ -126,7 +130,14 @@ public class GameCompose : GameWindow
 			_playerTexture,
 			_renderer);
 
-		player.AddChild(new Particles2d(_dashParticleEmitter!, _renderer));
+		player.AddChild(new Particles2d(_dashParticleEmitter!, _renderer)
+		{
+			Name = "DashParticles",
+		});
+		player.AddChild(new Particles2d(_wallCollisionParticleEmitter!, _renderer)
+		{
+			Name = "WallCollision",
+		});
 
 		var spawner = new Spawner(
 			[
@@ -145,7 +156,7 @@ public class GameCompose : GameWindow
 				new SpawnSpeedEntity(_speedEffect, _renderer),
 			])
 		{
-			Enabled = true
+			Enabled = false
 		};
 
 		_root = new Gameplay.Main(spawner, _renderer);
@@ -202,7 +213,7 @@ public class GameCompose : GameWindow
 				ReloadGame();
 			}
 
-			if (ImGui.Button( _paused ? "Paused" : "Un pause"))
+			if (ImGui.Button(_paused ? "Paused" : "Un pause"))
 			{
 				_paused = !_paused;
 			}

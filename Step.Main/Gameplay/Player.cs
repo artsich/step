@@ -10,6 +10,8 @@ namespace Step.Main.Gameplay;
 
 public class Player : GameObject
 {
+	private const float WallCollisionVelocityThreshold = 5f;
+
 	private float _velocity;
 	private Box2 _worldBb;
 	private readonly KeyboardState _input;
@@ -59,7 +61,9 @@ public class Player : GameObject
 	private Texture2d _playerTexture;
 	private Renderer _renderer;
 
-	private Particles2d _particles;
+	private Particles2d _dashParticles;
+	private Particles2d _wallCollisionParticles;
+	private bool _wallCollisionEffectTriggered = false;
 
 	public Player(
 		Vector2 position,
@@ -81,7 +85,8 @@ public class Player : GameObject
 
 	protected override void OnStart()
 	{
-		_particles = GetChildOf<Particles2d>();
+		_dashParticles = GetChildOf<Particles2d>("DashParticles");
+		_wallCollisionParticles = GetChildOf<Particles2d>("WallCollision");
 	}
 
 	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
@@ -259,6 +264,22 @@ public class Player : GameObject
 		_selectedEffectId = (_selectedEffectId + dir) % _effects.Count;
 	}
 
+	private void WallCollisionEffect(Vector2 pos, float angle)
+	{
+		if (!_wallCollisionEffectTriggered && 
+			MathF.Abs(_velocity) > WallCollisionVelocityThreshold)
+		{
+			_wallCollisionEffectTriggered = true;
+
+			_wallCollisionParticles.LocalTransform.Position = pos;
+
+			_wallCollisionParticles.Emitter.DirectionAngle = angle;
+			_wallCollisionParticles.Emitting = true;
+
+			AudioManager.Ins.PlaySound("wall_collision");
+		}
+	}
+
 	private void ResolveWorldCollision()
 	{
 		var box = Box;
@@ -266,16 +287,25 @@ public class Player : GameObject
 
 		if (!_worldBb.ContainsInclusive(box.Min))
 		{
-			LocalTransform.Position = new Vector2(
+			WallCollisionEffect(new(-halfSizeX, 0f), MathF.PI);
+
+			LocalTransform.Position = new(
 				_worldBb.Min.X + halfSizeX,
 				LocalTransform.Position.Y);
+			_velocity = 0f;
 		}
-
-		if (!_worldBb.ContainsInclusive(box.Max))
+		else if (!_worldBb.ContainsInclusive(box.Max))
 		{
-			LocalTransform.Position = new Vector2(
+			WallCollisionEffect(new(halfSizeX, 0f), 0f);
+
+			LocalTransform.Position = new(
 				_worldBb.Max.X - halfSizeX,
 				LocalTransform.Position.Y);
+			_velocity = 0f;
+		}
+		else
+		{
+			_wallCollisionEffectTriggered = false;
 		}
 	}
 
@@ -299,13 +329,13 @@ public class Player : GameObject
 				_velocity *= DashScale;
 				dashCdEllapsed = 0f;
 
-				_particles.Emitting = true;
+				_dashParticles.Emitting = true;
 				AudioManager.Ins.PlaySound("player_dash");
 			}
 		}
 
 		float dir = -Math.Sign(targetSpeed);
-		_particles.Emitter.DirectionSign = new Vector2(dir, _particles.Emitter.DirectionSign.Y);
+		_dashParticles.Emitter.DirectionSign = new Vector2(dir, _dashParticles.Emitter.DirectionSign.Y);
 
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
 		LocalTransform.Position = new Vector2(LocalTransform.Position.X + _velocity * dt, LocalTransform.Position.Y);

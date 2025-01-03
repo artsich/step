@@ -27,7 +27,7 @@ public class Emitter
 	[EditorProperty(0f, 300f)]
 	public float MaxSpeed { get; set; }
 
-	[EditorProperty(0f, 6.28f)]
+	[EditorProperty(-MathF.PI, MathF.PI)]
 	public float DirectionAngle { get; set; }
 
 	[JsonIgnore]

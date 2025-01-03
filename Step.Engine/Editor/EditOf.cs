@@ -115,7 +115,7 @@ public static class EditOf
 					{
 						var value = (Vector2)property.GetValue(target);
 						var systemVector = value.ToSystem();
-						if (ImGui.DragFloat2(property.Name, ref systemVector, attribute.From, attribute.To))
+						if (ImGui.DragFloat2(property.Name, ref systemVector, attribute.Speed, attribute.From, attribute.To))
 						{
 							property.SetValue(target, systemVector.FromSystem());
 						}

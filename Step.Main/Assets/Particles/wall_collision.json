@@ -1,28 +1,28 @@
 {
   "Amount": 7,
   "Size": [
-    1,
-    1
+    5,
+    5
   ],
-  "Lifetime": 0.24,
+  "Lifetime": 0.14,
   "Explosiveness": 0.19,
   "OneShot": true,
-  "MinSpeed": 17.31,
-  "MaxSpeed": 17.31,
+  "MinSpeed": 97.94,
+  "MaxSpeed": 97.94,
   "DirectionAngle": 0,
-  "Spread": 0.930435,
+  "Spread": 1.99,
   "Material": {
     "ColorMin": [
-      0.30980393,
-      0.07058824,
-      0.07058824,
-      0
+      0.6,
+      0.52156866,
+      0.4745098,
+      1
     ],
     "ColorMax": [
-      0.9250721,
-      0.44376323,
-      0.05065235,
-      1
+      0.6,
+      0.5222422,
+      0.47529414,
+      0.16078432
     ]
   }
 }
