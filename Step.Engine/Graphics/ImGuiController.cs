@@ -9,6 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Step.Engine.Graphics;
 
+// modified version of https://github.com/NogginBops/ImGui.NET_OpenTK_Sample
 public class ImGuiController : IDisposable
 {
 	private bool _frameBegun;
@@ -35,12 +36,9 @@ public class ImGuiController : IDisposable
 	private int GLVersion;
 	private bool CompatibilityProfile;
 
-	public float FontGlobalScale { get; set; }
-
-	/// <summary>
-	/// Constructs a new ImGuiController.
-	/// </summary>
-	public ImGuiController(int width, int height)
+	public ImGuiController(
+		int width, int height,
+		string? fontPath = null, float fontSize = 13f, float dpi = 1f)
 	{
 		_windowWidth = width;
 		_windowHeight = height;
@@ -57,10 +55,30 @@ public class ImGuiController : IDisposable
 		nint context = ImGui.CreateContext();
 		ImGui.SetCurrentContext(context);
 		var io = ImGui.GetIO();
-		io.Fonts.AddFontDefault();
+
+		if (fontPath != null)
+		{
+			fontSize = fontSize switch
+			{
+				<= 0.0f => throw new ArgumentOutOfRangeException(nameof(fontSize), fontSize, null),
+				_ => fontSize
+			};
+
+			if (!File.Exists(fontPath))
+			{
+				throw new FileNotFoundException("The font file could not be found.", fontPath);
+			}
+
+			var ranges = io.Fonts.GetGlyphRangesDefault();
+			io.Fonts.AddFontFromFileTTF(fontPath, fontSize * dpi, null, ranges);
+		}
+		else
+		{
+			io.Fonts. AddFontDefault();
+		}
+
 
 		io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
-		// Enable Docking
 		io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
 		CreateDeviceResources();
@@ -238,7 +256,6 @@ void main()
 			_windowHeight / _scaleFactor.Y);
 		io.DisplayFramebufferScale = _scaleFactor;
 		io.DeltaTime = deltaSeconds;
-		io.FontGlobalScale = Math.Clamp(FontGlobalScale, 1f, 2f);
 	}
 
 	readonly List<char> PressedChars = new List<char>();

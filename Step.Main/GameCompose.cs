@@ -82,11 +82,9 @@ public class GameCompose : GameWindow
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 
 		LoadAssets();
-
-		_controller = new ImGuiController(ClientSize.X, ClientSize.Y)
-		{
-			FontGlobalScale = 2f
-		};
+		_controller = new ImGuiController(
+			ClientSize.X, ClientSize.Y,
+			"Assets\\ProggyClean.ttf", 13.0f, this.GetDpi());
 
 		ReloadGame();
 	}
@@ -178,11 +176,11 @@ public class GameCompose : GameWindow
 	protected override void OnRenderFrame(FrameEventArgs e)
 	{
 		base.OnRenderFrame(e);
-		_controller.Update(this, (float)e.Time);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 		if (_showImGui)
 		{
+			_controller.Update(this, (float)e.Time);
 			ImGuiRender(e);
 		}
 		else
