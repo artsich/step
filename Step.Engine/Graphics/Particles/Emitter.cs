@@ -6,13 +6,13 @@ namespace Step.Engine.Graphics.Particles;
 
 public class Emitter
 {
-	[EditorProperty(1, 2000)]
+	[EditorProperty(speed: 1)]
 	public int Amount { get; set; }
 
 	[EditorProperty(1f, 100f)]
 	public Vector2 Size { get; set; } = Vector2.One;
 
-	[EditorProperty(0f, 20f)]
+	[EditorProperty(from: 0f, to: 100f, speed: 0.01f)]
 	public float Lifetime { get; set; }
 
 	[EditorProperty(0f, 1f)]

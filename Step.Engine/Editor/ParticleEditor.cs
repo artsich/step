@@ -99,7 +99,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 		if (ImGui.Begin("Particles render", ImGuiWindowFlags.NoScrollbar))
 		{
 			_renderer.PushRenderTarget(_particlesRenderTarget);
-			GL.Clear(ClearBufferMask.ColorBufferBit);
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 			_particles!.Draw();
 			_renderer.PopRenderTarget();
 

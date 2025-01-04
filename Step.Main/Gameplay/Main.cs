@@ -122,7 +122,7 @@ public class Main(Spawner spawner, Renderer renderer)
 			Player.Damage(1);
 		}
 
-		if (ImGui.TreeNodeEx("Spawner", ImGuiTreeNodeFlags.DefaultOpen))
+		if (ImGui.TreeNodeEx("Spawner"))
 		{
 			var thingsSpeed = spawner.Speed;
 			ImGui.SliderFloat("Things speed", ref thingsSpeed, 1f, 200f);

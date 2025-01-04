@@ -204,7 +204,7 @@ public class GameCompose : GameWindow
 				Console.Clear();
 			}
 
-			if (ImGui.Button("Full reload"))
+			if (ImGui.Button("Game & Assets reload"))
 			{
 				UnloadAssets();
 				LoadAssets();

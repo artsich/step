@@ -67,11 +67,10 @@ public static class EditOf
 					Name = property.Name,
 					RenderAction = target =>
 					{
-						var value = (int)property.GetValue(target);
-						var floatValue = (float)value;
-						if (ImGui.SliderFloat(property.Name, ref floatValue, attribute.From, attribute.To))
+						int value = (int)property.GetValue(target);
+						if (ImGui.DragInt(property.Name, ref value, (int)attribute.Speed,(int)attribute.From, (int)attribute.To))
 						{
-							property.SetValue(target, (int)floatValue);
+							property.SetValue(target, value);
 						}
 					}
 				});
@@ -84,7 +83,7 @@ public static class EditOf
 					RenderAction = target =>
 					{
 						var value = (float)property.GetValue(target);
-						if (ImGui.SliderFloat(property.Name, ref value, attribute.From, attribute.To, "%.2f"))
+						if (ImGui.DragFloat(property.Name, ref value, attribute.Speed, attribute.From, attribute.To, "%.2f"))
 						{
 							property.SetValue(target, value);
 						}

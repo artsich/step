@@ -88,7 +88,7 @@ public class GameObject(string name = nameof(GameObject))
 
 		foreach (var child in children)
 		{
-			if (ImGui.TreeNodeEx(child.Name, ImGuiTreeNodeFlags.DefaultOpen))
+			if (ImGui.TreeNodeEx(child.Name))
 			{
 				child.DebugDraw();
 				ImGui.TreePop();
