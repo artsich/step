@@ -45,7 +45,9 @@ public class Spawner(
 				cumulative += entity.Probability;
 				if (roll < cumulative)
 				{
-					return entity.CreateEntity(position, gameScene);
+					var instance = entity.CreateEntity(position, gameScene);
+					instance.Start();
+					return instance;
 				}
 			}
 		}

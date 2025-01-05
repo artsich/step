@@ -1,27 +1,28 @@
-﻿using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
+﻿using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using Serilog;
+using Step.Engine.Logging;
+using Step.Main;
 
-namespace Step.Main;
-
-internal static class Program
-{
-	private static void Main(string[] args)
+Log.Logger = new LoggerConfiguration()
+	.WriteTo.Async(wt =>
 	{
-		var nativeWindowSettings = new NativeWindowSettings()
-		{
-			ClientSize = new Vector2i(1920, 1080),
-			Title = "Borderline",
-			Vsync = VSyncMode.Adaptive,
-			Flags = ContextFlags.Default | ContextFlags.Debug,
-			WindowState = WindowState.Maximized,
-		};
+		wt.Console();
+		wt.ImGuiDebugLog();
+	})
+	.CreateLogger();
 
-		var gameSettings = GameWindowSettings.Default;
-		gameSettings.UpdateFrequency = 144;
+var nativeWindowSettings = new NativeWindowSettings()
+{
+	Title = "Borderline",
+	Vsync = VSyncMode.Adaptive,
+	Flags = ContextFlags.Default | ContextFlags.Debug,
+	WindowState = WindowState.Maximized,
+	WindowBorder = WindowBorder.Fixed,
+};
 
-		using var window = new Game(gameSettings, nativeWindowSettings);
+var gameSettings = GameWindowSettings.Default;
 
-		window.Run();
-	}
-}
+using var window = new GameCompose(gameSettings, nativeWindowSettings);
+
+window.Run();

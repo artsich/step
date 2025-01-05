@@ -1,5 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using Serilog;
 
 namespace Step.Engine.Graphics;
 
@@ -114,13 +115,13 @@ public class Renderer(int screenWidth, int screenHeight)
 		var extensions = extensionsStr.Split(' ');
 		extensionsStr = string.Join('\n', extensions);
 
-		Console.WriteLine("---------------------------------------");
-		Console.WriteLine("OpenGL Information:");
-		Console.WriteLine($"Vendor: {vendor}");
-		Console.WriteLine($"Renderer: {renderer}");
-		Console.WriteLine($"OpenGL Version: {version}");
-		Console.WriteLine($"GLSL Version: {glslVersion}");
-		Console.WriteLine($"Extensions:\n{extensionsStr}");
-		Console.WriteLine("---------------------------------------");
+		Log.Logger.Information("---------------------------------------");
+		Log.Logger.Information("OpenGL Information:");
+		Log.Logger.Information($"Vendor: {vendor}");
+		Log.Logger.Information($"Renderer: {renderer}");
+		Log.Logger.Information($"OpenGL Version: {version}");
+		Log.Logger.Information($"GLSL Version: {glslVersion}");
+		Log.Logger.Information($"Extensions:\n{extensionsStr}");
+		Log.Logger.Information("---------------------------------------");
 	}
 }

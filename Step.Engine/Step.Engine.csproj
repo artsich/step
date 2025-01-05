@@ -12,6 +12,8 @@
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="OpenAL.Soft" Version="1.23.1" />
     <PackageReference Include="OpenTK" Version="5.0.0-pre.13" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="StbImageSharp" Version="2.30.15" />
   </ItemGroup>
 

@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Serilog;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Graphics;
@@ -71,8 +72,7 @@ public class Player : GameObject
 		KeyboardState input,
 		Box2 worldBb,
 		Texture2d playerTexture,
-		Renderer renderer,
-		string name = "Player") : base(name)
+		Renderer renderer) : base(nameof(Player))
 	{
 		_input = input;
 		_worldBb = worldBb;
@@ -86,7 +86,7 @@ public class Player : GameObject
 	protected override void OnStart()
 	{
 		_dashParticles = GetChildOf<Particles2d>("DashParticles");
-		_wallCollisionParticles = GetChildOf<Particles2d>("WallCollision");
+		_wallCollisionParticles = GetChildOf<Particles2d>("WallCollisionParticles");
 	}
 
 	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
@@ -144,13 +144,13 @@ public class Player : GameObject
 
 	public void AddEffect(IEffect effect)
 	{
-		Console.WriteLine($"Effect `{effect.GetType().Name}` taken");
+		Log.Logger.Information($"Effect `{effect.GetType().Name}` taken");
 		_effects.Add(effect);
 	}
 
 	public void Take(Thing thing)
 	{
-		Console.WriteLine("Collected thing...");
+		Log.Logger.Information("Collected thing...");
 		thing.ApplyEffect(this);
 		OnThingTaken?.Invoke(thing);
 	}
@@ -243,7 +243,7 @@ public class Player : GameObject
 
 		foreach (var key in completed)
 		{
-			Console.WriteLine($"Effect completed {key.Name}");
+			Log.Logger.Information($"Effect completed {key.Name}");
 			_activatedEffects.Remove(key);
 		}
 	}
@@ -254,7 +254,7 @@ public class Player : GameObject
 		{
 			var name = _effects[_selectedEffectId].GetType().Name;
 			_effects.RemoveAt(_selectedEffectId);
-			Console.WriteLine($"{name} dropped...");
+			Log.Logger.Information($"{name} dropped...");
 		}
 	}
 
@@ -358,11 +358,11 @@ public class Player : GameObject
 			effect.Use();
 			_effects.RemoveAt(_selectedEffectId);
 			AddActivatedEffect(effect);
-			Console.WriteLine($"Effect `{effect.GetType().Name}` used");
+			Log.Logger.Information($"Effect `{effect.GetType().Name}` used");
 		}
 		else
 		{
-			Console.WriteLine($"Effect `{effect.GetType().Name}` can't be used...");
+			Log.Logger.Information($"Effect `{effect.GetType().Name}` can't be used...");
 		}
 	}
 }

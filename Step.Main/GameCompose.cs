@@ -4,6 +4,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using Serilog;
 using StbImageSharp;
 using Step.Engine;
 using Step.Engine.Audio;
@@ -72,6 +73,11 @@ public class GameCompose : GameWindow
 		MouseWheel += GameMouseWheel;
 
 		StbImage.stbi_set_flip_vertically_on_load(1);
+
+		_controller = new ImGuiController(
+			ClientSize.X, ClientSize.Y,
+			"Assets\\ProggyClean.ttf", 13.0f, this.GetDpi());
+
 		_renderer = new Renderer(ClientSize.X, ClientSize.Y);
 		_renderer.Load();
 
@@ -80,12 +86,7 @@ public class GameCompose : GameWindow
 		_editors.Add(new ParticlesEditor(_renderer));
 
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
-
 		LoadAssets();
-		_controller = new ImGuiController(
-			ClientSize.X, ClientSize.Y,
-			"Assets\\ProggyClean.ttf", 13.0f, this.GetDpi());
-
 		ReloadGame();
 	}
 
@@ -134,7 +135,7 @@ public class GameCompose : GameWindow
 		});
 		player.AddChild(new Particles2d(_wallCollisionParticleEmitter!, _renderer)
 		{
-			Name = "WallCollision",
+			Name = "WallCollisionParticles",
 		});
 
 		var spawner = new Spawner(
@@ -164,7 +165,7 @@ public class GameCompose : GameWindow
 		_root.OnFinish += () =>
 		{
 			Console.Clear();
-			Console.WriteLine("Reloading...");
+			Log.Logger.Information("Reloading...");
 			ReloadGame();
 		};
 
@@ -250,6 +251,8 @@ public class GameCompose : GameWindow
 			ImGui.End();
 		}
 
+		ImGui.ShowDebugLogWindow();
+
 		if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
 		{
 			_renderer.PushRenderTarget(_gameRenderTarget);
@@ -268,7 +271,7 @@ public class GameCompose : GameWindow
 			ImGui.End();
 		}
 
-		if (ImGui.Begin("Gameplay"))
+		if (ImGui.Begin("Scene"))
 		{
 			_root.DebugDraw();
 			ImGui.End();

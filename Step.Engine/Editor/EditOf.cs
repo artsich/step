@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
+using Serilog;
 
 namespace Step.Engine.Editor;
 
@@ -54,7 +55,7 @@ public static class EditOf
 				.GetCustomAttributes(typeof(EditorPropertyAttribute), true)
 				.FirstOrDefault() is not EditorPropertyAttribute attribute)
 			{
-				Console.WriteLine($"Editor attribute is null for property: {property.Name}");
+				Log.Information($"Editor attribute is null for property: {property.Name}");
 				continue;
 			}
 

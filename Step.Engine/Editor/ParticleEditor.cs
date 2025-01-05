@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
+using Serilog;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
 
@@ -73,7 +74,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 				Assets.SaveEmitter(
 					Path.Combine("Particles", _selectedFilePath),
 					_emitter);
-				Console.WriteLine($"Particle file changed - `{_selectedFilePath}`");
+				Log.Logger.Information($"Particle file changed - `{_selectedFilePath}`");
 			}
 
 			ImGui.SameLine();

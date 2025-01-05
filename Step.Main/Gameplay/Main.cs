@@ -4,6 +4,7 @@ using Step.Main.Gameplay.Spawn;
 using Step.Engine.Graphics;
 using Step.Engine;
 using Step.Engine.Audio;
+using Serilog;
 
 namespace Step.Main.Gameplay;
 
@@ -37,7 +38,7 @@ public class Main(Spawner spawner, Renderer renderer)
 
 		_player.OnDead += () =>
 		{
-			Console.WriteLine("Game over...");
+			Log.Logger.Information("Game over...");
 			OnFinish?.Invoke();
 		};
 
@@ -63,10 +64,10 @@ public class Main(Spawner spawner, Renderer renderer)
 			{
 				RemoveChild(thing);
 			}
-		});
 
-		AudioManager.Ins.PlaySound("kill_all");
-		_camera.Shake(magnitude: 5f, duration: 1f);
+			AudioManager.Ins.PlaySound("kill_all");
+			_camera.Shake(magnitude: 5f, duration: 1f);
+		});
 	}
 
 	protected override void OnUpdate(float deltaTime)
@@ -74,8 +75,6 @@ public class Main(Spawner spawner, Renderer renderer)
 		var spawnedThing = spawner.Get(deltaTime, this);
 		if (spawnedThing is not null)
 		{
-			// start must be called in another place?
-			spawnedThing.Start();
 			Defer(() => AddChild(spawnedThing));
 		}
 
@@ -111,7 +110,6 @@ public class Main(Spawner spawner, Renderer renderer)
 
 	protected override void OnDebugDraw()
 	{
-		ImGui.SeparatorText("Game info");
 		ImGui.Text($"Score: {_score}");
 
 		var fallingThings = GetChildsOf<Thing>();

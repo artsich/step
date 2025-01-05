@@ -1,5 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Mathematics;
+using Serilog;
 
 namespace Step.Engine.Graphics;
 
@@ -98,7 +99,7 @@ public class Shader
 		}
 		else
 		{
-			Console.Error.WriteLine($"Uniform {name} not found...");
+			Log.Logger.Error($"Uniform {name} not found...");
 			return -1;
 		}
 #else

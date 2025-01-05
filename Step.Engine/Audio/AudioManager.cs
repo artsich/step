@@ -1,4 +1,5 @@
 ﻿using OpenTK.Audio.OpenAL;
+using Serilog;
 
 namespace Step.Engine.Audio;
 
@@ -38,7 +39,7 @@ public class AudioManager : IDisposable
 	{
 		if (_loadedSounds.ContainsKey(key))
 		{
-			Console.WriteLine($"AudioManager: Sound with key '{key}' already exists.");
+			Log.Logger.Warning($"AudioManager: Sound with key '{key}' already exists.");
 		}
 
 		Sound sound = Assets.LoadSound(filePath);
@@ -53,7 +54,7 @@ public class AudioManager : IDisposable
 		}
 		else
 		{
-			Console.WriteLine($"AudioManager: Sound with key '{key}' not found.");
+			Log.Logger.Error($"AudioManager: Sound with key '{key}' not found.");
 		}
 	}
 
@@ -118,12 +119,12 @@ public class AudioManager : IDisposable
 		var extensions = extensionsStr.Split(' ');
 		extensionsStr = string.Join('\n', extensions);
 
-		Console.WriteLine("---------------------------------------");
-		Console.WriteLine("OpenAL Information:");
-		Console.WriteLine($"Vendor:   {vendor}");
-		Console.WriteLine($"Renderer: {renderer}");
-		Console.WriteLine($"Version:  {version}");
-		Console.WriteLine($"Extensions:\n{extensionsStr}");
-		Console.WriteLine("---------------------------------------");
+		Log.Logger.Information("---------------------------------------");
+		Log.Logger.Information("OpenAL Information:");
+		Log.Logger.Information($"Vendor:   {vendor}");
+		Log.Logger.Information($"Renderer: {renderer}");
+		Log.Logger.Information($"Version:  {version}");
+		Log.Logger.Information($"Extensions:\n{extensionsStr}");
+		Log.Logger.Information("---------------------------------------");
 	}
 }

@@ -6,6 +6,7 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Diagnostics;
 using ErrorCode = OpenTK.Graphics.OpenGL.ErrorCode;
 using OpenTK.Graphics.OpenGL;
+using Serilog;
 
 namespace Step.Engine.Graphics;
 
@@ -368,7 +369,7 @@ void main()
 				GL.BufferData(BufferTarget.ArrayBuffer, newSize, nint.Zero, BufferUsage.DynamicDraw);
 				_vertexBufferSize = newSize;
 
-				Console.WriteLine($"Resized dear imgui vertex buffer to new size {_vertexBufferSize}");
+				Log.Logger.Information($"Resized dear imgui vertex buffer to new size {_vertexBufferSize}");
 			}
 
 			int indexSize = cmd_list.IdxBuffer.Size * sizeof(ushort);
@@ -378,7 +379,7 @@ void main()
 				GL.BufferData(BufferTarget.ElementArrayBuffer, newSize, nint.Zero, BufferUsage.DynamicDraw);
 				_indexBufferSize = newSize;
 
-				Console.WriteLine($"Resized dear imgui index buffer to new size {_indexBufferSize}");
+				Log.Logger.Information($"Resized dear imgui index buffer to new size {_indexBufferSize}");
 			}
 		}
 
