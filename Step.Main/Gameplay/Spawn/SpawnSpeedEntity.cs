@@ -13,3 +13,13 @@ public sealed class SpawnSpeedEntity(Texture2d texture, Renderer renderer) : Spa
 	)
 {
 }
+
+public sealed class SpawnSizeChanger(Texture2d texture, Renderer renderer) : SpawnEntity(
+	0.2f,
+	(gs) => gs.EffectsCount<SizeChangeEffect>() < 1,
+	(pos, gs) => new Thing(pos, new Vector2(20), renderer, new SizeChangeEffect(gs.Player))
+	{
+		Texture = texture
+	})
+{
+}

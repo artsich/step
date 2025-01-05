@@ -353,9 +353,8 @@ public class Player : GameObject
 			return;
 
 		var effect = _effects[_selectedEffectId];
-		if (effect.CanApply())
+		if (effect.Use())
 		{
-			effect.Use();
 			_effects.RemoveAt(_selectedEffectId);
 			AddActivatedEffect(effect);
 			Log.Logger.Information($"Effect `{effect.GetType().Name}` used");

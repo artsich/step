@@ -47,6 +47,7 @@ public class GameCompose : GameWindow
 	private Texture2d _justThing;
 	private Texture2d _speedEffect;
 	private Texture2d _playerTexture;
+	private Texture2d _sizeChanger;
 	private Emitter _dashParticleEmitter;
 	private Renderer _renderer;
 	private ImGuiController _controller;
@@ -95,6 +96,7 @@ public class GameCompose : GameWindow
 		_justThing = Assets.LoadTexture2d("Textures\\thing.png");
 		_speedEffect = Assets.LoadTexture2d("Textures\\effect_speed.png");
 		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
+		_sizeChanger = Assets.LoadTexture2d("Textures\\effect_size_increase.png");
 
 		_dashParticleEmitter = Assets.LoadEmitter("Particles\\player_dash_particle.json");
 		_dashParticleEmitter!.Material!.Texture = _playerTexture;
@@ -148,6 +150,7 @@ public class GameCompose : GameWindow
 			[
 				new SpawnSimpleEntity(_justThing, _renderer, true),
 				new SpawnSimpleEntity(_justThing, _renderer, false),
+				new SpawnSizeChanger(_sizeChanger, _renderer),
 				new SpawnHealthEntity(_healthEffect, _renderer),
 				new SpawnKillAllEntity(_bombEffect, _renderer),
 				new SpawnSpeedEntity(_speedEffect, _renderer),
