@@ -15,21 +15,19 @@ using Step.Main.Gameplay;
 using Step.Main.Gameplay.Spawn;
 
 /*
- * Goals:
- * Enemies, friend
- *  Effects
- *    - speed
- *		- debuff
- *    - split platform on two but smaller size and move it simultaneously
- *  Render player Stats
- *  - inventory contains available effects of the user.
- *  - current health
- *
- *  Additional automatic platforms, that can collect things
- *  Guns - pistol, knife - additional effects...
- *  
+ *  [Mechanics]
+ *    Spawn temporal obstacle
+ *    Temporal pistol
+ *    Additional automatic obstacles, that can collect things
+ *  [Graphics]
+ *    Explosion effect
+ *  [Progress system]
+ *    Difficulty should be higher after some score
+ *  [Tech]
+ *    Make possible to play on different monitor size.
  *  [BUGS]
- *  When reload happens, not all events are unsubscribed, so memory leak
+ *    When reload happens, not all events are unsubscribed, so memory leak
+ *    https://github.com/aybe/DearImGui/blob/develop/DearImGui.OpenTK/Extensions/GameWindowBaseWithDebugContext.cs
  */
 
 namespace Step.Main;
