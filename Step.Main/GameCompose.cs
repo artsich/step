@@ -372,13 +372,14 @@ public class GameCompose : GameWindow
 		_justThing.Dispose();
 		_speedEffect.Dispose();
 		_playerTexture.Dispose();
-		AudioManager.Ins.Dispose();
+		AudioManager.Ins.UnloadSounds();
 	}
 
 	protected override void OnUnload()
 	{
 		UnloadAssets();
 
+		AudioManager.Ins.Dispose();
 		_renderer.Unload();
 		base.OnUnload();
 	}

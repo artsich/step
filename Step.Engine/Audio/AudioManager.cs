@@ -83,14 +83,23 @@ public class AudioManager : IDisposable
 		}
 	}
 
-	public void Dispose()
+	public void UnloadSounds()
 	{
-		// Dispose all loaded sounds
 		foreach (var sound in _loadedSounds.Values)
 		{
 			sound.Dispose();
 		}
 		_loadedSounds.Clear();
+	}
+
+	public void Dispose()
+	{
+		if (_instance == null)
+		{
+			return;
+		}
+
+		UnloadSounds();
 
 		ALC.MakeContextCurrent(ALContext.Null);
 		if (_context != IntPtr.Zero)
