@@ -15,25 +15,25 @@ public class Emitter
 	[EditorProperty(from: 0f, to: 100f, speed: 0.01f)]
 	public float Lifetime { get; set; }
 
-	[EditorProperty(0f, 1f)]
+	[EditorProperty(0f, 1f, speed: 0.01f)]
 	public float Explosiveness { get; set; }
 
 	[EditorProperty()]
 	public bool OneShot { get; set; }
 
-	[EditorProperty(0f, 300f)]
+	[EditorProperty(speed: 0.1f)]
 	public float MinSpeed { get; set; }
 
-	[EditorProperty(0f, 300f)]
+	[EditorProperty(speed: 0.1f)]
 	public float MaxSpeed { get; set; }
 
-	[EditorProperty(-MathF.PI, MathF.PI)]
+	[EditorProperty(-MathF.PI, MathF.PI, speed: 0.01f)]
 	public float DirectionAngle { get; set; }
 
 	[JsonIgnore]
 	public Vector2 DirectionSign { get; set; } = Vector2.One;
 
-	[EditorProperty(0f, 3.14f)]
+	[EditorProperty(0f, 3.14f, speed: 0.01f)]
 	public float Spread { get; set; }
 
 	[EditorProperty()]

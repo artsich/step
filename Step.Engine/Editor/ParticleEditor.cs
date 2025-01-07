@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using Serilog;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
@@ -24,9 +25,11 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 
 	private readonly float TargetAspectRatio = 16f / 9f;
 
-	public ParticlesEditor(Renderer renderer)
+	public ParticlesEditor(Vector2i clientSize, ICamera2d camera)
 	{
-		_renderer = renderer;
+		_renderer = new Renderer(clientSize.X, clientSize.Y);
+		_renderer.Load();
+		_renderer.SetCamera(camera);
 		_files = GetParticleFiles(_baseFolder);
 
 		_fileSelector = new("Select an particles file");
@@ -102,6 +105,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 			_renderer.PushRenderTarget(_particlesRenderTarget);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 			_particles!.Draw();
+			_renderer.Flush();
 			_renderer.PopRenderTarget();
 
 			var imgSize = StepMath.AdjustToAspect(
@@ -109,7 +113,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 				ImGui.GetContentRegionAvail().FromSystem())
 			.ToSystem();
 
-			ImGui.Image(_particlesRenderTarget.Color, imgSize, new(0f, 1f), new(1f, 0f));
+			ImGui.Image(_particlesRenderTarget.Color.Handle, imgSize, new(0f, 1f), new(1f, 0f));
 
 			ImGui.End();
 		}

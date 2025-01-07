@@ -82,11 +82,11 @@ public class GameCompose : GameWindow
 
 		_gameRenderTarget = new RenderTarget2d(ClientSize.X, ClientSize.Y, true);
 
-		_editors.Add(new ParticlesEditor(_renderer));
-
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 		LoadAssets();
 		ReloadGame();
+
+		_editors.Add(new ParticlesEditor(ClientSize, _mainCamera));
 	}
 
 	private void LoadAssets()
@@ -180,14 +180,19 @@ public class GameCompose : GameWindow
 		base.OnRenderFrame(e);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+		_renderer.PushRenderTarget(_gameRenderTarget);
+		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+		_root.Draw();
+		_renderer.Flush();
+		_renderer.PopRenderTarget();
+
 		if (_showImGui)
 		{
-			_controller.Update(this, (float)e.Time);
 			ImGuiRender(e);
 		}
 		else
 		{
-			_root.Draw();
+			_renderer.DrawScreenRectNow(_gameRenderTarget.Color);
 		}
 
 		SwapBuffers();
@@ -195,6 +200,8 @@ public class GameCompose : GameWindow
 
 	private void ImGuiRender(FrameEventArgs e)
 	{
+		_controller.Update(this, (float)e.Time);
+
 		ImGui.DockSpaceOverViewport();
 
 		if (ImGui.Begin("Some"))
@@ -246,7 +253,9 @@ public class GameCompose : GameWindow
 
 		if (ImGui.Begin("Performance"))
 		{
-			ImGui.Text($"Render time: {e.Time * 1000:F2}ms");
+			var ms = e.Time * 1000;
+			var fps = 1000 / ms;
+			ImGui.Text($"Render time: {ms:F2}ms | {fps:F2}fps");
 			ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}ms");
 
 			ImGui.End();
@@ -256,18 +265,13 @@ public class GameCompose : GameWindow
 
 		if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
 		{
-			_renderer.PushRenderTarget(_gameRenderTarget);
-			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-			_root.Draw();
-			_renderer.PopRenderTarget();
-
 			var imgSize = StepMath
 				.AdjustToAspect(
 					TargetAspectRatio,
 					ImGui.GetContentRegionAvail().FromSystem())
 				.ToSystem();
 
-			ImGui.Image(_gameRenderTarget.Color, imgSize, new(0f, 1f), new(1f, 0f));
+			ImGui.Image(_gameRenderTarget.Color.Handle, imgSize, new(0f, 1f), new(1f, 0f));
 
 			ImGui.End();
 		}

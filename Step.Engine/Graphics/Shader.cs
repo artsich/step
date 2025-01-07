@@ -136,4 +136,16 @@ public class Shader
 		Vector4 color = new(data.X, data.Y, data.Z, data.W);
 		SetVector4(name, color);
 	}
+
+	public unsafe void Set(string name, Span<int> values)
+	{
+		fixed (int* ptr = values)
+		{
+			GL.ProgramUniform1iv(
+				Handle,
+				GetUniformLocation(name),
+				values.Length,
+				ptr);
+		}
+	}
 }

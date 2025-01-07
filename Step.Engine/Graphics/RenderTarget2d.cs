@@ -6,7 +6,7 @@ public class RenderTarget2d : IDisposable
 {
 	public int Framebuffer { get; private set; }
 
-	public int Color { get; private set; }
+	public Texture2d Color { get; private set; }
 
 	public int DepthStencil { get; private set; }
 
@@ -55,11 +55,7 @@ public class RenderTarget2d : IDisposable
 
 	private void DisposeAttachments()
 	{
-		if (Color != 0)
-		{
-			GL.DeleteTexture(Color);
-			Color = 0;
-		}
+		Color?.Dispose();
 
 		if (DepthStencil != 0)
 		{
@@ -77,7 +73,7 @@ public class RenderTarget2d : IDisposable
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, Framebuffer);
 
 		Color = CreateColorTexture(width, height);
-		GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2d, Color, 0);
+		GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2d, Color.Handle, 0);
 
 		if (useDepthStencil)
 		{
@@ -100,13 +96,17 @@ public class RenderTarget2d : IDisposable
 		return depthStencil;
 	}
 
-	private static int CreateColorTexture(int width, int height)
+	private static Texture2d CreateColorTexture(int width, int height)
 	{
-		var color = GL.GenTexture();
-		GL.BindTexture(TextureTarget.Texture2d, color);
-		GL.TexImage2D(TextureTarget.Texture2d, 0, InternalFormat.Rgba8, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, nint.Zero);
-		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-		return color;
+
+		var result = new Texture2d();
+		result.SetImageData(
+			width, height,
+			InternalFormat.Rgba8,
+			PixelFormat.Rgba,
+			[]);
+		result.SetFilter(TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+	
+		return result;
 	}
 }

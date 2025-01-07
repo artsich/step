@@ -3,15 +3,22 @@ using StbImageSharp;
 
 namespace Step.Engine.Graphics;
 
-public class Texture2d(string path) : IDisposable
+public class Texture2d(string path = "") : IDisposable
 {
-	internal int Handle { get; private set; }
+	public int Handle { get; private set; } = GL.GenTexture();
 
 	public string Path { get; } = path;
 
+	public int Width { get; private set; }
+
+	public int Height { get; private set; }
+
 	public Texture2d Load()
 	{
-		Handle = GL.GenTexture();
+		if (string.IsNullOrEmpty(Path))
+		{
+			throw new InvalidOperationException("[Texture 2d] - Nothing to load");
+		}
 
 		using var fileStream = File.OpenRead(Path);
 		var imageResult = ImageResult.FromStream(fileStream);
@@ -35,7 +42,7 @@ public class Texture2d(string path) : IDisposable
 		return this;
 	}
 
-	private unsafe void SetImageData(
+	public unsafe void SetImageData(
 		int width,
 		int height,
 		InternalFormat internalFormat = InternalFormat.Rgba,
@@ -44,6 +51,9 @@ public class Texture2d(string path) : IDisposable
 		bool mipmap = true)
 	{
 		GL.BindTexture(TextureTarget.Texture2d, Handle);
+
+		Width = width;
+		Height = height;
 
 		if (!data.IsEmpty)
 		{
@@ -89,19 +99,19 @@ public class Texture2d(string path) : IDisposable
 
 	public void SetFilter(TextureMinFilter minFilter, TextureMagFilter magFilter)
 	{
-		BindAsSampler();
+		Bind();
 		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)minFilter);
 		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)magFilter);
 	}
 
 	public void SetWrap(TextureWrapMode s, TextureWrapMode t)
 	{
-		BindAsSampler();
+		Bind();
 		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, (int)s);
 		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, (int)t);
 	}
 
-	public void BindAsSampler(uint slot = 1)
+	public void Bind(uint slot = 1)
 	{
 		GL.ActiveTexture(TextureUnit.Texture0 + slot);
 		GL.BindTexture(TextureTarget.Texture2d, Handle);

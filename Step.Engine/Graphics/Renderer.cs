@@ -4,17 +4,33 @@ using Serilog;
 
 namespace Step.Engine.Graphics;
 
+public record struct RenderCmd
+{
+	public RenderTarget2d? Target;
+	public int Layer;
+
+	public Texture2d? Atlas;
+	public Matrix4 ModelMatrix;
+	public Color4<Rgba> Color;
+
+	public Rect? AtlasRect;
+}
+
 public class Renderer(int screenWidth, int screenHeight)
 {
-	private int _vao;
-	private Shader? _shader;
+	private Shader? _batchSpriteShader;
+	private Shader _screenQuadShader;
 	private ICamera2d? _camera;
 	private Texture2d _defaultWhiteTexture;
 
-	private int _screenWidth = screenWidth;
-	private int _screenHeight = screenHeight;
+	private readonly int _screenWidth = screenWidth;
+	private readonly int _screenHeight = screenHeight;
 
 	private readonly Stack<RenderTarget2d> _renderTargets = [];
+
+	private readonly List<RenderCmd> _commands = [];
+
+	private readonly SpriteBatch _spriteBatch = new();
 
 	public void SetBackground(Color4<Rgba> color)
 	{
@@ -29,15 +45,22 @@ public class Renderer(int screenWidth, int screenHeight)
 	public void Load()
 	{
 		PrintOpenGLInfo();
-		_vao = GL.GenVertexArray();
 
-		_shader = new Shader("Assets/Shaders/shader.vert", "Assets/Shaders/shader.frag");
+		_batchSpriteShader = new Shader(
+			"Assets/Shaders/SpriteBatch/shader.vert",
+			"Assets/Shaders/SpriteBatch/shader.frag");
+
+		Span<int> ids = stackalloc int[32];
+		for (int i = 0; i < 32; i++)
+		{
+			ids[i] = i;
+		}
+		_batchSpriteShader.Set("diffuseTextures[0]", ids);
+
+		_screenQuadShader = new Shader("Assets/Shaders/ScreenQuad/shader.vert", "Assets/Shaders/ScreenQuad/shader.frag");
+
 		_defaultWhiteTexture = new Texture2d(".\\Assets\\Textures\\white.png").Load();
-		_defaultWhiteTexture.BindAsSampler(0);
-
-		GL.Disable(EnableCap.CullFace);
-		GL.Enable(EnableCap.Blend);
-		GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+		_defaultWhiteTexture.Bind(0);
 	}
 
 	public void PushRenderTarget(RenderTarget2d renderTarget)
@@ -66,33 +89,44 @@ public class Renderer(int screenWidth, int screenHeight)
 		Vector2 shadowOffset = new(1, -1);
 		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.25f);
 
-		DrawRect(position + shadowOffset, size, shadowColor, texture);
-		DrawRect(position, size, color, texture);
+		DrawRect(position + shadowOffset, size, shadowColor, texture, layer: 1);
+		DrawRect(position, size, color, texture, layer: 0);
 	}
 
-	public void DrawRect(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
+	public void DrawRect(
+		Vector2 position,
+		Vector2 size,
+		Color4<Rgba> color,
+		Texture2d? texture = null,
+		int layer = 0)
 	{
-		_shader!.Use();
-		_shader.SetMatrix4("viewProj", _camera!.ViewProj);
-
 		var model = Matrix4.CreateScale(size.To3(1f)) * Matrix4.CreateTranslation(position.To3());
-		_shader.SetMatrix4("model", model);
-		_shader.SetColor("color", color);
 
-		if (texture != null)
+		var cmd = new RenderCmd
 		{
-			texture?.BindAsSampler(1);
-			_shader.SetInt("diffuseTexture", 1);
-		}
-		else
-		{
-			_defaultWhiteTexture?.BindAsSampler(0);
-			_shader.SetInt("diffuseTexture", 0);
-		}
+			Atlas = texture,
+			ModelMatrix = model,
+			Color = color,
+			Layer = layer,
+		};
 
-		GL.BindVertexArray(_vao);
+		SubmitCommand(cmd);
+	}
+
+	public void DrawScreenRectNow(Texture2d tex)
+	{
+		int vao = GL.GenVertexArray();
+		_screenQuadShader!.Use();
+
+		tex.Bind(0);
+		_screenQuadShader.SetInt("diffuseTexture", 0);
+
+		GL.BindVertexArray(vao);
 		GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-		texture?.Unbind();
+
+		GL.DeleteVertexArray(vao);
+
+		tex.Unbind();
 	}
 
 	public void Unload()
@@ -101,7 +135,66 @@ public class Renderer(int screenWidth, int screenHeight)
 		GL.BindVertexArray(0);
 		GL.UseProgram(0);
 
-		GL.DeleteProgram(_shader.Handle);
+		GL.DeleteProgram(_batchSpriteShader.Handle);
+	}
+
+	public void Flush()
+	{
+		int CompareTarget(RenderTarget2d? t1, RenderTarget2d? t2)
+		{
+			if (t1 == t2) return 0;
+			if (t1 == null) return -1;
+			if (t2 == null) return 1;
+			return t1.Framebuffer.CompareTo(t2.Framebuffer);
+		}
+
+		_commands.Sort((a, b) =>
+		{
+			//int targetCompare = CompareTarget(b.Target, a.Target);
+			//if (targetCompare != 0)
+			//	return targetCompare;
+
+			int layerCompare = b.Layer.CompareTo(a.Layer);
+			if (layerCompare != 0)
+				return layerCompare;
+
+			int aTexId = (a.Atlas == null) ? -1 : a.Atlas.Handle;
+			int bTexId = (b.Atlas == null) ? -1 : b.Atlas.Handle;
+			return bTexId.CompareTo(aTexId);
+		});
+
+		GL.Enable(EnableCap.Blend);
+		GL.BlendFunc(
+			BlendingFactor.SrcAlpha,
+			BlendingFactor.OneMinusSrcAlpha);
+
+		_batchSpriteShader!.Use();
+		_batchSpriteShader.SetMatrix4("viewProj", _camera!.ViewProj);
+
+		foreach (var cmd in _commands)
+		{
+			_spriteBatch.AddSprite(
+				cmd.ModelMatrix,
+				cmd.Atlas!,
+				textureRegion: cmd.AtlasRect,
+				color: (Vector4)cmd.Color);
+		}
+
+		_spriteBatch.Flush();
+
+		GL.Disable(EnableCap.Blend);
+		_commands.Clear();
+	}
+
+	private void SubmitCommand(RenderCmd cmd)
+	{
+		cmd.Target = _renderTargets.Count > 0
+					   ? _renderTargets.Peek()
+					   : null;
+
+		cmd.Atlas ??= _defaultWhiteTexture;
+
+		_commands.Add(cmd);
 	}
 
 	private static void PrintOpenGLInfo()
