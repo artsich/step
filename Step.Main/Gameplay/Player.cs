@@ -24,9 +24,9 @@ public class Player : GameObject
 
 	public float MaxSpeed { get; } = 200f;
 
-	public float DashScale { get; } = 5f;
+	public float DashScale { get; } = 2f;
 	public float DashCd = 2f;
-	private float dashCdEllapsed = 0f;
+	private float dashCdElapsed = 0f;
 
 	public float Acceleration { get; } = 10f;
 
@@ -64,6 +64,7 @@ public class Player : GameObject
 
 	private Particles2d _dashParticles;
 	private Particles2d _wallCollisionParticles;
+	private AnimatedSprite2d _animatedSprite;
 	private bool _wallCollisionEffectTriggered = false;
 
 	public Player(
@@ -87,6 +88,7 @@ public class Player : GameObject
 	{
 		_dashParticles = GetChildOf<Particles2d>("DashParticles");
 		_wallCollisionParticles = GetChildOf<Particles2d>("WallCollisionParticles");
+		_animatedSprite = GetChildOf<AnimatedSprite2d>();
 	}
 
 	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
@@ -164,7 +166,7 @@ public class Player : GameObject
 
 	protected override void OnRender()
 	{
-		_renderer.DrawObject(Position, Size, Color4.White, _playerTexture);
+		//_renderer.DrawObject(Position, Size, Color4.White, _playerTexture);
 	}
 
 	protected override void OnDebugDraw()
@@ -321,24 +323,30 @@ public class Player : GameObject
 			targetSpeed = MaxSpeed;
 		}
 
-		dashCdEllapsed += dt;
-		if (input.IsKeyDown(Keys.LeftControl) && dashCdEllapsed > DashCd)
+		_animatedSprite.Play(targetSpeed == 0f ? "idle" : "walk");
+
+		dashCdElapsed += dt;
+		if (input.IsKeyDown(Keys.LeftControl) && dashCdElapsed > DashCd)
 		{
 			if (targetSpeed != 0f)
 			{
 				_velocity *= DashScale;
-				dashCdEllapsed = 0f;
+				dashCdElapsed = 0f;
 
-				_dashParticles.Emitting = true;
+				_animatedSprite.Play("dash");
 				AudioManager.Ins.PlaySound("player_dash");
 			}
 		}
 
-		float dir = -Math.Sign(targetSpeed);
-		_dashParticles.Emitter.DirectionSign = new Vector2(dir, _dashParticles.Emitter.DirectionSign.Y);
-
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
+
 		LocalTransform.Position = new Vector2(LocalTransform.Position.X + _velocity * dt, LocalTransform.Position.Y);
+
+		float dir = Math.Sign(targetSpeed);
+		dir = dir == 0 ? 1 : dir;
+
+		LocalTransform.Scale = new(
+			dir * Math.Abs(LocalTransform.Scale.X), LocalTransform.Scale.Y);
 	}
 
 	private void AddActivatedEffect(IEffect effect)

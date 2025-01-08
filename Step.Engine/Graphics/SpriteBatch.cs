@@ -143,20 +143,22 @@ public sealed class SpriteBatch : IDisposable
 			_textureUsed++;
 		}
 
-		textureRegion ??= new Rect(Vector2.Zero, new Vector2(texture.Width, texture.Height));
+		textureRegion ??= new Rect(0f, 0f, texture.Width, texture.Height);
 		color ??= Vector4.One;
 
 		var normalizedRegion = new Rect(
-			textureRegion.Value.Min / new Vector2(texture.Width, texture.Height),
-			textureRegion.Value.Max / new Vector2(texture.Width, texture.Height)
+			textureRegion.Value.X / texture.Width,
+			(texture.Height - textureRegion.Value.Y) / texture.Height,
+			textureRegion.Value.Width / texture.Width,
+			textureRegion.Value.Height / texture.Height
 		);
 
 		Span<Vector2> texCoord =
 		[
-			normalizedRegion.Min,
-			new Vector2(normalizedRegion.Max.X, normalizedRegion.Min.Y),
-			normalizedRegion.Max,
-			new Vector2(normalizedRegion.Min.X, normalizedRegion.Max.Y),
+			new (normalizedRegion.X, normalizedRegion.Y - normalizedRegion.Height),
+			new (normalizedRegion.X + normalizedRegion.Width, normalizedRegion.Y - normalizedRegion.Height),
+			new (normalizedRegion.X + normalizedRegion.Width, normalizedRegion.Y),
+			new (normalizedRegion.X, normalizedRegion.Y),
 		];
 
 		var baseSpriteVertex = new SpriteVertex(

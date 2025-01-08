@@ -34,7 +34,11 @@ namespace Step.Main;
 
 public class GameCompose : GameWindow
 {
-	private readonly float TargetAspectRatio = 16f / 9f;
+	private const float TargetAspectRatio = 16f / 9f;
+	private const float InverseTargetAspectRatio = 1f / TargetAspectRatio;
+
+	private const float GameCameraWidth = 320f;
+	private const float GameCameraHeight = GameCameraWidth * InverseTargetAspectRatio;
 
 	private bool _paused = false;
 	private bool _showImGui = true;
@@ -48,6 +52,8 @@ public class GameCompose : GameWindow
 	private Texture2d _speedEffect;
 	private Texture2d _playerTexture;
 	private Texture2d _sizeChanger;
+	private Texture2d _heroTextureAtlas;
+	private Texture2d _heroSwordTexture;
 	private Emitter _dashParticleEmitter;
 	private Renderer _renderer;
 	private ImGuiController _controller;
@@ -97,6 +103,8 @@ public class GameCompose : GameWindow
 		_speedEffect = Assets.LoadTexture2d("Textures\\effect_speed.png");
 		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
 		_sizeChanger = Assets.LoadTexture2d("Textures\\effect_size_increase.png");
+		_heroTextureAtlas = Assets.LoadTexture2d("Textures\\HeroAtlas.png");
+		_heroSwordTexture = Assets.LoadTexture2d("Textures\\Sword.png");
 
 		_dashParticleEmitter = Assets.LoadEmitter("Particles\\player_dash_particle.json");
 		_dashParticleEmitter!.Material!.Texture = _playerTexture;
@@ -117,13 +125,29 @@ public class GameCompose : GameWindow
 
 	private void ReloadGame()
 	{
-		var width = 320f;
-		var height = (width * 9f) / 16f;
+		var width = GameCameraWidth;
+		var height = GameCameraHeight;
 		var camera = new Camera2d(width, height);
 
+		var sword = new GameObject("Sword")
+		{
+			LocalTransform = new Transform()
+			{
+				Position = new(-3.6f, 8f)
+			}
+		};
+		sword.AddChild(new Sprite2d(_renderer, _heroSwordTexture)
+		{
+			LocalTransform = new Transform()
+			{
+				Scale = new(16f)
+			}
+		});
+
 		var player = new Player(
-			new(0f, -75f),
-			new(40f, 20f),
+			new(0f, -60f),
+			//new(40f, 20f),
+			new(10f, 32f),
 			KeyboardState,
 			new Box2(-width / 2f, -height / 2f, width / 2f, height / 2f),
 			_playerTexture,
@@ -137,6 +161,30 @@ public class GameCompose : GameWindow
 		{
 			Name = "WallCollisionParticles",
 		});
+		player.AddChild(sword);
+
+		var idleFrames = new SpriteFrames("idle", true, 5f, _heroTextureAtlas,
+		[
+			new Rect(0, 64, 32, 32),
+			new Rect(32, 64, 32, 32),
+		]);
+
+		var walkFrames = new SpriteFrames("walk", true, 5f, _heroTextureAtlas,
+		[
+			new Rect(0, 128, 32, 32),
+			new Rect(32, 128, 32, 32),
+			new Rect(64, 128, 32, 32),
+			new Rect(96, 128, 32, 32),
+		]);
+
+		var dashFrames = new SpriteFrames("dash", false, 5f, _heroTextureAtlas,
+		[
+			new Rect(0, 320, 32, 32),
+			new Rect(32, 320, 32, 32),
+			new Rect(64, 320, 32, 32),
+		]);
+
+		player.AddChild(new AnimatedSprite2d(_renderer, [walkFrames, idleFrames, dashFrames]) { Name = "Animations" });
 
 		var spawner = new Spawner(
 			[
