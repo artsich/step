@@ -55,7 +55,6 @@ public static class EditOf
 				.GetCustomAttributes(typeof(EditorPropertyAttribute), true)
 				.FirstOrDefault() is not EditorPropertyAttribute attribute)
 			{
-				Log.Information($"Editor attribute is null for property: {property.Name}");
 				continue;
 			}
 

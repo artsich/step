@@ -154,7 +154,7 @@ public class Renderer(int screenWidth, int screenHeight)
 			//if (targetCompare != 0)
 			//	return targetCompare;
 
-			// todo: Why do i sort by layer if i can set Z position insted and use depth buffer for this?
+			// todo: Why do i sort by layer if i can set Z position instead and use depth buffer for this?
 			int layerCompare = b.Layer.CompareTo(a.Layer);
 			if (layerCompare != 0)
 				return layerCompare;
