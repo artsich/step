@@ -125,6 +125,8 @@ public class GameCompose : GameWindow
 
 	private void ReloadGame()
 	{
+		CollisionSystem.Ins.Reset();
+
 		var width = GameCameraWidth;
 		var height = GameCameraHeight;
 		var camera = new Camera2d(width, height);
@@ -370,6 +372,7 @@ public class GameCompose : GameWindow
 		if (!_paused)
 		{
 			_root.Update(dt);
+			CollisionSystem.Ins.Process();
 		}
 	}
 
