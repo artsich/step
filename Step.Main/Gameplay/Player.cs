@@ -4,12 +4,13 @@ using OpenTK.Windowing.GraphicsLibraryFramework;
 using Serilog;
 using Step.Engine;
 using Step.Engine.Audio;
+using Step.Engine.Collisions;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
 
 namespace Step.Main.Gameplay;
 
-public class Player : GameObject
+public class Player : CircleCollisionShape
 {
 	private const float WallCollisionVelocityThreshold = 5f;
 
@@ -73,8 +74,10 @@ public class Player : GameObject
 		KeyboardState input,
 		Box2 worldBb,
 		Texture2d playerTexture,
-		Renderer renderer) : base(nameof(Player))
+		Renderer renderer)
+		: base(renderer)
 	{
+		Name = nameof(Player);
 		_input = input;
 		_worldBb = worldBb;
 		_size = size;
@@ -345,8 +348,8 @@ public class Player : GameObject
 		float dir = Math.Sign(targetSpeed);
 		dir = dir == 0 ? 1 : dir;
 
-		LocalTransform.Scale = new(
-			dir * Math.Abs(LocalTransform.Scale.X), LocalTransform.Scale.Y);
+		_animatedSprite.LocalTransform.Scale = new(
+			dir * Math.Abs(_animatedSprite.LocalTransform.Scale.X), _animatedSprite.LocalTransform.Scale.Y);
 	}
 
 	private void AddActivatedEffect(IEffect effect)

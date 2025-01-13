@@ -8,6 +8,7 @@ using Serilog;
 using StbImageSharp;
 using Step.Engine;
 using Step.Engine.Audio;
+using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
@@ -55,15 +56,14 @@ public class GameCompose : GameWindow
 	private Texture2d _heroTextureAtlas;
 	private Texture2d _heroSwordTexture;
 	private Emitter _dashParticleEmitter;
+	private Emitter _wallCollisionParticleEmitter;
 	private Renderer _renderer;
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
 
 	private readonly List<IEditorView> _editors = [];
 
-	private Gameplay.Main _root;
 	private Camera2d _mainCamera;
-	private Emitter _wallCollisionParticleEmitter;
 
 	public GameCompose(
 		GameWindowSettings gameWindowSettings,
@@ -125,8 +125,6 @@ public class GameCompose : GameWindow
 
 	private void ReloadGame()
 	{
-		CollisionSystem.Ins.Reset();
-
 		var width = GameCameraWidth;
 		var height = GameCameraHeight;
 		var camera = new Camera2d(width, height);
@@ -188,6 +186,13 @@ public class GameCompose : GameWindow
 
 		player.AddChild(new AnimatedSprite2d(_renderer, [walkFrames, idleFrames, dashFrames]) { Name = "Animations" });
 
+		player.AddChild(new RectangleShape2d(_renderer)
+		{
+			Name = "Player collision shape",
+			//Visible = true,
+			Size = new Vector2(10f),
+		});
+
 		var spawner = new Spawner(
 			[
 				new(140f, 100f),
@@ -209,20 +214,32 @@ public class GameCompose : GameWindow
 			Enabled = false
 		};
 
-		_root = new Gameplay.Main(spawner, _renderer);
-		_root.AddChild(player);
-		_root.AddChild(camera);
+		var root = new Gameplay.Main(spawner, _renderer);
+		root.AddChild(player);
+		root.AddChild(camera);
 
-		_root.OnFinish += () =>
+		root.AddChild(new Borderline(_renderer)
+		{
+			Player = player,
+			Camera = camera,
+			Name = "BorderLine",
+			IsStatic = true,
+			Size = new Vector2(400f, 30f),
+			LocalTransform = new()
+			{
+				Position = new Vector2(0f, -100f)
+			}
+		});
+
+		root.OnFinish += () =>
 		{
 			Console.Clear();
 			Log.Logger.Information("Reloading...");
 			ReloadGame();
 		};
 
-		_root.Start();
-
-		_mainCamera = _root.GetChildOf<Camera2d>();
+		GameRoot.I.SetScene(root);
+		_mainCamera = root.GetChildOf<Camera2d>();
 	}
 
 	protected override void OnRenderFrame(FrameEventArgs e)
@@ -232,7 +249,8 @@ public class GameCompose : GameWindow
 
 		_renderer.PushRenderTarget(_gameRenderTarget);
 		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-		_root.Draw();
+		GameRoot.I.Draw();
+
 		_renderer.Flush();
 		_renderer.PopRenderTarget();
 
@@ -308,6 +326,8 @@ public class GameCompose : GameWindow
 			ImGui.Text($"Render time: {ms:F2}ms | {fps:F2}fps");
 			ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}ms");
 
+			ImGui.Separator();
+			ImGui.Text($"Collision shapes: {CollisionSystem.Ins.Count}");
 			ImGui.End();
 		}
 
@@ -328,7 +348,7 @@ public class GameCompose : GameWindow
 
 		if (ImGui.Begin("Scene"))
 		{
-			_root.DebugDraw();
+			GameRoot.I.DebugDraw();
 			ImGui.End();
 		}
 
@@ -371,8 +391,7 @@ public class GameCompose : GameWindow
 
 		if (!_paused)
 		{
-			_root.Update(dt);
-			CollisionSystem.Ins.Process();
+			GameRoot.I.Update(dt);
 		}
 	}
 

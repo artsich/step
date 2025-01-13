@@ -46,7 +46,6 @@ public class Spawner(
 				if (roll < cumulative)
 				{
 					var instance = entity.CreateEntity(position, gameScene);
-					instance.Start();
 					return instance;
 				}
 			}

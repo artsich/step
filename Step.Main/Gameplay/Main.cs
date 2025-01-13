@@ -32,6 +32,7 @@ public class Main(Spawner spawner, Renderer renderer)
 
 		_player.OnDamage += () =>
 		{
+			Log.Logger.Information("Player damaged..");
 			_camera.Shake(magnitude: 2f, duration: 0.5f);
 			AudioManager.Ins.PlaySound("player_take_damage");
 		};
@@ -56,18 +57,18 @@ public class Main(Spawner spawner, Renderer renderer)
 
 	public void KillEnemies()
 	{
-		Defer(() =>
-		{
-			var things = GetChildsOf<Thing>().Where(t => !t.IsFriend).ToArray();
-			_score += things.Length;
-			foreach (var thing in things)
-			{
-				RemoveChild(thing);
-			}
+		var things = GetChildsOf<Thing>()
+			.Where(t => !t.IsFriend)
+			.ToArray();
+		_score += things.Length;
 
-			AudioManager.Ins.PlaySound("kill_all");
-			_camera.Shake(magnitude: 5f, duration: 1f);
-		});
+		foreach (var thing in things)
+		{
+			thing.QueueFree();
+		}
+
+		AudioManager.Ins.PlaySound("kill_all");
+		_camera!.Shake(magnitude: 5f, duration: 1f);
 	}
 
 	protected override void OnUpdate(float deltaTime)
@@ -75,36 +76,11 @@ public class Main(Spawner spawner, Renderer renderer)
 		var spawnedThing = spawner.Get(deltaTime, this);
 		if (spawnedThing is not null)
 		{
-			Defer(() => AddChild(spawnedThing));
-		}
-
-		var fallingThings = GetChildsOf<Thing>();
-
-		var playerBox = Player.Box;
-		foreach (var thing in fallingThings)
-		{
-			if (thing.BoundingBox.Contains(playerBox))
+			CallDeferred(() =>
 			{
-				if (thing.IsFriend)
-				{
-					Player.Damage(1);
-				}
-				else
-				{
-					Player.Take(thing);
-				}
-
-				Defer(() => RemoveChild(thing));
-			}
-			else if (thing.BoundingBox.Max.Y < -90f)
-			{
-				if (!thing.IsFriend)
-				{
-					Player.Damage(1);
-				}
-
-				Defer(() => RemoveChild(thing));
-			}
+				AddChild(spawnedThing);
+				spawnedThing.Start();
+			});
 		}
 	}
 
