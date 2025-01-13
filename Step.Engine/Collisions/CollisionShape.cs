@@ -1,10 +1,8 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
-using Step.Engine.Editor;
+﻿using Step.Engine.Editor;
 
-namespace Step.Main.Gameplay;
+namespace Step.Engine.Collisions;
 
-public abstract class CollisionShape : GameObject
+public abstract class CollisionShape(CollisionSystem collisionSystem) : GameObject
 {
 	[EditorProperty]
 	public bool Visible { get; set; }
@@ -20,12 +18,17 @@ public abstract class CollisionShape : GameObject
 	public int MaxCollisionsPerFrame { get; set; } = 32;
 
 	private int _collisionsThisFrame;
-	private readonly CollisionSystem _collisionSystem;
 
-	protected CollisionShape(CollisionSystem collisionSystem)
+	public abstract bool CheckCollision(CollisionShape other);
+
+	protected override void OnStart()
 	{
-		_collisionSystem = collisionSystem;
-		_collisionSystem.Register(this);
+		collisionSystem.Register(this);
+	}
+
+	protected override void OnEnd()
+	{
+		collisionSystem.Unregister(this);
 	}
 
 	internal void ResetCollisionsCount()
@@ -41,6 +44,4 @@ public abstract class CollisionShape : GameObject
 			OnCollision?.Invoke(other);
 		}
 	}
-
-	public abstract bool CheckCollision(CollisionShape other, out Vector2 mtv);
 }

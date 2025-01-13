@@ -1,6 +1,4 @@
-﻿using OpenTK.Mathematics;
-
-namespace Step.Main.Gameplay;
+﻿namespace Step.Engine.Collisions;
 
 public class CollisionSystem
 {
@@ -11,6 +9,8 @@ public class CollisionSystem
 	private readonly List<CollisionShape> _shapes = [];
 
 	private CollisionSystem() { }
+
+	public int Count => _shapes.Count;
 
 	public T Register<T>(T shape) where T : CollisionShape
 	{
@@ -41,7 +41,7 @@ public class CollisionSystem
 				var a = _shapes[i];
 				var b = _shapes[j];
 
-				if (a.CheckCollision(b, out Vector2 mtv))
+				if (a.CheckCollision(b))
 				{
 					a.RaiseCollision(b);
 					b.RaiseCollision(a);
