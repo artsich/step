@@ -7,6 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Step.Main", "Step.Main\Step
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Step.Engine", "Step.Engine\Step.Engine.csproj", "{A7181465-A001-44BC-A128-4721AB8C220B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Step.Engine.Tests", "Step.Engine.Tests\Step.Engine.Tests.csproj", "{9F248A58-D43C-47FA-A3BC-89400570124C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9CC791DF-CB8B-46B3-A225-E9F56BB64CDC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{E8A2431C-57B3-4D66-8065-EF39AE44FAB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +27,17 @@ Global
 		{A7181465-A001-44BC-A128-4721AB8C220B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7181465-A001-44BC-A128-4721AB8C220B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7181465-A001-44BC-A128-4721AB8C220B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F248A58-D43C-47FA-A3BC-89400570124C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F248A58-D43C-47FA-A3BC-89400570124C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F248A58-D43C-47FA-A3BC-89400570124C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F248A58-D43C-47FA-A3BC-89400570124C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{910CEE69-C56F-4E46-B13D-2177B62654BF} = {E8A2431C-57B3-4D66-8065-EF39AE44FAB5}
+		{A7181465-A001-44BC-A128-4721AB8C220B} = {E8A2431C-57B3-4D66-8065-EF39AE44FAB5}
+		{9F248A58-D43C-47FA-A3BC-89400570124C} = {9CC791DF-CB8B-46B3-A225-E9F56BB64CDC}
 	EndGlobalSection
 EndGlobal

@@ -10,20 +10,36 @@ public class GameObject(string name = nameof(GameObject))
 
 	public Transform LocalTransform = new();
 
+	public GameObject? Parent => _parent;
+
 	protected GameObject? _parent;
 	protected List<GameObject> children = [];
 
-	private readonly Queue<Action> _deferredActions = [];
+	private bool _markedAsFree;
 
-	public void Defer(Action action)
+	public void Start()
 	{
-		_deferredActions.Enqueue(action);
+		foreach (var child in children)
+		{
+			child.Start();
+		}
+
+		OnStart();
+	}
+
+	public void End()
+	{
+		foreach (var child in children)
+		{
+			child.End();
+		}
+
+		OnEnd();
 	}
 
 	public void AddChild(GameObject child)
 	{
 		child._parent?.RemoveChild(child);
-
 		child._parent = this;
 		children.Add(child);
 	}
@@ -38,29 +54,18 @@ public class GameObject(string name = nameof(GameObject))
 		child._parent = null;
 	}
 
-	public Matrix4 GetGlobalMatrix()
-	{
-		Matrix4 localMat = LocalTransform.GetLocalMatrix();
-
-		if (_parent == null)
-		{
-			return localMat;
-		}
-		else
-		{
-			return localMat * _parent.GetGlobalMatrix();
-		}
-	}
-
 	public void Update(float deltaTime)
 	{
+		if (_markedAsFree)
+		{
+			return;
+		}
+
 		OnUpdate(deltaTime);
 		foreach (var child in children)
 		{
 			child.Update(deltaTime);
 		}
-
-		ProcessDeferred();
 	}
 
 	public void Draw()
@@ -96,6 +101,38 @@ public class GameObject(string name = nameof(GameObject))
 		}
 	}
 
+	public Matrix4 GetGlobalMatrix()
+	{
+		Matrix4 localMat = LocalTransform.GetLocalMatrix();
+
+		if (_parent == null)
+		{
+			return localMat;
+		}
+		else
+		{
+			return localMat * _parent.GetGlobalMatrix();
+		}
+	}
+
+	public void QueueFree()
+	{
+		if (!_markedAsFree)
+		{
+			_markedAsFree = true;
+			CallDeferred(() =>
+			{
+				_parent?.RemoveChild(this);
+				End();
+			});
+		}
+	}
+
+	public void CallDeferred(Action action)
+	{
+		GameRoot.I.Defer(action);
+	}
+
 	public T GetChildOf<T>() where T : GameObject
 	{
 		var result = children.OfType<T>().FirstOrDefault() ?? throw new ArgumentException($"{typeof(T).Name} not found...");
@@ -113,24 +150,6 @@ public class GameObject(string name = nameof(GameObject))
 		return children.OfType<T>();
 	}
 
-	public void Start()
-	{
-		OnStart();
-		foreach (var child in children)
-		{
-			child.Start();
-		}
-	}
-
-	public void End()
-	{
-		OnEnd();
-		foreach (var child in children)
-		{
-			child.End();
-		}
-	}
-
 	protected virtual void OnDebugDraw() { }
 
 	protected virtual void OnStart() { }
@@ -140,12 +159,4 @@ public class GameObject(string name = nameof(GameObject))
 	protected virtual void OnUpdate(float deltaTime) { }
 
 	protected virtual void OnRender() { }
-
-	private void ProcessDeferred()
-	{
-		while (_deferredActions.TryDequeue(out var action))
-		{
-			action();
-		}
-	}
 }
