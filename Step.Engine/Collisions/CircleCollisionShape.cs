@@ -20,12 +20,12 @@ public class CircleCollisionShape : CollisionShape
 
 	protected override void OnRender()
 	{
-		if (Visible)
+		if (Visible && IsActive)
 		{
 			var position = GetGlobalMatrix().ExtractTranslation().Xy;
-			renderer.DrawRect(
+			renderer.DrawCircle(
 				position,
-				new Vector2(Radius*2f),
+				Radius,
 				new Color4<Rgba>(0f, 0.6f, 0.7f, 0.42f),
 				layer: -1);
 		}
@@ -33,6 +33,7 @@ public class CircleCollisionShape : CollisionShape
 
 	protected override void OnDebugDraw()
 	{
+		base.OnDebugDraw();
 		EditOf.Render(this);
 	}
 

@@ -73,7 +73,7 @@ public class Thing : RectangleShape2d
 
 	private void OnCollisionWithPlayer(CollisionShape shape)
 	{
-		if (shape?.Parent is Player player)
+		if (shape is Player player)
 		{
 			if (IsFriend)
 			{

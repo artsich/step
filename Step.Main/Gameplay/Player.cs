@@ -92,6 +92,8 @@ public class Player : CircleCollisionShape
 		_dashParticles = GetChildOf<Particles2d>("DashParticles");
 		_wallCollisionParticles = GetChildOf<Particles2d>("WallCollisionParticles");
 		_animatedSprite = GetChildOf<AnimatedSprite2d>();
+
+		base.OnStart();
 	}
 
 	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
@@ -167,11 +169,6 @@ public class Player : CircleCollisionShape
 		ResolveWorldCollision();
 	}
 
-	protected override void OnRender()
-	{
-		//_renderer.DrawObject(Position, Size, Color4.White, _playerTexture);
-	}
-
 	protected override void OnDebugDraw()
 	{
 		ImGui.TextColored(new(1f, 0f, 0f, 1f), $"Health: {Hp}");
@@ -210,6 +207,8 @@ public class Player : CircleCollisionShape
 				}
 			}
 		}
+
+		base.OnDebugDraw();
 	}
 
 	private void UpdateEffects(float dt)

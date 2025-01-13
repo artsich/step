@@ -4,16 +4,24 @@ using Serilog;
 
 namespace Step.Engine.Graphics;
 
+
+public enum GeometryType : uint
+{
+	Quad = 0,
+	Circle,
+}
+
 public record struct RenderCmd
 {
-	public RenderTarget2d? Target;
 	public int Layer;
+	public GeometryType Type;
 
+	public RenderTarget2d? Target;
 	public Texture2d? Atlas;
-	public Matrix4 ModelMatrix;
-	public Color4<Rgba> Color;
 
+	public Color4<Rgba> Color;
 	public Rect? AtlasRect;
+	public Matrix4 ModelMatrix;
 }
 
 public class Renderer(int screenWidth, int screenHeight)
@@ -108,6 +116,28 @@ public class Renderer(int screenWidth, int screenHeight)
 			ModelMatrix = model,
 			Color = color,
 			Layer = layer,
+			Type = GeometryType.Quad,
+		};
+
+		SubmitCommand(cmd);
+	}
+
+	public void DrawCircle(
+		Vector2 position,
+		float radius,
+		Color4<Rgba> color,
+		Texture2d? texture = null,
+		int layer = 0)
+	{
+		var model = Matrix4.CreateScale(radius*2f) * Matrix4.CreateTranslation(position.To3());
+
+		var cmd = new RenderCmd
+		{
+			Atlas = texture,
+			ModelMatrix = model,
+			Color = color,
+			Layer = layer,
+			Type = GeometryType.Circle,
 		};
 
 		SubmitCommand(cmd);
@@ -159,6 +189,10 @@ public class Renderer(int screenWidth, int screenHeight)
 			if (layerCompare != 0)
 				return layerCompare;
 
+			int gTypeCompare = b.Type.CompareTo(a.Type);
+			if (gTypeCompare != 0)
+				return gTypeCompare;
+
 			int aTexId = (a.Atlas == null) ? -1 : a.Atlas.Handle;
 			int bTexId = (b.Atlas == null) ? -1 : b.Atlas.Handle;
 			return bTexId.CompareTo(aTexId);
@@ -177,6 +211,7 @@ public class Renderer(int screenWidth, int screenHeight)
 			_spriteBatch.AddSprite(
 				cmd.ModelMatrix,
 				cmd.Atlas!,
+				geometryType: cmd.Type,
 				textureRegion: cmd.AtlasRect,
 				color: (Vector4)cmd.Color);
 		}

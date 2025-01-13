@@ -8,6 +8,7 @@ public sealed class SpriteBatch : IDisposable
 {
 	private record struct SpriteVertex(
 		int TexId,
+		int GType,
 		Vector2 Position,
 		Vector2 TexCoord,
 		Vector4 Color);
@@ -88,19 +89,24 @@ public sealed class SpriteBatch : IDisposable
 		GL.VertexAttribIPointer(0, 1, VertexAttribIType.Int, stride, offset);
 		offset += sizeof(int);
 
-		// --- Position (Vector2) ---
+		// --- GType (int) ---
 		GL.EnableVertexAttribArray(1);
-		GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, offset);
-		offset += Vector2.SizeInBytes;
+		GL.VertexAttribIPointer(1, 1, VertexAttribIType.Int, stride, offset);
+		offset += sizeof(int);
 
-		// --- TexCoord (Vector2) ---
+		// --- Position (Vector2) ---
 		GL.EnableVertexAttribArray(2);
 		GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, stride, offset);
 		offset += Vector2.SizeInBytes;
 
-		// --- Color (Vector4) ---
+		// --- TexCoord (Vector2) ---
 		GL.EnableVertexAttribArray(3);
-		GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, stride, offset);
+		GL.VertexAttribPointer(3, 2, VertexAttribPointerType.Float, false, stride, offset);
+		offset += Vector2.SizeInBytes;
+
+		// --- Color (Vector4) ---
+		GL.EnableVertexAttribArray(4);
+		GL.VertexAttribPointer(4, 4, VertexAttribPointerType.Float, false, stride, offset);
 		offset += Vector4.SizeInBytes;
 
 		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
@@ -110,6 +116,7 @@ public sealed class SpriteBatch : IDisposable
 	public void AddSprite(
 		Matrix4 model,
 		Texture2d texture,
+		GeometryType geometryType = GeometryType.Quad,
 		Rect? textureRegion = null,
 		Vector4? color = null,
 		Vector2? pivot = null)
@@ -163,6 +170,7 @@ public sealed class SpriteBatch : IDisposable
 
 		var baseSpriteVertex = new SpriteVertex(
 			textureIndex,
+			(int)geometryType,
 			Vector2.One,
 			Vector2.One,
 			color.Value);

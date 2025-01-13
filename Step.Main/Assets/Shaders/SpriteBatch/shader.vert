@@ -1,11 +1,13 @@
 #version 460 core
 
 layout (location = 0) in int aTexId;
-layout (location = 1) in vec2 aPos;
-layout (location = 2) in vec2 aTexCoord;
-layout (location = 3) in vec4 aColor;
+layout (location = 1) in int aGType;
+layout (location = 2) in vec2 aPos;
+layout (location = 3) in vec2 aTexCoord;
+layout (location = 4) in vec4 aColor;
 
 out flat int TexId;
+out flat int GType;
 out vec2 TexCoord;
 out vec4 Color;
 
@@ -15,6 +17,7 @@ void main(void)
 {
     Color = aColor;
     TexId = aTexId;
+    GType = aGType;
     TexCoord = aTexCoord;
     gl_Position = viewProj * vec4(aPos, 0.0, 1.0);
 }
