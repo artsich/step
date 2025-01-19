@@ -11,25 +11,7 @@ using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
-using Step.Engine.Graphics.Particles;
 using Step.Main.Gameplay;
-using Step.Main.Gameplay.Spawn;
-
-/*
- *  [Mechanics]
- *    Spawn temporal obstacle
- *    Temporal pistol
- *    Additional automatic obstacles, that can collect things
- *  [Graphics]
- *    Explosion effect
- *  [Progress system]
- *    Difficulty should be higher after some score
- *  [Tech]
- *    Make possible to play on different monitor size.
- *  [BUGS]
- *    When reload happens, not all events are unsubscribed, so memory leak
- *    https://github.com/aybe/DearImGui/blob/develop/DearImGui.OpenTK/Extensions/GameWindowBaseWithDebugContext.cs
- */
 
 namespace Step.Main;
 
@@ -47,16 +29,6 @@ public class GameCompose : GameWindow
 	private float _lastUpdateTime;
 	private float _audioMasterVolume = 0.02f;
 
-	private Texture2d _healthEffect;
-	private Texture2d _bombEffect;
-	private Texture2d _justThing;
-	private Texture2d _speedEffect;
-	private Texture2d _playerTexture;
-	private Texture2d _sizeChanger;
-	private Texture2d _heroTextureAtlas;
-	private Texture2d _heroSwordTexture;
-	private Emitter _dashParticleEmitter;
-	private Emitter _wallCollisionParticleEmitter;
 	private Renderer _renderer;
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
@@ -97,31 +69,10 @@ public class GameCompose : GameWindow
 
 	private void LoadAssets()
 	{
-		_healthEffect = Assets.LoadTexture2d("Textures\\effect_health.png");
-		_bombEffect = Assets.LoadTexture2d("Textures\\effect_bomb.png");
-		_justThing = Assets.LoadTexture2d("Textures\\thing.png");
-		_speedEffect = Assets.LoadTexture2d("Textures\\effect_speed.png");
-		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
-		_sizeChanger = Assets.LoadTexture2d("Textures\\effect_size_increase.png");
-		_heroTextureAtlas = Assets.LoadTexture2d("Textures\\HeroAtlas.png");
-		_heroSwordTexture = Assets.LoadTexture2d("Textures\\Sword.png");
-
-		_dashParticleEmitter = Assets.LoadEmitter("Particles\\player_dash_particle.json");
-		_dashParticleEmitter!.Material!.Texture = _playerTexture;
-
-		_wallCollisionParticleEmitter = Assets.LoadEmitter("Particles\\wall_collision.json");
-
 		AudioManager.Ins.LoadSound("start", "Music\\ok_lets_go.mp3");
-		AudioManager.Ins.LoadSound("player_heal", "Music\\player_heal.mp3");
-		AudioManager.Ins.LoadSound("thing_taken", "Music\\thing_taken.wav");
-		AudioManager.Ins.LoadSound("kill_all", "Music\\kill_all.mp3");
-		AudioManager.Ins.LoadSound("player_take_damage", "Music\\player_take_damage.mp3");
 		AudioManager.Ins.LoadSound("main_theme", "Music\\main_theme.mp3");
-		AudioManager.Ins.LoadSound("player_dash", "Music\\dash.wav");
-		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
-
-		AudioManager.Ins.LoadSound("sword_hit", "Music\\sword\\sword_hit.wav");
 		AudioManager.Ins.LoadSound("player_hurt", "Music\\sword\\player_hurt.wav");
+		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
@@ -132,120 +83,8 @@ public class GameCompose : GameWindow
 		var height = GameCameraHeight;
 		var camera = new Camera2d(width, height);
 
-		var sword = new Sword()
-		{
-			LocalTransform = new Transform()
-			{
-				Position = new(0f, 8f)
-			}
-		};
-
-		sword.AddChild(new Sprite2d(_renderer, _heroSwordTexture)
-		{
-			LocalTransform = new Transform()
-			{
-				Scale = new(16f)
-			}
-		});
-
-		sword.AddChild(new CircleCollisionShape(_renderer) 
-		{
-			LocalTransform = new Transform()
-			{
-				Position = new Vector2(3.7f, 3.4f),
-			},
-			Name = "Sword hitbox",
-			IsActive = false,
-			IsStatic = true,
-			Radius = 6f,
-			Visible = true,
-		});
-
-		var player = new Player(
-			new(0f, -60f),
-			new(10f, 32f),
-			KeyboardState,
-			new Box2(-width / 2f, -height / 2f, width / 2f, height / 2f),
-			_playerTexture,
-			_renderer)
-		{
-			Radius = 5f,
-			Visible = true,
-		};
-
-		player.AddChild(new Particles2d(_dashParticleEmitter!, _renderer)
-		{
-			Name = "DashParticles",
-		});
-		player.AddChild(new Particles2d(_wallCollisionParticleEmitter!, _renderer)
-		{
-			Name = "WallCollisionParticles",
-		});
-		player.AddChild(sword);
-
-		var idleFrames = new SpriteFrames("idle", true, 2.5f, _heroTextureAtlas,
-		[
-			new Rect(0, 64, 32, 32),
-			new Rect(32, 64, 32, 32),
-		]);
-
-		var walkFrames = new SpriteFrames("walk", true, 5f, _heroTextureAtlas,
-		[
-			new Rect(0, 128, 32, 32),
-			new Rect(32, 128, 32, 32),
-			new Rect(64, 128, 32, 32),
-			new Rect(96, 128, 32, 32),
-		]);
-
-		var dashFrames = new SpriteFrames("dash", false, 5f, _heroTextureAtlas,
-		[
-			new Rect(0, 320, 32, 32),
-			new Rect(32, 320, 32, 32),
-			new Rect(64, 320, 32, 32),
-		]);
-
-		player.AddChild(new AnimatedSprite2d(_renderer, [walkFrames, idleFrames, dashFrames])
-		{
-			Name = "Animations"
-		});
-
-		var spawner = new Spawner(
-			[
-				new(140f, 100f),
-				new(110f, 105f),
-				new(0f, 90f),
-				new(-140f, 95f),
-				new(-110f, 110f)
-			],
-			1f,
-			[
-				new SpawnSimpleEntity(_justThing, _renderer, true),
-				new SpawnSimpleEntity(_justThing, _renderer, false),
-				new SpawnSizeChanger(_sizeChanger, _renderer),
-				new SpawnHealthEntity(_healthEffect, _renderer),
-				new SpawnKillAllEntity(_bombEffect, _renderer),
-				new SpawnSpeedEntity(_speedEffect, _renderer),
-			])
-		{
-			Enabled = false
-		};
-
-		var root = new Gameplay.Main(spawner, _renderer);
-		root.AddChild(player);
+		var root = new Gameplay.Main(_renderer);
 		root.AddChild(camera);
-
-		root.AddChild(new Borderline(_renderer)
-		{
-			Player = player,
-			Camera = camera,
-			Name = "BorderLine",
-			IsStatic = true,
-			Size = new Vector2(400f, 30f),
-			LocalTransform = new()
-			{
-				Position = new Vector2(0f, -100f)
-			}
-		});
 
 		root.OnFinish += () =>
 		{
@@ -457,11 +296,6 @@ public class GameCompose : GameWindow
 
 	private void UnloadAssets()
 	{
-		_healthEffect.Dispose();
-		_bombEffect.Dispose();
-		_justThing.Dispose();
-		_speedEffect.Dispose();
-		_playerTexture.Dispose();
 		AudioManager.Ins.UnloadSounds();
 	}
 
