@@ -66,6 +66,7 @@ public class Player : CircleCollisionShape
 	private Particles2d _dashParticles;
 	private Particles2d _wallCollisionParticles;
 	private AnimatedSprite2d _animatedSprite;
+	private Sword _sword;
 	private bool _wallCollisionEffectTriggered = false;
 
 	public Player(
@@ -89,11 +90,13 @@ public class Player : CircleCollisionShape
 
 	protected override void OnStart()
 	{
+		base.OnStart();
+
 		_dashParticles = GetChildOf<Particles2d>("DashParticles");
 		_wallCollisionParticles = GetChildOf<Particles2d>("WallCollisionParticles");
 		_animatedSprite = GetChildOf<AnimatedSprite2d>();
 
-		base.OnStart();
+		_sword = GetChildOf<Sword>();
 	}
 
 	public void ResetSpeedScale() => _speedScale = DefaultSpeedScale;
@@ -167,6 +170,11 @@ public class Player : CircleCollisionShape
 		UpdateEffects(deltaTime);
 		Move(_input, deltaTime);
 		ResolveWorldCollision();
+
+		if (_input.IsKeyPressed(Keys.F))
+		{
+			_sword.Attack();
+		}
 	}
 
 	protected override void OnDebugDraw()
@@ -341,8 +349,7 @@ public class Player : CircleCollisionShape
 		}
 
 		_velocity = MathHelper.Lerp(_velocity, targetSpeed * _speedScale, Acceleration * dt);
-
-		LocalTransform.Position = new Vector2(LocalTransform.Position.X + _velocity * dt, LocalTransform.Position.Y);
+		LocalTransform.Position += new Vector2(_velocity * dt, 0f);
 
 		float dir = Math.Sign(targetSpeed);
 		dir = dir == 0 ? 1 : dir;

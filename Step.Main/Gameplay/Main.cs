@@ -34,7 +34,7 @@ public class Main(Spawner spawner, Renderer renderer)
 		{
 			Log.Logger.Information("Player damaged..");
 			_camera.Shake(magnitude: 2f, duration: 0.5f);
-			AudioManager.Ins.PlaySound("player_take_damage");
+			AudioManager.Ins.PlaySound("player_hurt");
 		};
 
 		_player.OnDead += () =>

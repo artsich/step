@@ -45,7 +45,7 @@ public class GameCompose : GameWindow
 	private bool _showImGui = true;
 
 	private float _lastUpdateTime;
-	private float _audioMasterVolume = 0.1f;
+	private float _audioMasterVolume = 0.02f;
 
 	private Texture2d _healthEffect;
 	private Texture2d _bombEffect;
@@ -120,6 +120,9 @@ public class GameCompose : GameWindow
 		AudioManager.Ins.LoadSound("player_dash", "Music\\dash.wav");
 		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
 
+		AudioManager.Ins.LoadSound("sword_hit", "Music\\sword\\sword_hit.wav");
+		AudioManager.Ins.LoadSound("player_hurt", "Music\\sword\\player_hurt.wav");
+
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
 
@@ -145,6 +148,19 @@ public class GameCompose : GameWindow
 			}
 		});
 
+		sword.AddChild(new CircleCollisionShape(_renderer) 
+		{
+			LocalTransform = new Transform()
+			{
+				Position = new Vector2(3.7f, 3.4f),
+			},
+			Name = "Sword hitbox",
+			IsActive = false,
+			IsStatic = true,
+			Radius = 6f,
+			Visible = true,
+		});
+
 		var player = new Player(
 			new(0f, -60f),
 			new(10f, 32f),
@@ -167,7 +183,7 @@ public class GameCompose : GameWindow
 		});
 		player.AddChild(sword);
 
-		var idleFrames = new SpriteFrames("idle", true, 5f, _heroTextureAtlas,
+		var idleFrames = new SpriteFrames("idle", true, 2.5f, _heroTextureAtlas,
 		[
 			new Rect(0, 64, 32, 32),
 			new Rect(32, 64, 32, 32),

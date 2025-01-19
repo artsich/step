@@ -23,6 +23,8 @@ var nativeWindowSettings = new NativeWindowSettings()
 
 var gameSettings = GameWindowSettings.Default;
 
+gameSettings.UpdateFrequency = 144;
+
 using var window = new GameCompose(gameSettings, nativeWindowSettings);
 
 window.Run();

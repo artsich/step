@@ -47,8 +47,8 @@ public class Thing : RectangleShape2d
 
 	protected override void OnStart()
 	{
-		OnCollision += OnCollisionWithPlayer;
 		base.OnStart();
+		OnCollision += OnCollisionWithPlayer;
 	}
 
 	protected override void OnUpdate(float dt)
@@ -77,14 +77,14 @@ public class Thing : RectangleShape2d
 		{
 			if (IsFriend)
 			{
-				player.Damage(1);
+				//player.Damage(1);
 			}
 			else
 			{
-				player.Take(this);
+				player.Damage(1);
+				//player.Take(this);
+				QueueFree();
 			}
-
-			QueueFree();
 		}
 	}
 }
