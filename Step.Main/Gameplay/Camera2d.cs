@@ -8,7 +8,7 @@ namespace Step.Main.Gameplay;
 public class Camera2d : GameObject, ICamera2d
 {
 	private static readonly Random Random = new(244554);
-
+	private readonly IGameWindow _window;
 	private Matrix4 proj;
 	private Vector2 shakeOffset;
 
@@ -17,7 +17,7 @@ public class Camera2d : GameObject, ICamera2d
 	private float shakeDuration = 0f;
 	private float shakeMagnitude = 0f;
 
-	public Camera2d(float width, float height)
+	public Camera2d(float width, float height, IGameWindow window)
 		: base(nameof(Camera2d))
 	{
 		proj = Matrix4.CreateOrthographicOffCenter(
@@ -25,9 +25,21 @@ public class Camera2d : GameObject, ICamera2d
 			-height / 2f, height / 2f,
 			-1f, 100f
 		);
+		_window = window;
 
 		LocalTransform.Position = Vector2.Zero;
 		UpdateViewProj();
+	}
+
+	public Vector2 ScreenToWorld(Vector2 screenPos)
+	{
+		Vector2 normalizedScreenPos = new(
+			screenPos.X / _window.Size.X * 2 - 1,
+			-(screenPos.Y / _window.Size.Y * 2 - 1)
+		);
+
+		var inverseViewProj = Matrix4.Invert(ViewProj);
+		return (new Vector4(normalizedScreenPos, 0f, 1f) * inverseViewProj).Xy;
 	}
 
 	public void Shake(float magnitude, float duration)

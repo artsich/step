@@ -15,7 +15,12 @@ using Step.Main.Gameplay;
 
 namespace Step.Main;
 
-public class GameCompose : GameWindow
+public interface IGameWindow
+{
+	Vector2 Size { get; }
+}
+
+public class GameCompose : GameWindow, IGameWindow
 {
 	private const float TargetAspectRatio = 16f / 9f;
 	private const float InverseTargetAspectRatio = 1f / TargetAspectRatio;
@@ -36,6 +41,12 @@ public class GameCompose : GameWindow
 	private readonly List<IEditorView> _editors = [];
 
 	private Camera2d _mainCamera;
+
+	private Vector2 _currentWindowSize;
+
+	private Input _input;
+	
+	Vector2 IGameWindow.Size => _currentWindowSize;
 
 	public GameCompose(
 		GameWindowSettings gameWindowSettings,
@@ -65,6 +76,7 @@ public class GameCompose : GameWindow
 		ReloadGame();
 
 		_editors.Add(new ParticlesEditor(ClientSize, _mainCamera));
+		_currentWindowSize = ClientSize;
 	}
 
 	private void LoadAssets()
@@ -81,10 +93,26 @@ public class GameCompose : GameWindow
 	{
 		var width = GameCameraWidth;
 		var height = GameCameraHeight;
-		var camera = new Camera2d(width, height);
+		var camera = new Camera2d(width, height, this);
+
+		_input = new Input(MouseState, camera);
 
 		var root = new Gameplay.Main(_renderer);
 		root.AddChild(camera);
+
+		var player = new Player(_input);
+		player.AddChild(
+			new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
+			{
+				Color = Color4.Lightgreen,
+				LocalTransform = new Transform()
+				{
+					Scale = new Vector2(16f)
+				}
+			}
+		);
+
+		root.AddChild(player);
 
 		root.OnFinish += () =>
 		{
@@ -190,14 +218,22 @@ public class GameCompose : GameWindow
 
 		if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
 		{
+			var availRegion = ImGui.GetContentRegionAvail().FromSystem();
 			var imgSize = StepMath
 				.AdjustToAspect(
 					TargetAspectRatio,
-					ImGui.GetContentRegionAvail().FromSystem())
+					availRegion)
 				.ToSystem();
+
+			var headerOffset = new Vector2(
+				(ImGui.GetWindowSize().X - availRegion.X) / 2f,
+				ImGui.GetWindowSize().Y - availRegion.Y);
+			var windowPos = ImGui.GetWindowPos().FromSystem();
+			_input.SetMouseOffset(windowPos + headerOffset);
 
 			ImGui.Image(_gameRenderTarget.Color.Handle, imgSize, new(0f, 1f), new(1f, 0f));
 
+			_currentWindowSize = imgSize.FromSystem();
 			ImGui.End();
 		}
 
@@ -243,9 +279,15 @@ public class GameCompose : GameWindow
 				editor.Update(dt);
 			}
 		}
+		else
+		{
+			_currentWindowSize = ClientSize;
+			_input.SetMouseOffset(Vector2.Zero);
+		}
 
 		if (!_paused)
 		{
+			_input.Update(dt);
 			GameRoot.I.Update(dt);
 		}
 	}

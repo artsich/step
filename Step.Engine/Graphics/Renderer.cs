@@ -29,7 +29,7 @@ public class Renderer(int screenWidth, int screenHeight)
 	private Shader? _batchSpriteShader;
 	private Shader _screenQuadShader;
 	private ICamera2d? _camera;
-	private Texture2d _defaultWhiteTexture;
+	public Texture2d DefaultWhiteTexture { get; private set; }
 
 	private readonly int _screenWidth = screenWidth;
 	private readonly int _screenHeight = screenHeight;
@@ -67,8 +67,8 @@ public class Renderer(int screenWidth, int screenHeight)
 
 		_screenQuadShader = new Shader("Assets/Shaders/ScreenQuad/shader.vert", "Assets/Shaders/ScreenQuad/shader.frag");
 
-		_defaultWhiteTexture = new Texture2d(".\\Assets\\Textures\\white.png").Load();
-		_defaultWhiteTexture.Bind(0);
+		DefaultWhiteTexture = new Texture2d(".\\Assets\\Textures\\white.png").Load();
+		DefaultWhiteTexture.Bind(0);
 	}
 
 	public void PushRenderTarget(RenderTarget2d renderTarget)
@@ -228,7 +228,7 @@ public class Renderer(int screenWidth, int screenHeight)
 					   ? _renderTargets.Peek()
 					   : null;
 
-		cmd.Atlas ??= _defaultWhiteTexture;
+		cmd.Atlas ??= DefaultWhiteTexture;
 
 		_commands.Add(cmd);
 	}
