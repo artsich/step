@@ -11,6 +11,12 @@ public sealed class GameRoot
 	private GameObject _scene;
 	private readonly Queue<Action> _deferredActions = [];
 
+	public float TimeScale = 1.0f;
+
+	public float RealDt { get; private set; }
+
+	public float ScaledDt { get; private set; }
+
 	public void SetScene(GameObject scene)
 	{
 		_scene?.End();
@@ -22,7 +28,10 @@ public sealed class GameRoot
 
 	public void Update(float dt)
 	{
-		_scene.Update(dt);
+		RealDt = dt;
+		ScaledDt = dt * TimeScale;
+
+		_scene.Update(ScaledDt);
 		CollisionSystem.Ins.Process();
 
 		ProcessDeferred();

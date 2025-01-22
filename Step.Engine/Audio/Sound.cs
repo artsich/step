@@ -46,4 +46,9 @@ public class Sound : IDisposable
 		AL.DeleteSource(_sourceId);
 		AL.DeleteBuffer(_bufferId);
 	}
+
+	public void SlowDown(float pitch)
+	{
+		AL.Source(_sourceId, ALSourcef.Pitch, pitch);
+	}
 }

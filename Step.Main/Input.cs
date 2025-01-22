@@ -12,6 +12,8 @@ public sealed class Input(
 
 	public Vector2 MouseScreenPosition { get; private set; }
 
+	public MouseState MouseState => mouseState;
+
 	internal void Update(float _)
 	{
 		MouseScreenPosition = camera.ScreenToWorld(mouseState.Position - _mouseOffset);

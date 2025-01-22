@@ -82,7 +82,7 @@ public class GameCompose : GameWindow, IGameWindow
 	private void LoadAssets()
 	{
 		AudioManager.Ins.LoadSound("start", "Music\\ok_lets_go.mp3");
-		AudioManager.Ins.LoadSound("main_theme", "Music\\main_theme.mp3");
+		AudioManager.Ins.LoadSound("main_theme", "Music\\air-ambience-234180.mp3");
 		AudioManager.Ins.LoadSound("player_hurt", "Music\\sword\\player_hurt.wav");
 		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
 
@@ -111,6 +111,10 @@ public class GameCompose : GameWindow, IGameWindow
 				}
 			}
 		);
+
+		player.AddAbility(new SpeedIncreaseAbility(player));
+		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
+		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 
 		root.AddChild(player);
 

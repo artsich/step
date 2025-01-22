@@ -35,6 +35,14 @@ public class AudioManager : IDisposable
 		AL.Listener(ALListenerf.Gain, volume);
 	}
 
+	public void SlowDown(float pitch)
+	{
+		foreach (var (_, sound) in _loadedSounds)
+		{
+			sound.SlowDown(pitch);
+		}
+	}
+
 	public void LoadSound(string key, string filePath)
 	{
 		if (_loadedSounds.ContainsKey(key))
