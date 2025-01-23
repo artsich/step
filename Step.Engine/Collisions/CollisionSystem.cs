@@ -41,10 +41,16 @@ public class CollisionSystem
 				var a = _shapes[i];
 				var b = _shapes[j];
 
-				if (a.CheckCollision(b))
+				var aWithB = a.CollidableWith(b);
+				var bWithA = b.CollidableWith(a);
+
+				if ((aWithB || bWithA) && a.CheckCollision(b))
 				{
-					a.RaiseCollision(b);
-					b.RaiseCollision(a);
+					if (aWithB)
+						a.RaiseCollision(b);
+
+					if (bWithA)
+						b.RaiseCollision(a);
 				}
 			}
 		}

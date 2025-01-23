@@ -14,7 +14,7 @@ Log.Logger = new LoggerConfiguration()
 
 var nativeWindowSettings = new NativeWindowSettings()
 {
-	Title = "Borderline",
+	Title = "MinuteScape clone",
 	Vsync = VSyncMode.Adaptive,
 	Flags = ContextFlags.Default | ContextFlags.Debug,
 	WindowState = WindowState.Maximized,

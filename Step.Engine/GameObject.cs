@@ -88,7 +88,7 @@ public class GameObject(string name = nameof(GameObject))
 
 		if (children.Count > 0)
 		{
-			ImGui.SeparatorText("Children");
+			ImGui.SeparatorText($"Children : {children.Count}");
 		}
 
 		foreach (var child in children)

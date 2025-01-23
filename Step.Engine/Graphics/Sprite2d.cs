@@ -8,6 +8,8 @@ public class Sprite2d : CanvasItem
 	private readonly Texture2d _atlas;
 	private readonly Rect? _region;
 
+	public GeometryType GType = GeometryType.Quad;
+
 	public Sprite2d(Renderer renderer, Texture2d atlas, Rect? region = null)
 		: base(nameof(Sprite2d))
 	{
@@ -21,6 +23,7 @@ public class Sprite2d : CanvasItem
 	{
 		_renderer.SubmitCommand(new()
 		{
+			Type = GType,
 			Atlas = _atlas,
 			AtlasRect = _region,
 			Color = Color,

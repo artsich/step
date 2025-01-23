@@ -15,11 +15,20 @@ public abstract class CollisionShape(CollisionSystem collisionSystem) : GameObje
 	[EditorProperty]
 	public bool IsActive { get; set; } = true;
 
+	public int CollisionMask { get; set; }
+
+	public int CollisionLayers { get; set; }
+
 	public int MaxCollisionsPerFrame { get; set; } = 32;
 
 	private int _collisionsThisFrame;
 
 	public abstract bool CheckCollision(CollisionShape other);
+
+	public bool CollidableWith(CollisionShape other)
+	{
+		return (CollisionMask & other.CollisionLayers) != 0;
+	}
 
 	protected override void OnStart()
 	{

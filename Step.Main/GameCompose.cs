@@ -20,6 +20,12 @@ public interface IGameWindow
 	Vector2 Size { get; }
 }
 
+public enum PhysicLayers : int
+{
+	Player	= 1 << 0,
+	Enemy	= 1 << 1,
+}
+
 public class GameCompose : GameWindow, IGameWindow
 {
 	private const float TargetAspectRatio = 16f / 9f;
@@ -32,8 +38,10 @@ public class GameCompose : GameWindow, IGameWindow
 	private bool _showImGui = true;
 
 	private float _lastUpdateTime;
-	private float _audioMasterVolume = 0.02f;
+	private float _audioMasterVolume = 0.7f;
 
+	private Texture2d _gliderTexture;
+	private Texture2d _circleTexture;
 	private Renderer _renderer;
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
@@ -83,8 +91,13 @@ public class GameCompose : GameWindow, IGameWindow
 	{
 		AudioManager.Ins.LoadSound("start", "Music\\ok_lets_go.mp3");
 		AudioManager.Ins.LoadSound("main_theme", "Music\\air-ambience-234180.mp3");
-		AudioManager.Ins.LoadSound("player_hurt", "Music\\sword\\player_hurt.wav");
+		AudioManager.Ins.LoadSound("player_hurt_glider", "Music\\hurt.wav");
+		AudioManager.Ins.LoadSound("player_hurt_circle", "Music\\hurt2.wav");
+
 		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
+
+		_gliderTexture = Assets.LoadTexture2d("Textures\\glider-enemy.png");
+		_circleTexture = Assets.LoadTexture2d("Textures\\circle-enemy.png");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
@@ -101,6 +114,12 @@ public class GameCompose : GameWindow, IGameWindow
 		root.AddChild(camera);
 
 		var player = new Player(_input);
+		player.AddChild(new RectangleShape2d(_renderer)
+		{
+			Size = new Vector2(16f),
+			CollisionLayers = (int)PhysicLayers.Player,
+			CollisionMask = (int)PhysicLayers.Enemy
+		});
 		player.AddChild(
 			new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
 			{
@@ -116,7 +135,30 @@ public class GameCompose : GameWindow, IGameWindow
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 
+		var enemyFactory = new EnemyFactory(
+			_renderer,
+			_gliderTexture,
+			_circleTexture,
+			player);
+
+		var spawner = new Spawner(new Box2(-width / 2f, -height / 2f, width / 2f, height / 2f),
+			[
+				new SpawnRule
+				{
+					StartTime = 0f,
+					SpawnProbability = 1f,
+					CreateEntity = enemyFactory.CreateCircle
+				},
+				new SpawnRule
+				{
+					StartTime = 30f,
+					SpawnProbability = 0.2f,
+					CreateEntity = enemyFactory.CreateGlider
+				},
+			]);
+
 		root.AddChild(player);
+		root.AddChild(spawner);
 
 		root.OnFinish += () =>
 		{

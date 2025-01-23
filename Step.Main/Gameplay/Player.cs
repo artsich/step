@@ -1,6 +1,8 @@
-﻿using OpenTK.Windowing.GraphicsLibraryFramework;
+﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using Step.Engine;
 using Step.Engine.Audio;
+using Step.Engine.Collisions;
 using Step.Engine.Editor;
 
 namespace Step.Main.Gameplay;
@@ -179,7 +181,7 @@ public class PlayerAbilities(Input input, Player player)
 	}
 }
 
-public class Player :  GameObject
+public class Player : GameObject, ITarget
 {
 	[EditorProperty]
 	public float Speed { get; set; } = 30f;
@@ -190,7 +192,11 @@ public class Player :  GameObject
 	[EditorProperty]
 	public float HealBonusSpeed { get; set; } = 1f;
 
+	// TODO: This is bullshit of course
+	public Vector2 Position => GetGlobalMatrix().ExtractTranslation().Xy;
+
 	private PlayerAbilities _playerAbilities;
+	private RectangleShape2d _collisionShape;
 	private readonly Input _input;
 
 	public Player(Input input)
@@ -198,6 +204,26 @@ public class Player :  GameObject
 	{
 		_playerAbilities = new(input, this);
 		_input = input;
+	}
+
+	protected override void OnStart()
+	{
+		_collisionShape = GetChildOf<RectangleShape2d>();
+		_collisionShape.OnCollision += OnCollision;
+	}
+
+	private void OnCollision(CollisionShape shape)
+	{
+		if (shape.Parent is GliderEntity glider)
+		{
+			AudioManager.Ins.PlaySound("player_hurt_glider");
+			glider.QueueFree();
+		}
+		else if (shape.Parent is CircleEnemy circle)
+		{
+			AudioManager.Ins.PlaySound("player_hurt_circle");
+			circle.QueueFree();
+		}
 	}
 
 	public void AddAbility(IAbility ability) => _playerAbilities.Add(ability);
@@ -212,11 +238,14 @@ public class Player :  GameObject
 	{
 		var pos = LocalTransform.Position;
 		var mouse = _input.MouseScreenPosition;
+		var diff = mouse - pos;
 
-		var dir = (mouse - pos).Normalized();
-
-		pos += dir * Speed * deltaTime;
-		LocalTransform.Position = pos;
+		if (diff.LengthSquared > 0.01f)
+		{
+			var dir = diff.Normalized();
+			pos += dir * Speed * deltaTime;
+			LocalTransform.Position = pos;
+		}
 	}
 
 	protected override void OnDebugDraw()

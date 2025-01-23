@@ -1,0 +1,76 @@
+﻿using OpenTK.Mathematics;
+using Step.Engine;
+using Step.Engine.Collisions;
+using Step.Engine.Graphics;
+
+namespace Step.Main.Gameplay;
+
+public class EnemyFactory(Renderer renderer, Texture2d gliderTexture, Texture2d circleTexture, ITarget target) : IEnemyFactory
+{
+	private int _enemyId = 0;
+
+	private int NewId => _enemyId++;
+
+	public GliderEntity CreateGlider(Vector2 position)
+	{
+		var glider = new GliderEntity(target)
+		{
+			Name = $"Glider_{NewId}",
+			LocalTransform = new Transform()
+			{
+				Position = position,
+				Scale = new Vector2(0.3f),
+			}
+		};
+
+		glider.AddChild(
+			new RectangleShape2d(renderer)
+			{
+				Size = new Vector2(16f, 16f),
+				CollisionLayers = (int)PhysicLayers.Enemy
+			}
+		);
+
+		glider.AddChild(
+			new Sprite2d(renderer, gliderTexture)
+			{
+				Color = new Color4<Rgba>(0.2627f, 0.1804f, 0.3294f, 1.0f),
+			}
+		);
+
+		return glider;
+	}
+
+	public CircleEnemy CreateCircle(Vector2 spawnPosition)
+	{
+		var targetDir = (target.Position - spawnPosition).Normalized();
+
+		var circle = new CircleEnemy(targetDir)
+		{
+			Name = $"Circle_{NewId}",
+			LocalTransform = new Transform()
+			{
+				Position = spawnPosition,
+				Scale = new Vector2(0.3f),
+			}
+		};
+
+		circle.AddChild(
+			new RectangleShape2d(renderer)
+			{
+				Size = new Vector2(16f, 16f),
+				CollisionLayers = (int)PhysicLayers.Enemy
+			}
+		);
+
+		circle.AddChild(
+			new Sprite2d(renderer, circleTexture)
+			{
+				GType = GeometryType.Circle,
+				Color = new Color4<Rgba>(0.6824f, 0.2667f, 0.3529f, 1.0f),
+			}
+		);
+
+		return circle;
+	}
+}
