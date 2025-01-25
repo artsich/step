@@ -16,12 +16,18 @@ public record struct RenderCmd
 	public int Layer;
 	public GeometryType Type;
 
+	public Vector2 Pivot = new(0.5f);
+
 	public RenderTarget2d? Target;
 	public Texture2d? Atlas;
 
 	public Color4<Rgba> Color;
 	public Rect? AtlasRect;
 	public Matrix4 ModelMatrix;
+
+	public RenderCmd()
+	{
+	}
 }
 
 public class Renderer(int screenWidth, int screenHeight)
@@ -211,6 +217,7 @@ public class Renderer(int screenWidth, int screenHeight)
 			_spriteBatch.AddSprite(
 				cmd.ModelMatrix,
 				cmd.Atlas!,
+				pivot: cmd.Pivot,
 				geometryType: cmd.Type,
 				textureRegion: cmd.AtlasRect,
 				color: (Vector4)cmd.Color);

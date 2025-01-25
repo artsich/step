@@ -42,6 +42,7 @@ public class GameCompose : GameWindow, IGameWindow
 
 	private Texture2d _gliderTexture;
 	private Texture2d _circleTexture;
+	private Texture2d _playerTexture;
 	private Renderer _renderer;
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
@@ -98,6 +99,7 @@ public class GameCompose : GameWindow, IGameWindow
 
 		_gliderTexture = Assets.LoadTexture2d("Textures\\glider-enemy.png");
 		_circleTexture = Assets.LoadTexture2d("Textures\\circle-enemy.png");
+		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
@@ -120,16 +122,26 @@ public class GameCompose : GameWindow, IGameWindow
 			CollisionLayers = (int)PhysicLayers.Player,
 			CollisionMask = (int)PhysicLayers.Enemy
 		});
-		player.AddChild(
-			new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
+		var playerSprite = new PlayerSprite();
+		playerSprite.AddChild(new Sprite2d(_renderer, _playerTexture)
+		{
+			Name = "Frame",
+			Color = Color4.Lightgreen,
+		});
+
+		playerSprite.AddChild(new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
+		{
+			Name = "Health",
+			Color = Color4.Lightgreen,
+			Pivot = new Vector2(0f),
+			LocalTransform = new Transform()
 			{
-				Color = Color4.Lightgreen,
-				LocalTransform = new Transform()
-				{
-					Scale = new Vector2(16f)
-				}
+				Position = new Vector2(-8f, -8f),
+				Scale = new Vector2(16f),
 			}
-		);
+		});
+
+		player.AddChild(playerSprite);
 
 		player.AddAbility(new SpeedIncreaseAbility(player));
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });

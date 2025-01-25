@@ -8,6 +8,7 @@ namespace Step.Main.Gameplay;
 public class Main(Renderer renderer) : GameObject("Root")
 {
 	private Camera2d? _camera;
+	private Player _player;
 
 	public Action? OnFinish;
 
@@ -16,9 +17,21 @@ public class Main(Renderer renderer) : GameObject("Root")
 		renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 
 		_camera = GetChildOf<Camera2d>();
+		_player = GetChildOf<Player>();
+		_player.OnDeath += OnPlayerDeath;
 
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
+	}
+
+	protected override void OnEnd()
+	{
+		_player.OnDeath -= OnPlayerDeath;
+	}
+
+	private void OnPlayerDeath()
+	{
+		OnFinish?.Invoke();
 	}
 
 	protected override void OnUpdate(float deltaTime)

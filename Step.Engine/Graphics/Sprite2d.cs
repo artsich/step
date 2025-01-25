@@ -1,4 +1,5 @@
 ﻿using OpenTK.Mathematics;
+using Step.Engine.Editor;
 
 namespace Step.Engine.Graphics;
 
@@ -9,6 +10,9 @@ public class Sprite2d : CanvasItem
 	private readonly Rect? _region;
 
 	public GeometryType GType = GeometryType.Quad;
+
+	[EditorProperty]
+	public Vector2 Pivot { get; set; } = new Vector2(0.5f);
 
 	public Sprite2d(Renderer renderer, Texture2d atlas, Rect? region = null)
 		: base(nameof(Sprite2d))
@@ -28,7 +32,14 @@ public class Sprite2d : CanvasItem
 			AtlasRect = _region,
 			Color = Color,
 			Layer = Layer,
-			ModelMatrix = GetGlobalMatrix()
+			ModelMatrix = GetGlobalMatrix(),
+			Pivot = Pivot,
 		});
+	}
+
+	protected override void OnDebugDraw()
+	{
+		base.OnDebugDraw();
+		EditOf.Render(this);
 	}
 }

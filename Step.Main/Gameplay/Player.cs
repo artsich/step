@@ -186,11 +186,17 @@ public class Player : GameObject, ITarget
 	[EditorProperty]
 	public float Speed { get; set; } = 30f;
 
+	public float MaxHp { get; private set; } = 5f;
+
 	[EditorProperty]
-	public float Hp { get; set; } = 5f;
+	public float Hp { get; private set; } = 5f;
 
 	[EditorProperty]
 	public float HealBonusSpeed { get; set; } = 1f;
+
+	public event Action OnDeath;
+
+	public event Action OnDamage;
 
 	// TODO: This is bullshit of course
 	public Vector2 Position => GetGlobalMatrix().ExtractTranslation().Xy;
@@ -212,16 +218,32 @@ public class Player : GameObject, ITarget
 		_collisionShape.OnCollision += OnCollision;
 	}
 
+	private void TakeDamage(float amount)
+	{
+		Hp -= amount;
+		if (Hp <= 0)
+		{
+			OnDeath?.Invoke();
+			QueueFree();
+		}
+		else
+		{
+			OnDamage?.Invoke();
+		}
+	}
+
 	private void OnCollision(CollisionShape shape)
 	{
 		if (shape.Parent is GliderEntity glider)
 		{
 			AudioManager.Ins.PlaySound("player_hurt_glider");
+			TakeDamage(1);
 			glider.QueueFree();
 		}
 		else if (shape.Parent is CircleEnemy circle)
 		{
 			AudioManager.Ins.PlaySound("player_hurt_circle");
+			TakeDamage(1);
 			circle.QueueFree();
 		}
 	}
