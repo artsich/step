@@ -144,6 +144,7 @@ public class GameCompose : GameWindow, IGameWindow
 		player.AddChild(playerSprite);
 
 		player.AddAbility(new SpeedIncreaseAbility(player));
+		player.AddAbility(new RegenerationAbility(player));
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 

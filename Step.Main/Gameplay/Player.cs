@@ -11,9 +11,9 @@ public interface IAbility
 {
 	bool IsActive { get; }
 
-	void Activate();
+	void Activate() { }
 
-	void Deactivate();
+	void Deactivate() { }
 
 	void Update(float deltaTime) { }
 }
@@ -22,9 +22,7 @@ public abstract class PassiveAbility : IAbility
 {
 	public bool IsActive => false;
 
-	public abstract void Activate();
-
-	public abstract void Deactivate();
+	public virtual void Update(float dt) { }
 }
 
 public abstract class ActiveAbility : IAbility
@@ -80,16 +78,39 @@ public abstract class ActiveAbility : IAbility
 	}
 }
 
+public class RegenerationAbility(Player player) : PassiveAbility
+{
+	public float HealFactor { get; init; } = 0.1f;
+
+	public float HealPerSecond { get; init; } = 1f;
+
+	private float _timeElapsed;
+
+	public override void Update(float deltaTime) 
+	{
+		if (player.Hp < player.MaxHp)
+		{
+			_timeElapsed += deltaTime;
+
+			if (_timeElapsed > HealPerSecond)
+			{
+				player.Heal(HealFactor);
+				_timeElapsed = 0f;
+			}
+		}
+	}
+}
+
 public class SpeedIncreaseAbility(Player player) : PassiveAbility
 {
 	private readonly float speedMultiplier = 2f;
 
-	public override void Activate()
+	public void Activate()
 	{
 		player.Speed *= speedMultiplier;
 	}
 
-	public override void Deactivate()
+	public void Deactivate()
 	{
 		player.Speed /= speedMultiplier;
 	}
@@ -191,9 +212,6 @@ public class Player : GameObject, ITarget
 	[EditorProperty]
 	public float Hp { get; private set; } = 5f;
 
-	[EditorProperty]
-	public float HealBonusSpeed { get; set; } = 1f;
-
 	public event Action OnDeath;
 
 	public event Action OnDamage;
@@ -211,6 +229,13 @@ public class Player : GameObject, ITarget
 		_playerAbilities = new(input, this);
 		_input = input;
 	}
+
+	public void Heal(float healFactor)
+	{
+		Hp = Math.Min(Hp + healFactor, MaxHp);
+	}
+
+	public void AddAbility(IAbility ability) => _playerAbilities.Add(ability);
 
 	protected override void OnStart()
 	{
@@ -247,8 +272,6 @@ public class Player : GameObject, ITarget
 			circle.QueueFree();
 		}
 	}
-
-	public void AddAbility(IAbility ability) => _playerAbilities.Add(ability);
 
 	protected override void OnUpdate(float deltaTime)
 	{

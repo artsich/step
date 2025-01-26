@@ -9,26 +9,20 @@ public class PlayerSprite() : GameObject(name: "Player Health Sprite")
 	private Player _player;
 	private Sprite2d _spriteHp;
 
-	private float _hpScale = 1f;
+	private float _initialHeightScale;
 
 	protected override void OnStart()
 	{
 		_player = Parent as Player ?? throw new InvalidOperationException();
 		_spriteHp = GetChildOf<Sprite2d>("Health");
 
-		_player.OnDamage += OnPlayerDamage;
-
-		_hpScale = _spriteHp.LocalTransform.Scale.Y / _player.MaxHp;
+		_initialHeightScale = _spriteHp.LocalTransform.Scale.Y;
 	}
 
-	protected override void OnEnd()
+	protected override void OnUpdate(float deltaTime)
 	{
-		_player.OnDamage -= OnPlayerDamage;
-	}
-
-	private void OnPlayerDamage()
-	{
+		var hpScale = _initialHeightScale * (_player.Hp / _player.MaxHp);
 		var spriteScale = _spriteHp.LocalTransform.Scale;
-		_spriteHp.LocalTransform.Scale = spriteScale - new Vector2(0f, _hpScale);
+		_spriteHp.LocalTransform.Scale = new Vector2(spriteScale.X, hpScale);
 	}
 }
