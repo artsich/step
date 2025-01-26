@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
+using Serilog;
 using Step.Engine.Editor;
 
 namespace Step.Engine;
@@ -39,6 +40,9 @@ public class GameObject(string name = nameof(GameObject))
 			}
 		}
 	}
+
+	public bool MarkedAsFree => _markedAsFree;
+
 	public void Start()
 	{
 		foreach (var child in children)
@@ -148,11 +152,20 @@ public class GameObject(string name = nameof(GameObject))
 				End();
 			});
 		}
+		else
+		{
+			Log.Logger.Warning($"{nameof(QueueFree)} Already called...");
+		}
 	}
 
 	public void CallDeferred(Action action)
 	{
 		GameRoot.I.Defer(action);
+	}
+
+	public bool Contains<T>() where T : class
+	{
+		return children.OfType<T>().FirstOrDefault() != null;
 	}
 
 	public T GetChildOf<T>() where T : GameObject

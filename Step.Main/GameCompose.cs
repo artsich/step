@@ -24,6 +24,7 @@ public enum PhysicLayers : int
 {
 	Player	= 1 << 0,
 	Enemy	= 1 << 1,
+	Magnet  = 1 << 2,
 }
 
 public class GameCompose : GameWindow, IGameWindow
@@ -43,6 +44,7 @@ public class GameCompose : GameWindow, IGameWindow
 	private Texture2d _gliderTexture;
 	private Texture2d _circleTexture;
 	private Texture2d _playerTexture;
+	private Texture2d _crossTexture;
 	private Renderer _renderer;
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
@@ -94,12 +96,14 @@ public class GameCompose : GameWindow, IGameWindow
 		AudioManager.Ins.LoadSound("main_theme", "Music\\air-ambience-234180.mp3");
 		AudioManager.Ins.LoadSound("player_hurt_glider", "Music\\hurt.wav");
 		AudioManager.Ins.LoadSound("player_hurt_circle", "Music\\hurt2.wav");
+		AudioManager.Ins.LoadSound("player_pickup", "Music\\pickup.wav");
 
 		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
 
 		_gliderTexture = Assets.LoadTexture2d("Textures\\glider-enemy.png");
 		_circleTexture = Assets.LoadTexture2d("Textures\\circle-enemy.png");
 		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
+		_crossTexture = Assets.LoadTexture2d("Textures\\cross-enemy.png");
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
@@ -147,11 +151,13 @@ public class GameCompose : GameWindow, IGameWindow
 		player.AddAbility(new RegenerationAbility(player));
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
+		player.AddAbility(new MagnetAbility(50f, player, _renderer));
 
 		var enemyFactory = new EnemyFactory(
 			_renderer,
 			_gliderTexture,
 			_circleTexture,
+			_crossTexture,
 			player);
 
 		var spawner = new Spawner(new Box2(-width / 2f, -height / 2f, width / 2f, height / 2f),
@@ -164,10 +170,17 @@ public class GameCompose : GameWindow, IGameWindow
 				},
 				new SpawnRule
 				{
-					StartTime = 30f,
-					SpawnProbability = 0.2f,
+					StartTime = 60f,
+					SpawnProbability = 0.05f,
 					CreateEntity = enemyFactory.CreateGlider
 				},
+				new SpawnRule
+				{
+					StartTime = 30f,
+					SpawnProbability = 0.1f,
+					CreateEntity = enemyFactory.CreateCross,
+					SpawnLocation = SpawnLocationType.Interior,
+				}
 			]);
 
 		root.AddChild(player);

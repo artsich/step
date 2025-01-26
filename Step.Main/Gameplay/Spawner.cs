@@ -66,13 +66,11 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 
 	private void SpawnEnemy()
 	{
-		var spawnPos = GenerateSpawnPosition();
-
 		var availableRules = spawnRules
 			.Where(rule => _timeSinceStart >= rule.StartTime)
 			.ToList();
 
-		if (!availableRules.Any())
+		if (availableRules.Count == 0)
 			return;
 
 		float totalProbability = availableRules.Sum(rule => rule.SpawnProbability);
@@ -84,6 +82,8 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 			accumulatedProbability += rule.SpawnProbability;
 			if (randomValue <= accumulatedProbability)
 			{
+				var spawnPos = GenerateSpawnPosition(rule);
+
 				var enemy = rule.CreateEntity(spawnPos);
 
 				CallDeferred(() => AddChild(enemy));
@@ -93,8 +93,16 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 		}
 	}
 
-	private Vector2 GenerateSpawnPosition()
+	private Vector2 GenerateSpawnPosition(SpawnRule rule)
 	{
+		if (rule.SpawnLocation == SpawnLocationType.Interior)
+		{
+			return new Vector2(
+				(float)_random.NextDouble() * spawnArea.Size.X + spawnArea.Min.X,
+				(float)_random.NextDouble() * spawnArea.Size.Y + spawnArea.Min.Y
+			);
+		}
+
 		float margin = 50f;
 		var expandedBox = new Box2(
 			spawnArea.Min - new Vector2(margin),

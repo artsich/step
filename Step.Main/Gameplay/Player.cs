@@ -4,6 +4,7 @@ using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
+using Step.Engine.Graphics;
 
 namespace Step.Main.Gameplay;
 
@@ -21,6 +22,10 @@ public interface IAbility
 public abstract class PassiveAbility : IAbility
 {
 	public bool IsActive => false;
+
+	public virtual void Activate() { }
+
+	public virtual void Deactivate() { }
 
 	public virtual void Update(float dt) { }
 }
@@ -105,14 +110,42 @@ public class SpeedIncreaseAbility(Player player) : PassiveAbility
 {
 	private readonly float speedMultiplier = 2f;
 
-	public void Activate()
+	public override void Activate()
 	{
 		player.Speed *= speedMultiplier;
 	}
 
-	public void Deactivate()
+	public override void Deactivate()
 	{
 		player.Speed /= speedMultiplier;
+	}
+}
+
+public class MagnetAbility(float radius, GameObject magnetOwner, Renderer renderer) : PassiveAbility
+{
+	public override void Activate()
+	{
+		if (magnetOwner.Contains<MagnetZone>())
+		{
+			throw new InvalidOperationException("Magnet already active...");
+		}
+
+		magnetOwner.CallDeferred(() =>
+		{
+			var magnet = new MagnetZone(renderer)
+			{
+				Radius = radius,
+			};
+			magnetOwner.AddChild(magnet);
+			magnet.Start();
+		});
+	}
+
+	public override void Deactivate()
+	{
+		magnetOwner
+			.GetChildOf<MagnetZone>()
+			.QueueFree();
 	}
 }
 
@@ -269,6 +302,11 @@ public class Player : GameObject, ITarget
 			AudioManager.Ins.PlaySound("player_hurt_circle");
 			TakeDamage(1);
 			circle.QueueFree();
+		}
+		else if (shape.Parent is CrossEnemy cross)
+		{
+			AudioManager.Ins.PlaySound("player_pickup");
+			cross.QueueFree();
 		}
 	}
 

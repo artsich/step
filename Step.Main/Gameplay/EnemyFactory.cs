@@ -5,7 +5,13 @@ using Step.Engine.Graphics;
 
 namespace Step.Main.Gameplay;
 
-public class EnemyFactory(Renderer renderer, Texture2d gliderTexture, Texture2d circleTexture, ITarget target) : IEnemyFactory
+public class EnemyFactory(
+	Renderer renderer,
+	Texture2d gliderTexture,
+	Texture2d circleTexture,
+	Texture2d crossTexture,
+	ITarget target
+) : IEnemyFactory
 {
 	private int _enemyId = 0;
 
@@ -72,5 +78,35 @@ public class EnemyFactory(Renderer renderer, Texture2d gliderTexture, Texture2d 
 		);
 
 		return circle;
+	}
+
+	public CrossEnemy CreateCross(Vector2 position)
+	{
+		var cross = new CrossEnemy()
+		{
+			Name = $"Cross_{NewId}",
+			LocalTransform = new Transform()
+			{
+				Position = position,
+				Scale = new Vector2(0.3f),
+			}
+		};
+
+		cross.AddChild(
+			new RectangleShape2d(renderer)
+			{
+				Size = new Vector2(16f),
+				CollisionLayers = (int)PhysicLayers.Enemy
+			}
+		);
+
+		cross.AddChild(
+			new Sprite2d(renderer, crossTexture)
+			{
+				Color = new Color4<Rgba>(0f, 0f, 0.3294f, 1.0f),
+			}
+		);
+
+		return cross;
 	}
 }
