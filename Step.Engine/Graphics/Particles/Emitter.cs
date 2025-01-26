@@ -6,7 +6,7 @@ namespace Step.Engine.Graphics.Particles;
 
 public class Emitter
 {
-	[EditorProperty(speed: 1)]
+	[EditorProperty(speed: 1, from: 0, to: 10000)]
 	public int Amount { get; set; }
 
 	[EditorProperty(1f, 100f)]
