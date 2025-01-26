@@ -216,8 +216,7 @@ public class Player : GameObject, ITarget
 
 	public event Action OnDamage;
 
-	// TODO: This is bullshit of course
-	public Vector2 Position => GetGlobalMatrix().ExtractTranslation().Xy;
+	public Vector2 Position => GlobalPosition;
 
 	private PlayerAbilities _playerAbilities;
 	private RectangleShape2d _collisionShape;

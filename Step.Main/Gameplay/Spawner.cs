@@ -57,9 +57,7 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 
 		foreach (var enemy in children)
 		{
-			var pos = enemy.GetGlobalMatrix().ExtractTranslation().Xy;
-
-			if (!removalBox.ContainsInclusive(pos))
+			if (!removalBox.ContainsInclusive(enemy.GlobalPosition))
 			{
 				CallDeferred(enemy.QueueFree);
 			}

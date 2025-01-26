@@ -17,6 +17,28 @@ public class GameObject(string name = nameof(GameObject))
 
 	private bool _markedAsFree;
 
+	public Vector2 LocalPosition
+	{
+		get => LocalTransform.Position;
+		set => LocalTransform.Position = value;
+	}
+
+	public Vector2 GlobalPosition
+	{
+		get => GetGlobalMatrix().ExtractTranslation().Xy;
+		set
+		{
+			if (_parent != null)
+			{
+				var parentInverse = _parent.GetGlobalMatrix().Inverted();
+				LocalTransform.Position = (new Vector4(value) * parentInverse).Xy;
+			}
+			else
+			{
+				LocalTransform.Position = value;
+			}
+		}
+	}
 	public void Start()
 	{
 		foreach (var child in children)

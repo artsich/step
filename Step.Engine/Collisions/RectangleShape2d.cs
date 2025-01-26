@@ -69,7 +69,7 @@ public class RectangleShape2d : CollisionShape
 		}
 		else if (other is CircleCollisionShape otherCircle)
 		{
-			Vector2 p1 = otherCircle.GetGlobalMatrix().ExtractTranslation().Xy;
+			Vector2 p1 = otherCircle.GlobalPosition;
 			return CollisionHelpers.CircleVsAabb(p1, otherCircle.Radius, Aabb);
 		}
 

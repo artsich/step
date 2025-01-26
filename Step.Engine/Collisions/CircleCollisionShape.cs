@@ -22,7 +22,7 @@ public class CircleCollisionShape : CollisionShape
 	{
 		if (Visible && IsActive)
 		{
-			var position = GetGlobalMatrix().ExtractTranslation().Xy;
+			var position = GlobalPosition;
 			renderer.DrawCircle(
 				position,
 				Radius,
@@ -46,14 +46,14 @@ public class CircleCollisionShape : CollisionShape
 
 		if (other is CircleCollisionShape otherCircle)
 		{
-			Vector2 p1 = GetGlobalMatrix().ExtractTranslation().Xy;
-			Vector2 p2 = otherCircle.GetGlobalMatrix().ExtractTranslation().Xy;
+			Vector2 p1 = GlobalPosition;
+			Vector2 p2 = otherCircle.GlobalPosition;
 
 			return CollisionHelpers.CircleVsCircle(p1, Radius, p2, otherCircle.Radius);
 		}
 		else if (other is RectangleShape2d otherRectangle)
 		{
-			Vector2 p1 = GetGlobalMatrix().ExtractTranslation().Xy;
+			Vector2 p1 = GlobalPosition;
 			return CollisionHelpers.CircleVsAabb(p1, Radius, otherRectangle.Aabb);
 		}
 
