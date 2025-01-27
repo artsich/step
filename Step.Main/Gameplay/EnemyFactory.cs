@@ -40,7 +40,7 @@ public class EnemyFactory(
 		glider.AddChild(
 			new Sprite2d(renderer, gliderTexture)
 			{
-				Color = new Color4<Rgba>(0.2627f, 0.1804f, 0.3294f, 1.0f),
+				Color = Colors.Glider,
 			}
 		);
 
@@ -73,7 +73,7 @@ public class EnemyFactory(
 			new Sprite2d(renderer, circleTexture)
 			{
 				GType = GeometryType.Circle,
-				Color = new Color4<Rgba>(0.6824f, 0.2667f, 0.3529f, 1.0f),
+				Color = Colors.Circle,
 			}
 		);
 
@@ -103,7 +103,7 @@ public class EnemyFactory(
 		cross.AddChild(
 			new Sprite2d(renderer, crossTexture)
 			{
-				Color = new Color4<Rgba>(0f, 0f, 0.3294f, 1.0f),
+				Color = Colors.Cross,
 			}
 		);
 

@@ -1,6 +1,5 @@
 ﻿using ImGuiNET;
 using OpenTK.Mathematics;
-using Serilog;
 
 namespace Step.Engine.Editor;
 

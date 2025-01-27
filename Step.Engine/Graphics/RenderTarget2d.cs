@@ -98,13 +98,14 @@ public class RenderTarget2d : IDisposable
 
 	private static Texture2d CreateColorTexture(int width, int height)
 	{
-
 		var result = new Texture2d();
 		result.SetImageData(
 			width, height,
 			InternalFormat.Rgba8,
 			PixelFormat.Rgba,
 			[]);
+
+		result.SetWrap(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
 		result.SetFilter(TextureMinFilter.Nearest, TextureMagFilter.Nearest);
 	
 		return result;

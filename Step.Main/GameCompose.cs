@@ -130,7 +130,7 @@ public class GameCompose : GameWindow, IGameWindow
 		playerSprite.AddChild(new Sprite2d(_renderer, _playerTexture)
 		{
 			Name = "Frame",
-			Color = Color4.Lightgreen,
+			Color = Colors.Player,
 		});
 
 		playerSprite.AddChild(new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)

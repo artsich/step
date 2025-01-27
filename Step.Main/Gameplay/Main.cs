@@ -14,7 +14,7 @@ public class Main(Renderer renderer) : GameObject("Root")
 
 	protected override void OnStart()
 	{
-		renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
+		renderer.SetBackground(Colors.Background);
 
 		_camera = GetChildOf<Camera2d>();
 		_player = GetChildOf<Player>();
