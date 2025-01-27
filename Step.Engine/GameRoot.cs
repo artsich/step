@@ -8,7 +8,7 @@ public sealed class GameRoot
 
 	public static GameRoot I => _instance;
 
-	private GameObject _scene;
+	private GameObject? _scene;
 	private readonly Queue<Action> _deferredActions = [];
 
 	public float TimeScale = 1.0f;
@@ -16,6 +16,8 @@ public sealed class GameRoot
 	public float RealDt { get; private set; }
 
 	public float ScaledDt { get; private set; }
+
+	public GameObject Scene => _scene ?? throw new InvalidOperationException("Scene is null");
 
 	public void SetScene(GameObject scene)
 	{
@@ -31,7 +33,7 @@ public sealed class GameRoot
 		RealDt = dt;
 		ScaledDt = dt * TimeScale;
 
-		_scene.Update(ScaledDt);
+		_scene?.Update(ScaledDt);
 		CollisionSystem.Ins.Process();
 
 		ProcessDeferred();
@@ -39,12 +41,12 @@ public sealed class GameRoot
 
 	public void Draw()
 	{
-		_scene.Draw();
+		_scene?.Draw();
 	}
 
 	public void DebugDraw()
 	{
-		_scene.DebugDraw();
+		_scene?.DebugDraw();
 	}
 
 	public void Defer(Action action)

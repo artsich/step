@@ -119,6 +119,12 @@ public class Shader
 		GL.UniformMatrix4f(GetUniformLocation(name), 1, transpose, ref data);
 	}
 
+	public void SetVector2(string name, Vector2 data)
+	{
+		GL.UseProgram(Handle);
+		GL.Uniform2f(GetUniformLocation(name), 1, ref data);
+	}
+
 	public void SetVector3(string name, Vector3 data)
 	{
 		GL.UseProgram(Handle);

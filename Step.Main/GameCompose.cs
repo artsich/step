@@ -39,7 +39,7 @@ public class GameCompose : GameWindow, IGameWindow
 	private bool _showImGui = true;
 
 	private float _lastUpdateTime;
-	private float _audioMasterVolume = 0.7f;
+	private float _audioMasterVolume = 0.15f;
 
 	private Texture2d _gliderTexture;
 	private Texture2d _circleTexture;
@@ -49,6 +49,8 @@ public class GameCompose : GameWindow, IGameWindow
 	private ImGuiController _controller;
 	private RenderTarget2d _gameRenderTarget;
 
+	private Texture2d _finalImage;
+
 	private readonly List<IEditorView> _editors = [];
 
 	private Camera2d _mainCamera;
@@ -56,7 +58,8 @@ public class GameCompose : GameWindow, IGameWindow
 	private Vector2 _currentWindowSize;
 
 	private Input _input;
-	
+	private CrtEffect _crtEffect;
+
 	Vector2 IGameWindow.Size => _currentWindowSize;
 
 	public GameCompose(
@@ -81,6 +84,15 @@ public class GameCompose : GameWindow, IGameWindow
 		_renderer.Load();
 
 		_gameRenderTarget = new RenderTarget2d(ClientSize.X, ClientSize.Y, true);
+
+		_crtEffect = new CrtEffect(
+			new Shader(
+				".\\Assets\\Shaders\\CRT\\shader.vert",
+				".\\Assets\\Shaders\\CRT\\shader.frag"
+			),
+			new RenderTarget2d(ClientSize.X, ClientSize.Y, true),
+			_renderer
+		);
 
 		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 		LoadAssets();
@@ -209,13 +221,34 @@ public class GameCompose : GameWindow, IGameWindow
 		_renderer.Flush();
 		_renderer.PopRenderTarget();
 
+		var player = GameRoot.I.Scene.GetChildOf<Player>();
+		var camera = GameRoot.I.Scene.GetChildOf<Camera2d>();
+
+		if (player != null && camera != null)
+		{
+			Vector2 playerWorldPos = player.GlobalPosition;
+
+			Vector4 clipSpace = new Vector4(playerWorldPos.X, playerWorldPos.Y, 0, 1) * camera.ViewProj;
+			var pos = new Vector2(
+				(clipSpace.X / clipSpace.W + 1.0f) * 0.5f,
+				(clipSpace.Y / clipSpace.W + 1.0f) * 0.5f);
+
+			_crtEffect.VignetteTarget = pos;
+		}
+		else
+		{
+			_crtEffect.VignetteTarget = new Vector2(0.5f);
+		}
+
+		_crtEffect.Apply(_gameRenderTarget.Color, out _finalImage);
+
 		if (_showImGui)
 		{
 			ImGuiRender(e);
 		}
 		else
 		{
-			_renderer.DrawScreenRectNow(_gameRenderTarget.Color);
+			_renderer.DrawScreenRectNow(_finalImage);
 		}
 
 		SwapBuffers();
@@ -269,8 +302,17 @@ public class GameCompose : GameWindow, IGameWindow
 						ImGui.EndTabItem();
 					}
 				}
+				
+
+				if (ImGui.BeginTabItem("Shaders"))
+				{
+					_crtEffect.DebugDraw();
+					ImGui.EndTabItem();
+				}
+
 				ImGui.EndTabBar();
 			}
+
 			ImGui.End();
 		}
 
@@ -303,8 +345,8 @@ public class GameCompose : GameWindow, IGameWindow
 			var windowPos = ImGui.GetWindowPos().FromSystem();
 			_input.SetMouseOffset(windowPos + headerOffset);
 
-			ImGui.Image(_gameRenderTarget.Color.Handle, imgSize, new(0f, 1f), new(1f, 0f));
-
+			ImGui.Image(_finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
+			
 			_currentWindowSize = imgSize.FromSystem();
 			ImGui.End();
 		}

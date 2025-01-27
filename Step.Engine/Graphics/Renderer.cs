@@ -46,6 +46,8 @@ public class Renderer(int screenWidth, int screenHeight)
 
 	private readonly SpriteBatch _spriteBatch = new();
 
+	public ScreenQuad ScreenQuad { get; } = new ScreenQuad();
+
 	public void SetBackground(Color4<Rgba> color)
 	{
 		GL.ClearColor(color);
@@ -151,16 +153,12 @@ public class Renderer(int screenWidth, int screenHeight)
 
 	public void DrawScreenRectNow(Texture2d tex)
 	{
-		int vao = GL.GenVertexArray();
 		_screenQuadShader!.Use();
 
 		tex.Bind(0);
 		_screenQuadShader.SetInt("diffuseTexture", 0);
 
-		GL.BindVertexArray(vao);
-		GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-
-		GL.DeleteVertexArray(vao);
+		ScreenQuad.Draw();
 
 		tex.Unbind();
 	}
