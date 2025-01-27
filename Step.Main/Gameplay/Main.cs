@@ -19,14 +19,21 @@ public class Main(Renderer renderer) : GameObject("Root")
 		_camera = GetChildOf<Camera2d>();
 		_player = GetChildOf<Player>();
 		_player.OnDeath += OnPlayerDeath;
+		_player.OnDamage += OnPlayerDamage;
 
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
 	}
 
+	private void OnPlayerDamage()
+	{
+		_camera!.Shake(2f, 0.2f);
+	}
+
 	protected override void OnEnd()
 	{
 		_player.OnDeath -= OnPlayerDeath;
+		_player.OnDamage -= OnPlayerDamage;
 	}
 
 	private void OnPlayerDeath()
