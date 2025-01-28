@@ -10,8 +10,6 @@ public class GliderEntity(ITarget target)
 	[EditorProperty]
 	public float Speed { get; set; } = 30f;
 
-	public float RotationSpeed { get; set; } = 5f;
-
 	public float MinFollowDistance { get; set; } = 25f;
 
 	private bool _isFollowing = true;
@@ -51,11 +49,6 @@ public class GliderEntity(ITarget target)
 		LocalTransform.Position = pos;
 
 		var targetAngle = MathF.Atan2(dir.Y, dir.X) - MathF.PI / 2;
-		var currentAngle = LocalTransform.Rotation;
-
-		var angleDiff = targetAngle - currentAngle;
-
-		var rotation = currentAngle + angleDiff * RotationSpeed * deltaTime;
-		LocalTransform.Rotation = rotation;
+		LocalTransform.Rotation = targetAngle;
 	}
 }
