@@ -322,7 +322,7 @@ public class Player : GameObject, ITarget
 		var mouse = _input.MouseScreenPosition;
 		var diff = mouse - pos;
 
-		if (diff.LengthSquared > 0.01f)
+		if (diff.LengthSquared > 1f)
 		{
 			var dir = diff.Normalized();
 			pos += dir * Speed * deltaTime;
