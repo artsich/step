@@ -170,14 +170,22 @@ public class GameObject(string name = nameof(GameObject))
 
 	public T GetChildOf<T>() where T : GameObject
 	{
-		var result = children.OfType<T>().FirstOrDefault() ?? throw new ArgumentException($"{typeof(T).Name} not found...");
-		return result;
+		foreach (var child in children)
+		{
+			if (child is T typedChild)
+				return typedChild;
+		}
+		throw new ArgumentException($"Child of type {typeof(T).Name} not found in {Name}");
 	}
 
 	public T GetChildOf<T>(string name) where T : GameObject
 	{
-		var result = children.OfType<T>().FirstOrDefault(x => x.Name == name) ?? throw new ArgumentException($"{typeof(T).Name} not found...");
-		return result;
+		foreach (var child in children)
+		{
+			if (child is T typedChild && typedChild.Name == name)
+				return typedChild;
+		}
+		throw new ArgumentException($"Child of type {typeof(T).Name} with name {name} not found in {Name}");
 	}
 
 	public IEnumerable<T> GetChildsOf<T>() where T : GameObject

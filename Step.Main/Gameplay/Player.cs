@@ -184,7 +184,7 @@ public class TimeFreezeAbility : ActiveAbility
 
 public class PlayerAbilities(Input input, Player player)
 {
-	private readonly IList<IAbility> _abilities = [];
+	private readonly List<IAbility> _abilities = [];
 
 	public void Add(IAbility ability)
 	{
@@ -212,13 +212,21 @@ public class PlayerAbilities(Input input, Player player)
 		TryAbility<TimeFreezeAbility>(MouseButton.Right);
 	}
 
+	private T? FindActiveAbility<T>() 
+		where T : IAbility
+	{
+		foreach (var ability in _abilities)
+		{
+			if (ability.IsActive && ability is T typedAbility)
+				return typedAbility;
+		}
+
+		return default;
+	}
+
 	private void TryAbility<T>(MouseButton btn) where T : IAbility
 	{
-		var ability = _abilities
-				.Where(a => a.IsActive)
-				.OfType<T>()
-				.FirstOrDefault();
-
+		var ability = FindActiveAbility<T>();
 		if (ability is null)
 		{
 			return;

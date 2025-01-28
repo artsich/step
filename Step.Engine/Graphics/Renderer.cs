@@ -174,33 +174,8 @@ public class Renderer(int screenWidth, int screenHeight)
 
 	public void Flush()
 	{
-		int CompareTarget(RenderTarget2d? t1, RenderTarget2d? t2)
-		{
-			if (t1 == t2) return 0;
-			if (t1 == null) return -1;
-			if (t2 == null) return 1;
-			return t1.Framebuffer.CompareTo(t2.Framebuffer);
-		}
-
-		_commands.Sort((a, b) =>
-		{
-			//int targetCompare = CompareTarget(b.Target, a.Target);
-			//if (targetCompare != 0)
-			//	return targetCompare;
-
-			// todo: Why do i sort by layer if i can set Z position instead and use depth buffer for this?
-			int layerCompare = b.Layer.CompareTo(a.Layer);
-			if (layerCompare != 0)
-				return layerCompare;
-
-			int gTypeCompare = b.Type.CompareTo(a.Type);
-			if (gTypeCompare != 0)
-				return gTypeCompare;
-
-			int aTexId = (a.Atlas == null) ? -1 : a.Atlas.Handle;
-			int bTexId = (b.Atlas == null) ? -1 : b.Atlas.Handle;
-			return bTexId.CompareTo(aTexId);
-		});
+		//todo: Investigate how much allocations happens here!
+		_commands.Sort(CompareRenderCommands);
 
 		GL.Enable(EnableCap.Blend);
 		GL.BlendFunc(
@@ -236,6 +211,34 @@ public class Renderer(int screenWidth, int screenHeight)
 		cmd.Atlas ??= DefaultWhiteTexture;
 
 		_commands.Add(cmd);
+	}
+
+	private static int CompareTarget(RenderTarget2d? t1, RenderTarget2d? t2)
+	{
+		if (t1 == t2) return 0;
+		if (t1 == null) return -1;
+		if (t2 == null) return 1;
+		return t1.Framebuffer.CompareTo(t2.Framebuffer);
+	}
+
+	private static int CompareRenderCommands(RenderCmd a, RenderCmd b)
+	{
+		//int targetCompare = CompareTarget(b.Target, a.Target);
+		//if (targetCompare != 0)
+		//    return targetCompare;
+
+		// todo: Why do i sort by layer if i can set Z position instead and use depth buffer for this?
+		int layerCompare = b.Layer.CompareTo(a.Layer);
+		if (layerCompare != 0)
+			return layerCompare;
+
+		int gTypeCompare = b.Type.CompareTo(a.Type);
+		if (gTypeCompare != 0)
+			return gTypeCompare;
+
+		int aTexId = (a.Atlas == null) ? -1 : a.Atlas.Handle;
+		int bTexId = (b.Atlas == null) ? -1 : b.Atlas.Handle;
+		return bTexId.CompareTo(aTexId);
 	}
 
 	private static void PrintOpenGLInfo()
