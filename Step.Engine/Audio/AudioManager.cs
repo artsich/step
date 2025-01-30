@@ -18,14 +18,19 @@ public class AudioManager : IDisposable
 	{
 		_device = ALC.OpenDevice(null);
 		if (_device == IntPtr.Zero)
-			throw new Exception("Failed to open the default OpenAL device.");
+		{
+			Log.Logger.Warning("Failed to open the default OpenAL device.");
+			return;
+		}
 
 		_context = ALC.CreateContext(_device, (int[]?)null);
 		if (_context == IntPtr.Zero)
-			throw new Exception("Failed to create an OpenAL audio context.");
+		{
+			Log.Logger.Warning("Failed to create an OpenAL audio context.");
+			return;
+		}
 
 		ALC.MakeContextCurrent(_context);
-
 		PrintOpenALInfo();
 	}
 
