@@ -30,10 +30,7 @@ public class MagnetZone : CircleCollisionShape
 
 		foreach(var cross in _attractedEnemies)
 		{
-			if (!cross.MarkedAsFree)
-			{
-				cross.Unfollow();
-			}
+			cross.Unfollow();
 		}
 		_attractedEnemies.Clear();
 
