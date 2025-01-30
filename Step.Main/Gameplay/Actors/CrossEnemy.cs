@@ -1,6 +1,6 @@
 ﻿using Step.Engine;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
 public class CrossEnemy()
 	: GameObject(name: nameof(CrossEnemy))

@@ -2,7 +2,7 @@
 using Step.Engine;
 using Step.Engine.Editor;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
 public class CircleEnemy(Vector2 targetDir)
 	: GameObject(nameof(CircleEnemy))

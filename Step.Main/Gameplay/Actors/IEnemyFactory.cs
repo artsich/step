@@ -1,6 +1,6 @@
 ﻿using OpenTK.Mathematics;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
 public interface IEnemyFactory
 {

@@ -2,7 +2,7 @@
 using Step.Engine;
 using Step.Engine.Graphics;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
 public class PlayerSprite() : GameObject(name: "Player Health Sprite")
 {

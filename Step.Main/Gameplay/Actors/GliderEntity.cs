@@ -2,7 +2,7 @@
 using Step.Engine;
 using Step.Engine.Editor;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
 public class GliderEntity(ITarget target)
 	: GameObject(nameof(GliderEntity))
@@ -21,7 +21,7 @@ public class GliderEntity(ITarget target)
 
 		if (_isFollowing)
 		{
-			var dir = (target.Position - pos);
+			var dir = target.Position - pos;
 			var len = dir.Length;
 			dir /= len;
 

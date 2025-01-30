@@ -12,6 +12,7 @@ using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Main.Gameplay;
+using Step.Main.Gameplay.Actors;
 
 namespace Step.Main;
 

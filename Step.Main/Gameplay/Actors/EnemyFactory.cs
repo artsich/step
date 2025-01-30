@@ -3,7 +3,7 @@ using Step.Engine;
 using Step.Engine.Collisions;
 using Step.Engine.Graphics;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
 public class EnemyFactory(
 	Renderer renderer,
