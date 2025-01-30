@@ -4,7 +4,6 @@ using Serilog;
 
 namespace Step.Engine.Graphics;
 
-
 public enum GeometryType : uint
 {
 	Quad = 0,
@@ -30,6 +29,24 @@ public record struct RenderCmd
 	}
 }
 
+public struct RenderStats
+{
+	public int TexturesUsed;
+	public int DrawCalls;
+	public int TotalSprites;
+	public float GpuTimeMs;
+	public int ActiveShaders;
+
+	public void Reset()
+	{
+		TexturesUsed = 0;
+		DrawCalls = 0;
+		TotalSprites = 0;
+		GpuTimeMs = 0;
+		ActiveShaders = 0;
+	}
+}
+
 public class Renderer(int screenWidth, int screenHeight)
 {
 	private Shader? _batchSpriteShader;
@@ -47,6 +64,9 @@ public class Renderer(int screenWidth, int screenHeight)
 	private readonly SpriteBatch _spriteBatch = new();
 
 	public ScreenQuad ScreenQuad { get; } = new ScreenQuad();
+
+	public RenderStats Stats;
+	private GpuTimer _gpuTimer = new();
 
 	public void SetBackground(Color4<Rgba> color)
 	{
@@ -137,7 +157,7 @@ public class Renderer(int screenWidth, int screenHeight)
 		Texture2d? texture = null,
 		int layer = 0)
 	{
-		var model = Matrix4.CreateScale(radius*2f) * Matrix4.CreateTranslation(position.To3());
+		var model = Matrix4.CreateScale(radius * 2f) * Matrix4.CreateTranslation(position.To3());
 
 		var cmd = new RenderCmd
 		{
@@ -165,15 +185,16 @@ public class Renderer(int screenWidth, int screenHeight)
 
 	public void Unload()
 	{
-		GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-		GL.BindVertexArray(0);
-		GL.UseProgram(0);
+		_gpuTimer.Dispose();
 
-		GL.DeleteProgram(_batchSpriteShader.Handle);
+		GL.UseProgram(0);
+		GL.DeleteProgram(_batchSpriteShader!.Handle);
 	}
 
 	public void Flush()
 	{
+		Stats.Reset();
+
 		//todo: Investigate how much allocations happens here!
 		_commands.Sort(CompareRenderCommands);
 
@@ -184,6 +205,8 @@ public class Renderer(int screenWidth, int screenHeight)
 
 		_batchSpriteShader!.Use();
 		_batchSpriteShader.SetMatrix4("viewProj", _camera!.ViewProj);
+
+		_gpuTimer.Start();
 
 		foreach (var cmd in _commands)
 		{
@@ -197,8 +220,10 @@ public class Renderer(int screenWidth, int screenHeight)
 		}
 
 		_spriteBatch.Flush();
-
 		GL.Disable(EnableCap.Blend);
+
+		Stats.GpuTimeMs = _gpuTimer.Stop();
+
 		_commands.Clear();
 	}
 

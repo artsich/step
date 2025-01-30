@@ -325,6 +325,10 @@ public class GameCompose : GameWindow, IGameWindow
 
 			ImGui.Separator();
 			ImGui.Text($"Collision shapes: {CollisionSystem.Ins.Count}");
+
+			ImGui.Separator();
+			ImGui.Text($"Draw time: {_renderer.Stats.GpuTimeMs:F5} ms");
+
 			ImGui.End();
 		}
 
