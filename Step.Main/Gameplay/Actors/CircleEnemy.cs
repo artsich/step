@@ -12,9 +12,6 @@ public class CircleEnemy(Vector2 targetDir)
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		var pos = LocalTransform.Position;
-
-		pos += targetDir * Speed * deltaTime;
-		LocalTransform.Position = pos;
+		GlobalPosition += targetDir * Speed * deltaTime;
 	}
 }

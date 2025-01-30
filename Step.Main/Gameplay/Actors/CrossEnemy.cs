@@ -7,7 +7,7 @@ public class CrossEnemy()
 {
 	private GameObject? _target;
 
-	public float Speed { get; set; } = 20f;
+	public float Speed { get; set; } = 40f;
 
 	public void Follow(GameObject target)
 	{
@@ -23,8 +23,7 @@ public class CrossEnemy()
 	{
 		if (_target != null)
 		{
-			var direction = (_target.GlobalPosition - GlobalPosition).Normalized();
-			LocalTransform.Position += direction * Speed * deltaTime;
+			GlobalPosition = GlobalPosition.MoveToward(_target.GlobalPosition, Speed * deltaTime);
 		}
 	}
 }

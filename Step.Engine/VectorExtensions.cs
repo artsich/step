@@ -43,4 +43,15 @@ public static class VectorExtensions
 	{
 		return new(vector.X, vector.Y, vector.Z, vector.W);
 	}
+
+	public static Vector2 MoveToward(this Vector2 from, Vector2 to, float dt)
+	{
+		var direction = from.DirectionTo(to);
+		return from + direction * dt;
+	}
+
+	public static Vector2 DirectionTo(this Vector2 from, Vector2 to)
+	{
+		return (to - from).Normalized();
+	}
 }

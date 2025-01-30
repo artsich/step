@@ -49,7 +49,7 @@ public class EnemyFactory(
 
 	public CircleEnemy CreateCircle(Vector2 spawnPosition)
 	{
-		var targetDir = (target.Position - spawnPosition).Normalized();
+		var targetDir = spawnPosition.DirectionTo(target.Position);
 
 		var circle = new CircleEnemy(targetDir)
 		{
