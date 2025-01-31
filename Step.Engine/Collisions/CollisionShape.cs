@@ -2,12 +2,10 @@
 
 namespace Step.Engine.Collisions;
 
-public abstract class CollisionShape(CollisionSystem collisionSystem) : GameObject
+public abstract class CollisionShape : GameObject
 {
 	[EditorProperty]
 	public bool Visible { get; set; }
-
-	public event Action<CollisionShape>? OnCollision;
 
 	[EditorProperty]
 	public bool IsStatic { get; set; }
@@ -23,7 +21,9 @@ public abstract class CollisionShape(CollisionSystem collisionSystem) : GameObje
 
 	private int _collisionsThisFrame;
 
-	public abstract bool CheckCollision(CollisionShape other);
+	public event Action<CollisionShape, CollisionInfo>? OnCollision;
+
+	public abstract CollisionInfo CheckCollision(CollisionShape other);
 
 	public bool CollidableWith(CollisionShape other)
 	{
@@ -32,12 +32,12 @@ public abstract class CollisionShape(CollisionSystem collisionSystem) : GameObje
 
 	protected override void OnStart()
 	{
-		collisionSystem.Register(this);
+		CollisionSystem.Ins.Register(this);
 	}
 
 	protected override void OnEnd()
 	{
-		collisionSystem.Unregister(this);
+		CollisionSystem.Ins.Unregister(this);
 	}
 
 	internal void ResetCollisionsCount()
@@ -45,12 +45,12 @@ public abstract class CollisionShape(CollisionSystem collisionSystem) : GameObje
 		_collisionsThisFrame = 0;
 	}
 
-	internal void RaiseCollision(CollisionShape other)
+	internal void RaiseCollision(CollisionShape other, CollisionInfo info)
 	{
 		if (_collisionsThisFrame < MaxCollisionsPerFrame)
 		{
 			_collisionsThisFrame++;
-			OnCollision?.Invoke(other);
+			OnCollision?.Invoke(other, info);
 		}
 	}
 }

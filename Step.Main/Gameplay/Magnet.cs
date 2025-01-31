@@ -60,7 +60,7 @@ public class MagnetZone : CircleCollisionShape
 		_attractedEnemies.AddRange(_activeEnemies);
 	}
 
-	private void OnCollisionWithCross(CollisionShape shape)
+	private void OnCollisionWithCross(CollisionShape shape, CollisionInfo _)
 	{
 		if (shape.Parent is CrossEnemy cross && !_attractedEnemies.Contains(cross))
 		{

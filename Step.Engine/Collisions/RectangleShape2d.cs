@@ -16,22 +16,44 @@ public class RectangleShape2d : CollisionShape
 		get
 		{
 			var modelMat = GetGlobalMatrix();
-
 			var pos = modelMat.ExtractTranslation().Xy;
 			var scale = modelMat.ExtractScale().Xy;
 			var scaledSize = Size * scale;
-
 			var scaledSizeHalf = scaledSize / 2f;
-
 			return new Box2(pos - scaledSizeHalf, pos + scaledSizeHalf);
 		}
 	}
 
 	public RectangleShape2d(Renderer renderer)
-		: base(CollisionSystem.Ins)
 	{
 		Name = nameof(RectangleShape2d);
 		_renderer = renderer;
+	}
+
+	public override CollisionInfo CheckCollision(CollisionShape other)
+	{
+		if (!IsActive)
+			return CollisionInfo.None;
+
+		if (other is RectangleShape2d otherRect)
+		{
+			return CollisionHelpers.AabbVsAabb(Aabb, otherRect.Aabb);
+		}
+		
+		if (other is CircleCollisionShape otherCircle)
+		{
+			var info = CollisionHelpers.CircleVsAabb(
+				otherCircle.GlobalPosition,
+				otherCircle.Radius,
+				Aabb);
+			
+			return info with
+			{
+				Normal = -info.Normal,
+			};
+		}
+
+		return CollisionInfo.None;
 	}
 
 	protected override void OnRender()
@@ -41,7 +63,6 @@ public class RectangleShape2d : CollisionShape
 			var mat = GetGlobalMatrix();
 			var scale = mat.ExtractScale().Xy;
 			var scaledSize = Size * scale;
-
 			var position = mat.ExtractTranslation().Xy;
 			_renderer.DrawRect(
 				position,
@@ -54,25 +75,5 @@ public class RectangleShape2d : CollisionShape
 	protected override void OnDebugDraw()
 	{
 		EditOf.Render(this);
-	}
-
-	public override bool CheckCollision(CollisionShape other)
-	{
-		if (!IsActive)
-		{
-			return false;
-		}
-
-		if (other is RectangleShape2d otherRect)
-		{
-			return Aabb.TouchWith(otherRect.Aabb);
-		}
-		else if (other is CircleCollisionShape otherCircle)
-		{
-			Vector2 p1 = otherCircle.GlobalPosition;
-			return CollisionHelpers.CircleVsAabb(p1, otherCircle.Radius, Aabb);
-		}
-
-		return false;
 	}
 }

@@ -11,6 +11,7 @@ using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
+using Step.Engine.Physics;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Actors;
 
@@ -23,9 +24,10 @@ public interface IGameWindow
 
 public enum PhysicLayers : int
 {
-	Player	= 1 << 0,
-	Enemy	= 1 << 1,
-	Magnet  = 1 << 2,
+	Player = 1 << 0,
+	Enemy = 1 << 1,
+	Magnet = 1 << 2,
+	Frame = 1 << 3,
 }
 
 public class GameCompose : GameWindow, IGameWindow
@@ -132,13 +134,15 @@ public class GameCompose : GameWindow, IGameWindow
 		var root = new Gameplay.Main(_renderer);
 		root.AddChild(camera);
 
-		var player = new Player(_input);
-		player.AddChild(new RectangleShape2d(_renderer)
-		{
-			Size = new Vector2(16f),
-			CollisionLayers = (int)PhysicLayers.Player,
-			CollisionMask = (int)PhysicLayers.Enemy
-		});
+		var player = new Player(
+			_input,
+			new RectangleShape2d(_renderer)
+			{
+				Size = new Vector2(16f),
+				CollisionLayers = (int)PhysicLayers.Player,
+				CollisionMask = (int)(PhysicLayers.Enemy | PhysicLayers.Frame)
+			});
+
 		var playerSprite = new PlayerSprite();
 		playerSprite.AddChild(new Sprite2d(_renderer, _playerTexture)
 		{
@@ -196,6 +200,9 @@ public class GameCompose : GameWindow, IGameWindow
 				}
 			]);
 
+		var frame = new Frame(_renderer);
+
+		root.AddChild(frame);
 		root.AddChild(player);
 		root.AddChild(spawner);
 
@@ -303,7 +310,7 @@ public class GameCompose : GameWindow, IGameWindow
 						ImGui.EndTabItem();
 					}
 				}
-				
+
 
 				if (ImGui.BeginTabItem("Shaders"))
 				{
@@ -351,7 +358,7 @@ public class GameCompose : GameWindow, IGameWindow
 			_input.SetMouseOffset(windowPos + headerOffset);
 
 			ImGui.Image(_finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
-			
+
 			_currentWindowSize = imgSize.FromSystem();
 			ImGui.End();
 		}

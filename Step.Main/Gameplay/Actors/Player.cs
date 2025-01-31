@@ -1,13 +1,12 @@
 ﻿using OpenTK.Mathematics;
-using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
-using Step.Main.Gameplay.Actors;
+using Step.Engine.Physics;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
-public class Player : GameObject, ITarget
+public class Player : KinematicBody2D, ITarget
 {
 	[EditorProperty]
 	public float Speed { get; set; } = 30f;
@@ -17,21 +16,24 @@ public class Player : GameObject, ITarget
 	[EditorProperty]
 	public float Hp { get; private set; } = 5f;
 
-	public event Action OnDeath;
+	public event Action? OnDeath;
 
-	public event Action OnDamage;
+	public event Action? OnDamage;
 
 	public Vector2 Position => GlobalPosition;
 
-	private PlayerAbilities _playerAbilities;
-	private RectangleShape2d _collisionShape;
+	private readonly PlayerAbilities _playerAbilities;
+
+	private CollisionShape? _collisionShape;
 	private readonly Input _input;
 
-	public Player(Input input)
-		: base(name: nameof(Player))
+	public Player(Input input, CollisionShape collisionShape)
+		: base(collisionShape)
 	{
 		_playerAbilities = new(input, this);
 		_input = input;
+
+		Name = nameof(Player);
 	}
 
 	public void Heal(float healFactor)
@@ -43,8 +45,15 @@ public class Player : GameObject, ITarget
 
 	protected override void OnStart()
 	{
-		_collisionShape = GetChildOf<RectangleShape2d>();
+		base.OnStart();
+		_collisionShape = GetChildOf<CollisionShape>();
 		_collisionShape.OnCollision += OnCollision;
+	}
+
+	protected override void OnEnd()
+	{
+		base.OnEnd();
+		_playerAbilities.Clear();
 	}
 
 	private void TakeDamage(float amount)
@@ -61,7 +70,7 @@ public class Player : GameObject, ITarget
 		}
 	}
 
-	private void OnCollision(CollisionShape shape)
+	private void OnCollision(CollisionShape shape, CollisionInfo _)
 	{
 		if (shape.Parent is GliderEntity glider)
 		{
@@ -85,20 +94,24 @@ public class Player : GameObject, ITarget
 	protected override void OnUpdate(float deltaTime)
 	{
 		_playerAbilities.Update(deltaTime);
-		Move(deltaTime);
+		Move();
+
+		base.OnUpdate(deltaTime);
 	}
 
-	private void Move(float deltaTime)
+	private void Move()
 	{
-		var pos = LocalTransform.Position;
 		var mouse = _input.MouseScreenPosition;
-		var diff = mouse - pos;
+		var diff = mouse - GlobalPosition;
 
 		if (diff.LengthSquared > 1f)
 		{
 			var dir = diff.Normalized();
-			pos += dir * Speed * deltaTime;
-			LocalTransform.Position = pos;
+			Velocity = dir * Speed;
+		}
+		else
+		{
+			Velocity = Vector2.Zero;
 		}
 	}
 

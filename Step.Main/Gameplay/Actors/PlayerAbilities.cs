@@ -193,6 +193,15 @@ public class PlayerAbilities(Input input, Player player)
 		}
 	}
 
+	public void Clear()
+	{
+		foreach (var ability in _abilities)
+		{
+			ability.Deactivate();
+		}
+		_abilities.Clear();
+	}
+
 	public void Update(float dt)
 	{
 		ProcessInput();

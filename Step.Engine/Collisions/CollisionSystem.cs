@@ -1,8 +1,10 @@
-﻿namespace Step.Engine.Collisions;
+﻿using System.Diagnostics;
+
+namespace Step.Engine.Collisions;
 
 public class CollisionSystem
 {
-	private readonly static CollisionSystem _instance = new();
+	private static readonly CollisionSystem _instance = new();
 
 	public static CollisionSystem Ins => _instance;
 
@@ -38,19 +40,19 @@ public class CollisionSystem
 		{
 			for (int j = i + 1; j < _shapes.Count; j++)
 			{
-				var a = _shapes[i];
-				var b = _shapes[j];
+				var shapeA = _shapes[i];
+				var shapeB = _shapes[j];
 
-				var aWithB = a.CollidableWith(b);
-				var bWithA = b.CollidableWith(a);
+				if (!shapeA.IsActive || !shapeB.IsActive)
+					continue;
 
-				if ((aWithB || bWithA) && a.CheckCollision(b))
+				if (!shapeA.CollidableWith(shapeB) && !shapeB.CollidableWith(shapeA))
+					continue;
+
+				CollisionInfo info = shapeA.CheckCollision(shapeB);
+				if (info.HasCollision)
 				{
-					if (aWithB)
-						a.RaiseCollision(b);
-
-					if (bWithA)
-						b.RaiseCollision(a);
+					ResolveCollision(shapeA, shapeB, info);
 				}
 			}
 		}
@@ -59,5 +61,54 @@ public class CollisionSystem
 	public void Reset()
 	{
 		_shapes.Clear();
+	}
+
+	private static void ResolveCollision(CollisionShape shapeA, CollisionShape shapeB, CollisionInfo info)
+	{
+		var aWithB = shapeA.CollidableWith(shapeB);
+		var bWithA = shapeB.CollidableWith(shapeA);
+
+		if (aWithB && bWithA)
+		{
+			ResolveCollisionOverlap(shapeA, shapeB, info);
+		}
+
+		if (aWithB)
+		{
+			shapeA.RaiseCollision(shapeB, info);
+		}
+
+		if (bWithA)
+		{
+			shapeB.RaiseCollision(
+				shapeA,
+				info with
+				{ 
+					Normal = -info.Normal 
+				});
+		}
+	}
+
+	private static void ResolveCollisionOverlap(CollisionShape shapeA, CollisionShape shapeB, CollisionInfo info)
+	{
+		Debug.Assert(shapeA.Parent != null, "Shape A must have a parent.");
+		Debug.Assert(shapeB.Parent != null, "Shape B must have a parent.");
+
+		var a = shapeA.Parent!;
+		var b = shapeB.Parent!;
+
+		if (!shapeA.IsStatic && !shapeB.IsStatic)
+		{
+			a.GlobalPosition += info.Normal * info.Penetration * 0.5f;
+			b.GlobalPosition -= info.Normal * info.Penetration * 0.5f;
+		}
+		else if (!shapeA.IsStatic)
+		{
+			a.GlobalPosition += info.Normal * info.Penetration;
+		}
+		else if (!shapeB.IsStatic)
+		{
+			b.GlobalPosition -= info.Normal * info.Penetration;
+		}
 	}
 }

@@ -6,25 +6,48 @@ namespace Step.Engine.Collisions;
 
 public class CircleCollisionShape : CollisionShape
 {
-	private readonly Renderer renderer;
+	private readonly Renderer _renderer;
 
 	[EditorProperty(from: 0f, speed: 0.1f)]
 	public float Radius { get; set; } = 1.0f;
 
 	public CircleCollisionShape(Renderer renderer)
-		: base(CollisionSystem.Ins)
 	{
 		Name = nameof(CircleCollisionShape);
-		this.renderer = renderer;
+		_renderer = renderer;
+	}
+
+	public override CollisionInfo CheckCollision(CollisionShape other)
+	{
+		if (!IsActive)
+			return CollisionInfo.None;
+
+		if (other is CircleCollisionShape otherCircle)
+		{
+			return CollisionHelpers.CircleVsCircle(
+				GlobalPosition, 
+				Radius,
+				otherCircle.GlobalPosition, 
+				otherCircle.Radius);
+		}
+		
+		if (other is RectangleShape2d otherRectangle)
+		{
+			return CollisionHelpers.CircleVsAabb(
+				GlobalPosition,
+				Radius,
+				otherRectangle.Aabb);
+		}
+
+		return CollisionInfo.None;
 	}
 
 	protected override void OnRender()
 	{
 		if (Visible && IsActive)
 		{
-			var position = GlobalPosition;
-			renderer.DrawCircle(
-				position,
+			_renderer.DrawCircle(
+				GlobalPosition,
 				Radius,
 				new Color4<Rgba>(0f, 0.6f, 0.7f, 0.42f),
 				layer: -1);
@@ -35,28 +58,5 @@ public class CircleCollisionShape : CollisionShape
 	{
 		base.OnDebugDraw();
 		EditOf.Render(this);
-	}
-
-	public override bool CheckCollision(CollisionShape other)
-	{
-		if (!IsActive)
-		{
-			return false;
-		}
-
-		if (other is CircleCollisionShape otherCircle)
-		{
-			Vector2 p1 = GlobalPosition;
-			Vector2 p2 = otherCircle.GlobalPosition;
-
-			return CollisionHelpers.CircleVsCircle(p1, Radius, p2, otherCircle.Radius);
-		}
-		else if (other is RectangleShape2d otherRectangle)
-		{
-			Vector2 p1 = GlobalPosition;
-			return CollisionHelpers.CircleVsAabb(p1, Radius, otherRectangle.Aabb);
-		}
-
-		return false;
 	}
 }
