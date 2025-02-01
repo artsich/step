@@ -11,7 +11,6 @@ using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
-using Step.Engine.Physics;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Actors;
 
@@ -28,6 +27,7 @@ public enum PhysicLayers : int
 	Enemy = 1 << 1,
 	Magnet = 1 << 2,
 	Frame = 1 << 3,
+	Shield = 1 << 4,
 }
 
 public class GameCompose : GameWindow, IGameWindow
@@ -129,7 +129,7 @@ public class GameCompose : GameWindow, IGameWindow
 		var height = GameCameraHeight;
 		var camera = new Camera2d(width, height, this);
 
-		_input = new Input(MouseState, camera);
+		_input = new Input(MouseState, KeyboardState, camera, this);
 
 		var root = new Gameplay.Main(_renderer);
 		root.AddChild(camera);
@@ -169,6 +169,7 @@ public class GameCompose : GameWindow, IGameWindow
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 		player.AddAbility(new MagnetAbility(50f, player, _renderer));
+		player.AddAbility(new ShieldAbility(player, new PlayerShield(_input, _renderer)) { Duration = 3f });
 
 		var enemyFactory = new EnemyFactory(
 			_renderer,

@@ -101,7 +101,7 @@ public class Player : KinematicBody2D, ITarget
 
 	private void Move()
 	{
-		var mouse = _input.MouseScreenPosition;
+		var mouse = _input.MouseWorldPosition;
 		var diff = mouse - GlobalPosition;
 
 		if (diff.LengthSquared > 1f)

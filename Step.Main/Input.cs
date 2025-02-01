@@ -6,17 +6,29 @@ namespace Step.Main;
 
 public sealed class Input(
 	MouseState mouseState,
-	Camera2d camera)
+	KeyboardState keyboardState,
+	Camera2d camera,
+	IGameWindow window)
 {
 	private Vector2 _mouseOffset;
 
-	public Vector2 MouseScreenPosition { get; private set; }
+	public Vector2 MouseWorldPosition { get; private set; }
+
+	public Vector2 MouseScreenPosition01 { get; private set; }
 
 	public MouseState MouseState => mouseState;
 
+	public KeyboardState KeyboardState => keyboardState;
+
 	internal void Update(float _)
 	{
-		MouseScreenPosition = camera.ScreenToWorld(mouseState.Position - _mouseOffset);
+		var mousePosition = mouseState.Position - _mouseOffset;
+		MouseWorldPosition = camera.ScreenToWorld(mousePosition);
+
+		MouseScreenPosition01 = new(
+			mousePosition.X / window.Size.X,
+			1f - mousePosition.Y / window.Size.Y
+		);
 	}
 
 	internal void SetMouseOffset(Vector2 offset) => _mouseOffset = offset;

@@ -161,6 +161,31 @@ public class SizeChangerAbility(Player player) : ActiveAbility
 	}
 }
 
+public class ShieldAbility : ActiveAbility
+{
+	private readonly Player _player;
+
+	public ShieldAbility(Player player, PlayerShield shield)
+	{
+		_player = player;
+		_player.AddChild(shield);
+	}
+
+	protected override void OnActivated()
+	{
+		_player
+			.GetChildOf<PlayerShield>()
+			.Enable();
+	}
+
+	protected override void OnDeactivated()
+	{
+		_player
+			.GetChildOf<PlayerShield>()
+			.Disable();
+	}
+}
+
 public class TimeFreezeAbility : ActiveAbility
 {
 	private readonly float _freezeScale = 0.5f;
@@ -214,6 +239,7 @@ public class PlayerAbilities(Input input, Player player)
 
 	private void ProcessInput()
 	{
+		TryAbility<ShieldAbility>(Keys.Space);
 		TryAbility<SizeChangerAbility>(MouseButton.Left);
 		TryAbility<TimeFreezeAbility>(MouseButton.Right);
 	}
@@ -243,6 +269,24 @@ public class PlayerAbilities(Input input, Player player)
 			ability.Activate();
 		}
 		else if (input.MouseState.IsButtonReleased(btn))
+		{
+			ability.Deactivate();
+		}
+	}
+
+	private void TryAbility<T>(Keys key) where T : IAbility
+	{
+		var ability = FindActiveAbility<T>();
+		if (ability is null)
+		{
+			return;
+		}
+
+		if (input.KeyboardState.IsKeyPressed(key))
+		{
+			ability.Activate();
+		}
+		else if (input.KeyboardState.IsKeyReleased(key))
 		{
 			ability.Deactivate();
 		}
