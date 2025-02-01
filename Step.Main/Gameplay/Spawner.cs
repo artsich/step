@@ -15,6 +15,9 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 	[EditorProperty]
 	public float SpawnRateIncreaseFactor { get; set; } = 0.5f;
 
+	[EditorProperty]
+	public bool On { get; set; } = true;
+
 	private float _timeSinceLastSpawn;
 	private float _timeSinceLastIncrease;
 	private float _timeSinceStart;
@@ -26,8 +29,19 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 		_currentSpawnRate = InitialEntitiesPerSecond;
 	}
 
+	protected override void OnDebugDraw()
+	{
+		base.OnDebugDraw();
+		EditOf.Render(this);
+	}
+
 	protected override void OnUpdate(float deltaTime)
 	{
+		if (!On)
+		{
+			return;
+		}
+
 		_timeSinceStart += deltaTime;
 		_timeSinceLastSpawn += deltaTime;
 		_timeSinceLastIncrease += deltaTime;
