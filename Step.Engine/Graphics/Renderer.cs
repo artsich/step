@@ -19,6 +19,7 @@ public record struct RenderCmd
 
 	public RenderTarget2d? Target;
 	public Texture2d? Atlas;
+	public Shader? Shader;
 
 	public Color4<Rgba> Color;
 	public Rect? AtlasRect;
@@ -50,7 +51,7 @@ public struct RenderStats
 public class Renderer(int screenWidth, int screenHeight)
 {
 	private Shader? _batchSpriteShader;
-	private Shader _screenQuadShader;
+	private Shader? _screenQuadShader;
 	private ICamera2d? _camera;
 	public Texture2d DefaultWhiteTexture { get; private set; }
 
@@ -86,14 +87,9 @@ public class Renderer(int screenWidth, int screenHeight)
 			"Assets/Shaders/SpriteBatch/shader.vert",
 			"Assets/Shaders/SpriteBatch/shader.frag");
 
-		Span<int> ids = stackalloc int[32];
-		for (int i = 0; i < 32; i++)
-		{
-			ids[i] = i;
-		}
-		_batchSpriteShader.Set("diffuseTextures[0]", ids);
-
-		_screenQuadShader = new Shader("Assets/Shaders/ScreenQuad/shader.vert", "Assets/Shaders/ScreenQuad/shader.frag");
+		_screenQuadShader = new Shader(
+			"Assets/Shaders/ScreenQuad/shader.vert",
+			"Assets/Shaders/ScreenQuad/shader.frag");
 
 		DefaultWhiteTexture = new Texture2d(".\\Assets\\Textures\\white.png").Load();
 		DefaultWhiteTexture.Bind(0);
@@ -203,13 +199,21 @@ public class Renderer(int screenWidth, int screenHeight)
 			BlendingFactor.SrcAlpha,
 			BlendingFactor.OneMinusSrcAlpha);
 
-		_batchSpriteShader!.Use();
-		_batchSpriteShader.SetMatrix4("viewProj", _camera!.ViewProj);
-
 		_gpuTimer.Start();
+
+		Shader currentShader = _batchSpriteShader!;
+		SetDefaultShaderVariables(currentShader);
 
 		foreach (var cmd in _commands)
 		{
+			if (cmd.Shader != currentShader)
+			{
+				_spriteBatch.Flush();
+				currentShader = cmd.Shader!;
+				currentShader.Use();
+				SetDefaultShaderVariables(currentShader);
+			}
+
 			_spriteBatch.AddSprite(
 				cmd.ModelMatrix,
 				cmd.Atlas!,
@@ -234,8 +238,21 @@ public class Renderer(int screenWidth, int screenHeight)
 					   : null;
 
 		cmd.Atlas ??= DefaultWhiteTexture;
+		cmd.Shader ??= _batchSpriteShader;
 
 		_commands.Add(cmd);
+	}
+
+	private void SetDefaultShaderVariables(Shader shader)
+	{
+		shader.SetMatrix4("viewProj", _camera!.ViewProj);
+
+		Span<int> ids = stackalloc int[32];
+		for (int i = 0; i < 32; i++)
+		{
+			ids[i] = i;
+		}
+		shader.Set("diffuseTextures[0]", ids);
 	}
 
 	private static int CompareTarget(RenderTarget2d? t1, RenderTarget2d? t2)
@@ -256,6 +273,10 @@ public class Renderer(int screenWidth, int screenHeight)
 		int layerCompare = b.Layer.CompareTo(a.Layer);
 		if (layerCompare != 0)
 			return layerCompare;
+
+		int shaderCompare = b.Shader!.Handle.CompareTo(a.Shader!.Handle);
+		if (shaderCompare != 0)
+			return shaderCompare;
 
 		int gTypeCompare = b.Type.CompareTo(a.Type);
 		if (gTypeCompare != 0)
