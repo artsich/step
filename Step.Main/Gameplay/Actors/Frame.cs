@@ -16,64 +16,36 @@ public class Frame : GameObject
 	{
 		float totalWidth = Thickness * 2f + InnerWidth;
 
-		AddChild(
-			new StaticBody2d(
-				new RectangleShape2d(renderer)
-				{
-					Size = new Vector2(Thickness, totalWidth),
-					CollisionLayers = (int)PhysicLayers.Frame,
-					CollisionMask = (int)PhysicLayers.Player,
-					Visible = true,
-					IsStatic = true,
-				})
-			{
-				Name = "Left",
-				LocalPosition = new Vector2(-InnerWidth / 2 - Thickness / 2, 0)
-			});
+		AddWall(renderer, "Left", new Vector2(-InnerWidth / 2 - Thickness / 2, 0), new Vector2(Thickness, totalWidth));
+		AddWall(renderer, "Top", new Vector2(0, -InnerWidth / 2 - Thickness / 2), new Vector2(totalWidth, Thickness));
+		AddWall(renderer, "Right", new Vector2(InnerWidth / 2 + Thickness / 2, 0), new Vector2(Thickness, totalWidth));
+		AddWall(renderer, "Bottom", new Vector2(0, InnerWidth / 2 + Thickness / 2), new Vector2(totalWidth, Thickness));
+	}
 
-		AddChild(
-			new StaticBody2d(
-				new RectangleShape2d(renderer)
-				{
-					Size = new Vector2(totalWidth, Thickness),
-					CollisionLayers = (int)PhysicLayers.Frame,
-					CollisionMask = (int)PhysicLayers.Player,
-					Visible = true,
-					IsStatic = true,
-				})
+	private void AddWall(Renderer renderer, string name, Vector2 position, Vector2 size)
+	{
+		var wall = new StaticBody2d(
+			new RectangleShape2d(renderer)
 			{
-				Name = "Top",
-				LocalPosition = new Vector2(0, -InnerWidth / 2 - Thickness / 2)
-			});
+				Size = size,
+				CollisionLayers = (int)PhysicLayers.Frame,
+				CollisionMask = (int)PhysicLayers.Player,
+				IsStatic = true,
+			})
+		{
+			Name = name,
+			LocalPosition = position
+		};
 
-		AddChild(
-			new StaticBody2d(
-				new RectangleShape2d(renderer)
-				{
-					Size = new Vector2(Thickness, totalWidth),
-					CollisionLayers = (int)PhysicLayers.Frame,
-					CollisionMask = (int)PhysicLayers.Player,
-					Visible = true,
-					IsStatic = true,
-				})
+		wall.AddChild(new Sprite2d(renderer, renderer.DefaultWhiteTexture)
+		{
+			Layer = 2,
+			LocalTransform = new()
 			{
-				Name = "Right",
-				LocalPosition = new Vector2(InnerWidth / 2 + Thickness / 2, 0)
-			});
+				Scale = size
+			}
+		});
 
-		AddChild(
-			new StaticBody2d(
-				new RectangleShape2d(renderer)
-				{
-					Size = new Vector2(totalWidth, Thickness),
-					CollisionLayers = (int)PhysicLayers.Frame,
-					CollisionMask = (int)PhysicLayers.Player,
-					Visible = true,
-					IsStatic = true,
-				})
-			{
-				Name = "Bottom",
-				LocalPosition = new Vector2(0, InnerWidth / 2 + Thickness / 2)
-			});
+		AddChild(wall);
 	}
 }

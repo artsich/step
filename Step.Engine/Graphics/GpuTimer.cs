@@ -1,7 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 
 namespace Step.Engine.Graphics;
-using System;
 
 public class GpuTimer : IDisposable
 {
