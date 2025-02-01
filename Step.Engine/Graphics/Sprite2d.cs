@@ -25,6 +25,12 @@ public class Sprite2d : CanvasItem
 
 	protected override void OnRender()
 	{
+		// todo: Children should not be rendered too.
+		if (!Visible)
+		{
+			return;
+		}
+
 		_renderer.SubmitCommand(new()
 		{
 			Type = GType,
@@ -34,6 +40,7 @@ public class Sprite2d : CanvasItem
 			Layer = Layer,
 			ModelMatrix = GetGlobalMatrix(),
 			Pivot = Pivot,
+			Shader = Shader,
 		});
 	}
 

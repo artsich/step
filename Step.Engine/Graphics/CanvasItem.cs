@@ -9,4 +9,8 @@ public abstract class CanvasItem(string name = nameof(CanvasItem)) : GameObject(
 	public virtual int Layer { get; set; }
 
 	public Color4<Rgba> Color { get; set; } = Color4.White;
+
+	public Shader? Shader { get; set; }
+
+	public bool Visible { get; set; } = true;
 }

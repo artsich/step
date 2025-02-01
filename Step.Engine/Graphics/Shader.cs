@@ -99,7 +99,7 @@ public class Shader
 		}
 		else
 		{
-			Log.Logger.Error($"Uniform {name} not found...");
+			//Log.Logger.Error($"Uniform {name} not found...");
 			return -1;
 		}
 #else
