@@ -26,7 +26,7 @@ public class MagnetZone : CircleCollisionShape
 
 	protected override void OnEnd()
 	{
-		base.OnStart();
+		base.OnEnd();
 
 		foreach(var cross in _attractedEnemies)
 		{
