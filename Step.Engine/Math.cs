@@ -4,6 +4,12 @@ namespace Step.Engine;
 
 public static class StepMath
 {
+	public static float LerpAngle(float from, float to, float t)
+	{
+		float diff = MathF.IEEERemainder(to - from, MathF.PI * 2);
+		return from + diff * t;
+	}
+
 	public static Vector2 AdjustToAspect(float targetAspect, Vector2 size)
 	{
 		float aspect = size.X / size.Y;

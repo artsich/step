@@ -11,7 +11,10 @@ public class PlayerShield : GameObject
 {
 	private readonly Input _input;
 	private readonly CircleCollisionShape _collisionShape;
-	private Sprite2d _sprite;
+	private readonly Sprite2d _sprite;
+
+	private bool _isActivated;
+	private float _arcAngle;
 
 	[EditorProperty]
 	public float Radius
@@ -35,12 +38,12 @@ public class PlayerShield : GameObject
 			Visible = false
 		};
 		AddChild(_collisionShape);
-		Radius = 30f;
+		Radius = 20f;
 
 		_sprite = new Sprite2d(renderer, renderer.DefaultWhiteTexture)
 		{
 			Visible = false,
-			Color = new (1f, 0.7f, 0.93f, 1f),
+			Color = new(1f, 0.7f, 0.93f, 1f),
 			Shader = new Shader(
 				"Assets/Shaders/Shield/shader.vert",
 				"Assets/Shaders/Shield/shader.frag"),
@@ -64,24 +67,34 @@ public class PlayerShield : GameObject
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		if (_sprite.Visible)
+		var speed = 10f;
+		var currentArc = GetCurrentArc();
+		_arcAngle = StepMath.LerpAngle(_arcAngle, currentArc, speed * deltaTime);
+
+		if (_isActivated)
 		{
-			Vector2 arcDir = (_input.MouseWorldPosition - GlobalPosition).Normalized();
-			float arcAngle = MathF.Atan2(arcDir.Y, arcDir.X);
-			_sprite.Shader!.SetFloat("arcAngle", arcAngle);
+			_sprite.Shader!.SetFloat("arcAngle", _arcAngle);
 		}
 	}
 
 	public void Enable()
 	{
+		_isActivated = true;
 		_collisionShape.IsActive = true;
 		_sprite.Visible = true;
 	}
 
 	public void Disable()
 	{
+		_isActivated = false;
 		_collisionShape.IsActive = false;
 		_sprite.Visible = false;
+	}
+
+	private float GetCurrentArc()
+	{
+		Vector2 arcDir = (_input.MouseWorldPosition - GlobalPosition).Normalized();
+		return MathF.Atan2(arcDir.Y, arcDir.X);
 	}
 
 	private void OnCollisionWithEnemy(CollisionShape shape, CollisionInfo info)
@@ -93,7 +106,7 @@ public class PlayerShield : GameObject
 			Vector2 arcDir = GlobalPosition - _input.MouseWorldPosition;
 			float arcAngle = MathF.Atan2(arcDir.Y, arcDir.X);
 
-        	if (MathF.Abs(collisionAngle - arcAngle) <= MathF.PI / 4f)
+			if (MathF.Abs(collisionAngle - arcAngle) <= MathF.PI / 4f)
 			{
 				shape.Parent.QueueFree();
 			}
