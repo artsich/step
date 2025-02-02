@@ -39,7 +39,7 @@ public class Frame : GameObject
 
 		wall.AddChild(new Sprite2d(renderer, renderer.DefaultWhiteTexture)
 		{
-			Layer = 2,
+			Layer = 0,
 			LocalTransform = new()
 			{
 				Scale = size

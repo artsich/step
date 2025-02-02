@@ -68,7 +68,7 @@ public class RectangleShape2d : CollisionShape
 				position,
 				scaledSize,
 				new Color4<Rgba>(0f, 0.6f, 0.7f, 0.42f),
-				layer: -1);
+				layer: 1000);
 		}
 	}
 
