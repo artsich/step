@@ -1,8 +1,8 @@
-﻿using Step.Engine;
+﻿using OpenTK.Mathematics;
+using Step.Engine;
 using Step.Engine.Collisions;
 using Step.Engine.Graphics;
 using Step.Engine.Physics;
-using OpenTK.Mathematics;
 
 namespace Step.Main.Gameplay.Actors;
 

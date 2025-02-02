@@ -4,7 +4,7 @@ using Step.Engine.Editor;
 
 namespace Step.Main.Gameplay;
 
-public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof(Spawner))
+public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof(Spawner))
 {
 	[EditorProperty]
 	public float InitialEntitiesPerSecond { get; set; } = 1f;
@@ -87,13 +87,13 @@ public class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof
 		if (availableRules.Count == 0)
 			return;
 
-		float totalProbability = availableRules.Sum(rule => rule.SpawnProbability);
+		float totalProbability = availableRules.Sum(rule => rule.SpawnWeight);
 		float randomValue = (float)_random.NextDouble() * totalProbability;
 
 		float accumulatedProbability = 0f;
 		foreach (var rule in availableRules)
 		{
-			accumulatedProbability += rule.SpawnProbability;
+			accumulatedProbability += rule.SpawnWeight;
 			if (randomValue <= accumulatedProbability)
 			{
 				var spawnPos = GenerateSpawnPosition(rule);

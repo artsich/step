@@ -2,7 +2,7 @@
 
 namespace Step.Engine.Graphics;
 
-public class AnimatedSprite2d(
+public sealed class AnimatedSprite2d(
 	Renderer renderer,
 	SpriteFrames[] animations) : CanvasItem
 {

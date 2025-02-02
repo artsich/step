@@ -105,7 +105,7 @@ public class RegenerationAbility(Player player) : PassiveAbility
 
 public class SpeedIncreaseAbility(Player player) : PassiveAbility
 {
-	private readonly float speedMultiplier = 2f;
+	private readonly float speedMultiplier = 1.1f;
 
 	public override void Activate()
 	{

@@ -17,7 +17,7 @@ public class GliderEntity(ITarget target)
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		var pos = LocalTransform.Position;
+		var pos = GlobalPosition;
 
 		if (_isFollowing)
 		{
@@ -39,14 +39,14 @@ public class GliderEntity(ITarget target)
 		{
 
 			pos += _constantDir * Speed * deltaTime;
-			LocalTransform.Position = pos;
+			GlobalPosition = pos;
 		}
 	}
 
 	private void Follow(float deltaTime, Vector2 pos, Vector2 dir)
 	{
 		pos += dir * Speed * deltaTime;
-		LocalTransform.Position = pos;
+		GlobalPosition = pos;
 
 		var targetAngle = MathF.Atan2(dir.Y, dir.X) - MathF.PI / 2;
 		LocalTransform.Rotation = targetAngle;

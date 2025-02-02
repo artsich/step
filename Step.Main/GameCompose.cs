@@ -183,19 +183,19 @@ public class GameCompose : GameWindow, IGameWindow
 				new SpawnRule
 				{
 					StartTime = 0f,
-					SpawnProbability = 1f,
+					SpawnWeight = 1f,
 					CreateEntity = enemyFactory.CreateCircle
 				},
 				new SpawnRule
 				{
 					StartTime = 60f,
-					SpawnProbability = 0.05f,
+					SpawnWeight = 0.05f,
 					CreateEntity = enemyFactory.CreateGlider
 				},
 				new SpawnRule
 				{
 					StartTime = 30f,
-					SpawnProbability = 0.1f,
+					SpawnWeight = 0.1f,
 					CreateEntity = enemyFactory.CreateCross,
 					SpawnLocation = SpawnLocationType.Interior,
 				}

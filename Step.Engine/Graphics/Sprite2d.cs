@@ -3,7 +3,7 @@ using Step.Engine.Editor;
 
 namespace Step.Engine.Graphics;
 
-public class Sprite2d : CanvasItem
+public sealed class Sprite2d : CanvasItem
 {
 	private readonly Renderer _renderer;
 	private readonly Texture2d _atlas;

@@ -5,7 +5,7 @@ using Step.Engine.Graphics;
 
 namespace Step.Main.Gameplay;
 
-public class Camera2d : GameObject, ICamera2d
+public sealed class Camera2d : GameObject, ICamera2d
 {
 	private static readonly Random Random = new(244554);
 	private readonly IGameWindow _window;

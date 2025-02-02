@@ -4,7 +4,7 @@ using Step.Engine.Graphics;
 
 namespace Step.Engine.Collisions;
 
-public class RectangleShape2d : CollisionShape
+public sealed class RectangleShape2d : CollisionShape
 {
 	private readonly Renderer _renderer;
 
@@ -58,7 +58,7 @@ public class RectangleShape2d : CollisionShape
 
 	protected override void OnRender()
 	{
-		if (Visible)
+		if (Visible && IsActive)
 		{
 			var mat = GetGlobalMatrix();
 			var scale = mat.ExtractScale().Xy;

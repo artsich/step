@@ -9,8 +9,8 @@ public class KinematicBody2D : GameObject
 	[EditorProperty]
 	public Vector2 Velocity { get; set; }
 
-	public KinematicBody2D(CollisionShape collisionShape)
-		: base(nameof(KinematicBody2D))
+	public KinematicBody2D(CollisionShape collisionShape, string name = nameof(KinematicBody2D))
+		: base(name)
 	{
 		AddChild(collisionShape);
 	}

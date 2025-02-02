@@ -4,7 +4,7 @@ using Step.Engine.Graphics;
 
 namespace Step.Engine.Collisions;
 
-public class CircleCollisionShape : CollisionShape
+public sealed class CircleCollisionShape : CollisionShape
 {
 	private readonly Renderer _renderer;
 

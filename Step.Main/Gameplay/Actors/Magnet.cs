@@ -1,40 +1,47 @@
-﻿using Step.Engine.Collisions;
+﻿using Step.Engine;
+using Step.Engine.Collisions;
 using Step.Engine.Graphics;
-using Step.Main.Gameplay.Actors;
 
-namespace Step.Main.Gameplay;
+namespace Step.Main.Gameplay.Actors;
 
-public class MagnetZone : CircleCollisionShape
+public sealed class MagnetZone : GameObject
 {
 	private readonly List<CrossEnemy> _attractedEnemies = [];
 	private readonly List<CrossEnemy> _activeEnemies = [];
+	private readonly CircleCollisionShape _circleCollisionShape;
 
-	public MagnetZone(Renderer renderer) : base(renderer)
+	public float Radius
 	{
-		Name = nameof(MagnetZone);
+		get => _circleCollisionShape.Radius;
+		set => _circleCollisionShape.Radius = value;
+	}
 
-		CollisionLayers = (int)PhysicLayers.Magnet;
-		CollisionMask = (int)PhysicLayers.Enemy;
-		IsStatic = true;
+	public MagnetZone(Renderer renderer)
+		: base(nameof(MagnetZone))
+	{
+		_circleCollisionShape = new CircleCollisionShape(renderer)
+		{
+			CollisionLayers = (int)PhysicLayers.Magnet,
+			CollisionMask = (int)PhysicLayers.Enemy,
+			IsStatic = true
+		};
+		AddChild(_circleCollisionShape);
 	}
 
 	protected override void OnStart()
 	{
-		base.OnStart();
-		OnCollision += OnCollisionWithCross;
+		_circleCollisionShape.OnCollision += OnCollisionWithCross;
 	}
 
 	protected override void OnEnd()
 	{
-		base.OnEnd();
-
-		foreach(var cross in _attractedEnemies)
+		foreach (var cross in _attractedEnemies)
 		{
 			cross.Unfollow();
 		}
 		_attractedEnemies.Clear();
 
-		OnCollision -= OnCollisionWithCross;
+		_circleCollisionShape.OnCollision -= OnCollisionWithCross;
 	}
 
 	protected override void OnUpdate(float deltaTime)
@@ -47,7 +54,7 @@ public class MagnetZone : CircleCollisionShape
 				continue;
 
 			var distance = (cross.GlobalPosition - GlobalPosition).Length;
-			if (distance > Radius)
+			if (distance > _circleCollisionShape.Radius)
 			{
 				cross.Unfollow();
 				continue;

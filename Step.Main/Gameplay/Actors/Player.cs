@@ -11,10 +11,10 @@ public class Player : KinematicBody2D, ITarget
 	[EditorProperty]
 	public float Speed { get; set; } = 30f;
 
-	public float MaxHp { get; private set; } = 5f;
+	public float MaxHp { get; private set; } = 10f;
 
 	[EditorProperty]
-	public float Hp { get; private set; } = 5f;
+	public float Hp { get; private set; }
 
 	public event Action? OnDeath;
 
@@ -28,12 +28,11 @@ public class Player : KinematicBody2D, ITarget
 	private readonly Input _input;
 
 	public Player(Input input, CollisionShape collisionShape)
-		: base(collisionShape)
+		: base(collisionShape, nameof(Player))
 	{
 		_playerAbilities = new(input, this);
 		_input = input;
-
-		Name = nameof(Player);
+		Hp = MaxHp;
 	}
 
 	public void Heal(float healFactor)

@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine.Graphics;
+﻿using Step.Engine.Graphics;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Main.Gameplay.Actors;
