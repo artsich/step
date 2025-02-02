@@ -92,19 +92,14 @@ public class Shader
 
 	private int GetUniformLocation(string name)
 	{
-#if DEBUG
 		if (_uniformLocations.TryGetValue(name, out var index))
 		{
 			return index;
 		}
 		else
 		{
-			//Log.Logger.Error($"Uniform {name} not found...");
 			return -1;
 		}
-#else
-		return _uniformLocations[name];
-#endif
 	}
 
 	public void SetFloat(string name, float data)

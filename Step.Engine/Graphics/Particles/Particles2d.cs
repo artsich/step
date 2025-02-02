@@ -2,7 +2,7 @@
 
 namespace Step.Engine.Graphics.Particles;
 
-public class Particles2d : GameObject
+public class Particles2d : CanvasItem
 {
 	struct Particle
 	{
@@ -86,6 +86,11 @@ public class Particles2d : GameObject
 
 	protected override void OnRender()
 	{
+		if (!Visible)
+		{
+			return;
+		}
+
 		Matrix4 globalMatrix = GetGlobalMatrix();
 
 		var colorMin = Emitter.Material?.ColorMin ?? Vector4.One;
@@ -103,8 +108,9 @@ public class Particles2d : GameObject
 			_renderer.DrawRect(
 				finalPos.Xy,
 				Emitter.Size,
-				(Color4<Rgba>)color,
-				Emitter.Material?.Texture);
+				(Color4<Rgba>) (color * (Vector4)Color),
+				Emitter.Material?.Texture,
+				layer: Layer);
 		}
 	}
 
