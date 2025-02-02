@@ -203,6 +203,7 @@ public class Renderer(int screenWidth, int screenHeight)
 
 		Shader currentShader = _batchSpriteShader!;
 		SetDefaultShaderVariables(currentShader);
+		Stats.ActiveShaders++;
 
 		foreach (var cmd in _commands)
 		{
@@ -212,6 +213,7 @@ public class Renderer(int screenWidth, int screenHeight)
 				currentShader = cmd.Shader!;
 				currentShader.Use();
 				SetDefaultShaderVariables(currentShader);
+				Stats.ActiveShaders++;
 			}
 
 			_spriteBatch.AddSprite(
