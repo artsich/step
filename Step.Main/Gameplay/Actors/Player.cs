@@ -20,6 +20,8 @@ public class Player : KinematicBody2D, ITarget
 
 	public event Action? OnDamage;
 
+	public event Action? OnCrossCoinCollected;
+
 	public Vector2 Position => GlobalPosition;
 
 	private readonly PlayerAbilities _playerAbilities;
@@ -87,6 +89,7 @@ public class Player : KinematicBody2D, ITarget
 		{
 			AudioManager.Ins.PlaySound("player_pickup");
 			cross.QueueFree();
+			OnCrossCoinCollected?.Invoke();
 		}
 	}
 

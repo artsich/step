@@ -18,6 +18,8 @@ public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject
 	[EditorProperty]
 	public bool On { get; set; } = true;
 
+	public event Action<GameObject>? OnSpawn;
+
 	private float _timeSinceLastSpawn;
 	private float _timeSinceLastIncrease;
 	private float _timeSinceStart;
@@ -99,6 +101,7 @@ public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject
 				var spawnPos = GenerateSpawnPosition(rule);
 
 				var enemy = rule.CreateEntity(spawnPos);
+				OnSpawn?.Invoke(enemy);
 
 				CallDeferred(() => AddChild(enemy));
 				CallDeferred(enemy.Start);
