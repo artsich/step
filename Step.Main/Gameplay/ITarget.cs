@@ -1,8 +1,6 @@
-﻿using OpenTK.Mathematics;
-
-namespace Step.Main.Gameplay;
+﻿namespace Step.Main.Gameplay;
 
 public interface ITarget
 {
-	Vector2 Position { get; }
+	Vector2f Position { get; }
 }

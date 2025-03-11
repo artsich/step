@@ -1,5 +1,5 @@
 ﻿using ImGuiNET;
-using OpenTK.Mathematics;
+using Silk.NET.Maths;
 
 namespace Step.Engine.Editor;
 
@@ -17,7 +17,7 @@ public static class EditOf
 	{
 		if (target == null)
 		{
-			ImGui.TextColored(Vector4.UnitX.ToSystem(), $"{label ?? typeof(T).Name} is null");
+			ImGui.TextColored(Vector4f.UnitX.ToSystem(), $"{label ?? typeof(T).Name} is null");
 			return;
 		}
 
@@ -111,7 +111,7 @@ public static class EditOf
 					Name = property.Name,
 					RenderAction = target =>
 					{
-						var value = (Vector2)property.GetValue(target);
+						var value = (Vector2f)property.GetValue(target);
 						var systemVector = value.ToSystem();
 						if (ImGui.DragFloat2(property.Name, ref systemVector, attribute.Speed, attribute.From, attribute.To))
 						{
@@ -120,14 +120,14 @@ public static class EditOf
 					}
 				});
 			}
-			else if (propertyType == typeof(Vector4) && attribute != null)
+			else if (propertyType == typeof(Vector4f) && attribute != null)
 			{
 				handlers.Add(new PropertyHandler
 				{
 					Name = property.Name,
 					RenderAction = target =>
 					{
-						var value = (Vector4)property.GetValue(target);
+						var value = (Vector4f)property.GetValue(target);
 						var systemVector = value.ToSystem();
 						if (attribute.IsColor)
 						{
@@ -171,5 +171,4 @@ public static class EditOf
 
 		return handlers;
 	}
-
 }

@@ -60,8 +60,6 @@ public class Main(Renderer renderer) : GameObject("Root")
 	{
 		_gameInfo = GameInfo.FromFile(PathToSaveFile);
 
-		renderer.SetBackground(Colors.Background);
-
 		_camera = GetChildOf<Camera2d>();
 		_player = GetChildOf<Player>();
 		_spawner = GetChildOf<Spawner>();

@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Collisions;
 using Step.Engine.Graphics;
 
@@ -17,7 +16,7 @@ public class EnemyFactory(
 
 	private int NewId => _enemyId++;
 
-	public GliderEntity CreateGlider(Vector2 position)
+	public GliderEntity CreateGlider(Vector2f position)
 	{
 		var glider = new GliderEntity(target)
 		{
@@ -25,14 +24,14 @@ public class EnemyFactory(
 			LocalTransform = new Transform()
 			{
 				Position = position,
-				Scale = new Vector2(0.3f),
+				Scale = new Vector2f(0.3f),
 			}
 		};
 
 		glider.AddChild(
 			new RectangleShape2d(renderer)
 			{
-				Size = new Vector2(16f, 16f),
+				Size = new Vector2f(16f, 16f),
 				CollisionLayers = (int)PhysicLayers.Enemy
 			}
 		);
@@ -40,14 +39,14 @@ public class EnemyFactory(
 		glider.AddChild(
 			new Sprite2d(renderer, gliderTexture)
 			{
-				Color = Colors.Glider,
+				Color = GameColors.Glider,
 			}
 		);
 
 		return glider;
 	}
 
-	public CircleEnemy CreateCircle(Vector2 spawnPosition)
+	public CircleEnemy CreateCircle(Vector2f spawnPosition)
 	{
 		var targetDir = spawnPosition.DirectionTo(target.Position);
 
@@ -57,14 +56,14 @@ public class EnemyFactory(
 			LocalTransform = new Transform()
 			{
 				Position = spawnPosition,
-				Scale = new Vector2(0.3f),
+				Scale = new Vector2f(0.3f),
 			}
 		};
 
 		circle.AddChild(
 			new RectangleShape2d(renderer)
 			{
-				Size = new Vector2(16f, 16f),
+				Size = new Vector2f(16f, 16f),
 				CollisionLayers = (int)PhysicLayers.Enemy
 			}
 		);
@@ -73,14 +72,14 @@ public class EnemyFactory(
 			new Sprite2d(renderer, circleTexture)
 			{
 				GType = GeometryType.Circle,
-				Color = Colors.Circle,
+				Color = GameColors.Circle,
 			}
 		);
 
 		return circle;
 	}
 
-	public CrossEnemy CreateCross(Vector2 position)
+	public CrossEnemy CreateCross(Vector2f position)
 	{
 		var cross = new CrossEnemy()
 		{
@@ -88,14 +87,14 @@ public class EnemyFactory(
 			LocalTransform = new Transform()
 			{
 				Position = position,
-				Scale = new Vector2(0.3f),
+				Scale = new Vector2f(0.3f),
 			}
 		};
 
 		cross.AddChild(
 			new RectangleShape2d(renderer)
 			{
-				Size = new Vector2(16f),
+				Size = new Vector2f(16f),
 				CollisionLayers = (int)PhysicLayers.Enemy
 			}
 		);
@@ -103,7 +102,7 @@ public class EnemyFactory(
 		cross.AddChild(
 			new Sprite2d(renderer, crossTexture)
 			{
-				Color = Colors.Cross,
+				Color = GameColors.Cross,
 			}
 		);
 

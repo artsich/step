@@ -20,4 +20,10 @@
       <Folder Include="Assets\Textures\" />
     </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Global\Usings.cs">
+      <Link>External\Usings.cs</Link>
+    </Compile>
+  </ItemGroup>
+
 </Project>

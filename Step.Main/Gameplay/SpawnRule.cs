@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 
 namespace Step.Main.Gameplay;
 
@@ -15,7 +14,7 @@ public class SpawnRule
 
 	public float SpawnWeight { get; init; }
 
-	public Func<Vector2, GameObject> CreateEntity { get; init; }
+	public Func<Vector2f, GameObject> CreateEntity { get; init; }
 
 	public SpawnLocationType SpawnLocation { get; init; } = SpawnLocationType.Border;
 }

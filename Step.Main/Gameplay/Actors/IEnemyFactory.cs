@@ -1,12 +1,10 @@
-﻿using OpenTK.Mathematics;
-
-namespace Step.Main.Gameplay.Actors;
+﻿namespace Step.Main.Gameplay.Actors;
 
 public interface IEnemyFactory
 {
-	GliderEntity CreateGlider(Vector2 position);
+	GliderEntity CreateGlider(Vector2f position);
 
-	CircleEnemy CreateCircle(Vector2 position);
+	CircleEnemy CreateCircle(Vector2f position);
 
-	CrossEnemy CreateCross(Vector2 position);
+	CrossEnemy CreateCross(Vector2f position);
 }

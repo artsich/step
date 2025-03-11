@@ -1,11 +1,13 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using Silk.NET.OpenGL;
 using StbImageSharp;
 
 namespace Step.Engine.Graphics;
 
 public class Texture2d(string path = "") : IDisposable
 {
-	public int Handle { get; private set; } = GL.GenTexture();
+	private readonly GL GL = Ctx.GL;
+
+	public uint Handle { get; private set; } = Ctx.GL.GenTexture();
 
 	public string Path { get; } = path;
 
@@ -50,7 +52,7 @@ public class Texture2d(string path = "") : IDisposable
 		Span<byte> data = default,
 		bool mipmap = true)
 	{
-		GL.BindTexture(TextureTarget.Texture2d, Handle);
+		GL.BindTexture(TextureTarget.Texture2D, Handle);
 
 		Width = width;
 		Height = height;
@@ -60,10 +62,10 @@ public class Texture2d(string path = "") : IDisposable
 			fixed (void* d = &data[0])
 			{
 				GL.TexImage2D(
-					TextureTarget.Texture2d,
+					TextureTarget.Texture2D,
 					0,
 					internalFormat,
-					width, height,
+					(uint)width, (uint)height,
 					0,
 					sourceFormat,
 					PixelType.UnsignedByte,
@@ -73,11 +75,11 @@ public class Texture2d(string path = "") : IDisposable
 		else
 		{
 			GL.TexImage2D(
-				TextureTarget.Texture2d,
+				TextureTarget.Texture2D,
 				0,
 				internalFormat,
-				width,
-				height,
+				(uint)width,
+				(uint)height,
 				0,
 				sourceFormat,
 				PixelType.UnsignedByte,
@@ -86,40 +88,40 @@ public class Texture2d(string path = "") : IDisposable
 
 		if (mipmap)
 		{
-			GL.GenerateMipmap(TextureTarget.Texture2d);
-			GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureBaseLevel, 0);
-			GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMaxLevel, 8);
+			GL.GenerateMipmap(TextureTarget.Texture2D);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 8);
 		}
 
 		SetWrap(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
 		SetFilter(TextureMinFilter.Nearest, TextureMagFilter.Nearest);
 
-		GL.BindTexture(TextureTarget.Texture2d, 0);
+		GL.BindTexture(TextureTarget.Texture2D, 0);
 	}
 
 	public void SetFilter(TextureMinFilter minFilter, TextureMagFilter magFilter)
 	{
 		Bind();
-		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMinFilter, (int)minFilter);
-		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureMagFilter, (int)magFilter);
+		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)minFilter);
+		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)magFilter);
 	}
 
 	public void SetWrap(TextureWrapMode s, TextureWrapMode t)
 	{
 		Bind();
-		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapS, (int)s);
-		GL.TexParameteri(TextureTarget.Texture2d, TextureParameterName.TextureWrapT, (int)t);
+		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)s);
+		GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)t);
 	}
 
 	public void Bind(uint slot = 1)
 	{
-		GL.ActiveTexture(TextureUnit.Texture0 + slot);
-		GL.BindTexture(TextureTarget.Texture2d, Handle);
+		GL.ActiveTexture(TextureUnit.Texture0 + (int)slot);
+		GL.BindTexture(TextureTarget.Texture2D, Handle);
 	}
 
 	public void Unbind()
 	{
-		GL.BindTexture(TextureTarget.Texture2d, 0);
+		GL.BindTexture(TextureTarget.Texture2D, 0);
 	}
 
 	public void Dispose()

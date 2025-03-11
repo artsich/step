@@ -1,4 +1,4 @@
-﻿using OpenTK.Mathematics;
+﻿using Silk.NET.Maths;
 
 namespace Step.Engine.Graphics.Particles;
 
@@ -9,8 +9,8 @@ public class Particles2d : CanvasItem
 		public bool Active;
 		public float StartTime;
 		public float Age;
-		public Vector2 Position;
-		public Vector2 Velocity;
+		public Vector2f Position;
+		public Vector2f Velocity;
 	}
 
 	private readonly Random _rand = new();
@@ -91,10 +91,10 @@ public class Particles2d : CanvasItem
 			return;
 		}
 
-		Matrix4 globalMatrix = GetGlobalMatrix();
+		Matrix4f globalMatrix = GetGlobalMatrix();
 
-		var colorMin = Emitter.Material?.ColorMin ?? Vector4.One;
-		var colorMax = Emitter.Material?.ColorMax ?? Vector4.One;
+		var colorMin = Emitter.Material?.ColorMin ?? Vector4f.One;
+		var colorMax = Emitter.Material?.ColorMax ?? Vector4f.One;
 
 		var particles = GetParticles();
 		for (int i = 0; i < particles.Length; i++)
@@ -103,12 +103,12 @@ public class Particles2d : CanvasItem
 			if (!p.Active)
 				continue;
 
-			var color = Vector4.Lerp(colorMin, colorMax, p.Age / Emitter.Lifetime);
-			var finalPos = new Vector4(p.Position, 0f, 1f) * globalMatrix;
+			var color = Vector4D.Lerp(colorMin, colorMax, p.Age / Emitter.Lifetime);
+			var finalPos = new Vector4f(p.Position, 0f, 1f) * globalMatrix;
 			_renderer.DrawRect(
-				finalPos.Xy,
+				finalPos.Xy(),
 				Emitter.Size,
-				(Color4<Rgba>) (color * (Vector4)Color),
+				color * Color,
 				Emitter.Material?.Texture,
 				layer: Layer);
 		}
@@ -144,17 +144,17 @@ public class Particles2d : CanvasItem
 			Active = true,
 			StartTime = startT,
 			Age = 0f,
-			Position = Vector2.Zero,
+			Position = Vector2f.Zero,
 			Velocity = RandomVelocity(),
 		};
 	}
 
-	private Vector2 RandomVelocity()
+	private Vector2f RandomVelocity()
 	{
 		float offset = ((float)_rand.NextDouble() * 2f - 1f) * Emitter.Spread;
 		float angle = Emitter.DirectionAngle + offset;
 		float speed = Emitter.MinSpeed + (float)_rand.NextDouble() * (Emitter.MaxSpeed - Emitter.MinSpeed);
 
-		return new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * speed;
+		return new Vector2f(MathF.Cos(angle), MathF.Sin(angle)) * speed;
 	}
 }

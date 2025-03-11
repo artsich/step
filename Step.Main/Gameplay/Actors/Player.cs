@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using Silk.NET.Maths;
+using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
@@ -22,7 +23,7 @@ public class Player : KinematicBody2D, ITarget
 
 	public event Action? OnCrossCoinCollected;
 
-	public Vector2 Position => GlobalPosition;
+	public Vector2f Position => GlobalPosition;
 
 	private readonly PlayerAbilities _playerAbilities;
 
@@ -108,12 +109,12 @@ public class Player : KinematicBody2D, ITarget
 
 		if (diff.LengthSquared > 1f)
 		{
-			var dir = diff.Normalized();
+			var dir = Vector2D.Normalize(diff);
 			Velocity = dir * Speed;
 		}
 		else
 		{
-			Velocity = Vector2.Zero;
+			Velocity = Vector2f.Zero;
 		}
 	}
 

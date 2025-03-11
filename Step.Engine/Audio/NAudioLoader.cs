@@ -1,6 +1,6 @@
 ﻿using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
-using OpenTK.Audio.OpenAL;
+using Silk.NET.OpenAL;
 
 namespace Step.Engine.Audio;
 
@@ -9,8 +9,9 @@ internal static class NAudioLoader
 	/// <summary>
 	/// Decodes any file NAudio can read into 16-bit PCM, then uploads it to an OpenAL buffer.
 	/// </summary>
-	public static Sound LoadSound(string filePath)
+	public unsafe static Sound LoadSound(string filePath)
 	{
+		var al = AudioManager.Al;
 		// AudioFileReader decodes WAV, MP3, etc. into a floating-point stream (ISampleProvider).
 		using var audioFile = new AudioFileReader(filePath);
 
@@ -41,11 +42,11 @@ internal static class NAudioLoader
 		int bitsPerSample = waveFormat.BitsPerSample; // Should be 16
 		int sampleRate = waveFormat.SampleRate;
 
-		ALFormat alFormat;
-		if (channels == 1 && bitsPerSample == 8) alFormat = ALFormat.Mono8;
-		else if (channels == 1 && bitsPerSample == 16) alFormat = ALFormat.Mono16;
-		else if (channels == 2 && bitsPerSample == 8) alFormat = ALFormat.Stereo8;
-		else if (channels == 2 && bitsPerSample == 16) alFormat = ALFormat.Stereo16;
+		BufferFormat alFormat;
+		if (channels == 1 && bitsPerSample == 8) alFormat = BufferFormat.Mono8;
+		else if (channels == 1 && bitsPerSample == 16) alFormat = BufferFormat.Mono16;
+		else if (channels == 2 && bitsPerSample == 8) alFormat = BufferFormat.Stereo8;
+		else if (channels == 2 && bitsPerSample == 16) alFormat = BufferFormat.Stereo16;
 		else
 		{
 			throw new NotSupportedException(
@@ -53,9 +54,12 @@ internal static class NAudioLoader
 			);
 		}
 
-		int bufferId = AL.GenBuffer();
-		AL.BufferData(bufferId, alFormat, ref pcmData[0], pcmData.Length, sampleRate);
+		uint bufferId = al.GenBuffer();
+		fixed (byte* pData = pcmData)
+		{
+			al.BufferData(bufferId, alFormat, pData, pcmData.Length, sampleRate);
+		}
 
-		return new Sound(bufferId);
+		return new Sound(bufferId, al);
 	}
 }

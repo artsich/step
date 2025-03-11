@@ -1,10 +1,9 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Editor;
 
 namespace Step.Main.Gameplay.Actors;
 
-public class CircleEnemy(Vector2 targetDir)
+public class CircleEnemy(Vector2f targetDir)
 	: GameObject(nameof(CircleEnemy))
 {
 	[EditorProperty]

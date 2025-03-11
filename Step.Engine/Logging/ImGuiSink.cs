@@ -11,6 +11,6 @@ public sealed class ImGuiSink(IFormatProvider? formatProvider) : ILogEventSink
 		var message = logEvent.RenderMessage(formatProvider);
 		var output = $"[{logEvent.Level}] {message}";
 
-		ImGui.DebugLog($"{output}\n");
+		ImGui.LogText($"{output}\n");
 	}
 }

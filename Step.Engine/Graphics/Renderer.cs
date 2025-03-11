@@ -1,6 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
-using Serilog;
+﻿using Serilog;
+using Silk.NET.OpenGL;
 
 namespace Step.Engine.Graphics;
 
@@ -15,15 +14,15 @@ public record struct RenderCmd
 	public int Layer;
 	public GeometryType Type;
 
-	public Vector2 Pivot = new(0.5f);
+	public Vector2f Pivot = new(0.5f);
 
 	public RenderTarget2d? Target;
 	public Texture2d? Atlas;
 	public Shader? Shader;
 
-	public Color4<Rgba> Color;
+	public Vector4f Color;
 	public Rect? AtlasRect;
-	public Matrix4 ModelMatrix;
+	public Matrix4f ModelMatrix;
 
 	public RenderCmd()
 	{
@@ -48,7 +47,7 @@ public struct RenderStats
 	}
 }
 
-public class Renderer(int screenWidth, int screenHeight)
+public class Renderer(int screenWidth, int screenHeight, GL GL)
 {
 	private Shader? _batchSpriteShader;
 	private Shader? _screenQuadShader;
@@ -64,12 +63,12 @@ public class Renderer(int screenWidth, int screenHeight)
 
 	private readonly SpriteBatch _spriteBatch = new();
 
-	public ScreenQuad ScreenQuad { get; } = new ScreenQuad();
+	public ScreenQuad ScreenQuad { get; } = new ScreenQuad(GL);
 
 	public RenderStats Stats;
-	private GpuTimer _gpuTimer = new();
+	private GpuTimer _gpuTimer = new(GL);
 
-	public void SetBackground(Color4<Rgba> color)
+	public void SetBackground(Vector4f color)
 	{
 		GL.ClearColor(color);
 	}
@@ -116,19 +115,19 @@ public class Renderer(int screenWidth, int screenHeight)
 		}
 	}
 
-	public void DrawObject(Vector2 position, Vector2 size, Color4<Rgba> color, Texture2d? texture = null)
+	public void DrawObject(Vector2f position, Vector2f size, Vector4f color, Texture2d? texture = null)
 	{
-		Vector2 shadowOffset = new(1, -1);
-		Color4<Rgba> shadowColor = new(0f, 0f, 0f, 0.25f);
+		Vector2f shadowOffset = new(1, -1);
+		Vector4f shadowColor = new(0f, 0f, 0f, 0.25f);
 
 		DrawRect(position + shadowOffset, size, shadowColor, texture, layer: 1);
 		DrawRect(position, size, color, texture, layer: 0);
 	}
 
 	public void DrawRect(
-		Vector2 position,
-		Vector2 size,
-		Color4<Rgba> color,
+		Vector2f position,
+		Vector2f size,
+		Vector4f color,
 		Texture2d? texture = null,
 		int layer = 0)
 	{
@@ -147,9 +146,9 @@ public class Renderer(int screenWidth, int screenHeight)
 	}
 
 	public void DrawCircle(
-		Vector2 position,
+		Vector2f position,
 		float radius,
-		Color4<Rgba> color,
+		Vector4f color,
 		Texture2d? texture = null,
 		int layer = 0)
 	{
@@ -199,7 +198,7 @@ public class Renderer(int screenWidth, int screenHeight)
 			BlendingFactor.SrcAlpha,
 			BlendingFactor.OneMinusSrcAlpha);
 
-		_gpuTimer.Start();
+		//_gpuTimer.Start();
 
 		Shader currentShader = _batchSpriteShader!;
 		SetDefaultShaderVariables(currentShader);
@@ -222,13 +221,13 @@ public class Renderer(int screenWidth, int screenHeight)
 				pivot: cmd.Pivot,
 				geometryType: cmd.Type,
 				textureRegion: cmd.AtlasRect,
-				color: (Vector4)cmd.Color);
+				color: cmd.Color);
 		}
 
 		_spriteBatch.Flush();
 		GL.Disable(EnableCap.Blend);
 
-		Stats.GpuTimeMs = _gpuTimer.Stop();
+		//Stats.GpuTimeMs = _gpuTimer.Stop();
 
 		_commands.Clear();
 	}
@@ -283,19 +282,20 @@ public class Renderer(int screenWidth, int screenHeight)
 		if (gTypeCompare != 0)
 			return gTypeCompare;
 
-		int aTexId = a.Atlas == null ? -1 : a.Atlas.Handle;
-		int bTexId = b.Atlas == null ? -1 : b.Atlas.Handle;
+		int aTexId = a.Atlas == null ? -1 : (int)a.Atlas.Handle;
+		int bTexId = b.Atlas == null ? -1 : (int)b.Atlas.Handle;
 		return bTexId.CompareTo(aTexId);
 	}
 
-	private static void PrintOpenGLInfo()
+	private void PrintOpenGLInfo()
 	{
-		string vendor = GL.GetString(StringName.Vendor) ?? "Vendor not found...";
-		string renderer = GL.GetString(StringName.Renderer) ?? "Renderer not found...";
-		string version = GL.GetString(StringName.Version) ?? "Opengl version is not found...";
-		string glslVersion = GL.GetString(StringName.ShadingLanguageVersion) ?? "GLSL version not found...";
+		string vendor = GL.GetStringS(StringName.Vendor) ?? "Vendor not found...";
+		string renderer = GL.GetStringS(StringName.Renderer) ?? "Renderer not found...";
+		string version = GL.GetStringS(StringName.Version) ?? "Opengl version is not found...";
+		string glslVersion = GL.GetStringS(StringName.ShadingLanguageVersion) ?? "GLSL version not found...";
 
-		string extensionsStr = GL.GetString(StringName.Extensions) ?? "NotFound...";
+		// TODO: OpenGL: GL_INVALID_ENUM error generated.
+		string extensionsStr = GL.GetStringS(StringName.Extensions) ?? "NotFound...";
 		var extensions = extensionsStr.Split(' ');
 		extensionsStr = string.Join('\n', extensions);
 

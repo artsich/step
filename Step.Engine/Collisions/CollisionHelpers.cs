@@ -1,29 +1,27 @@
-﻿using OpenTK.Mathematics;
-
-namespace Step.Engine.Collisions;
+﻿namespace Step.Engine.Collisions;
 
 public static class CollisionHelpers
 {
-	public static CollisionInfo CircleVsCircle(Vector2 p1, float r1, Vector2 p2, float r2)
+	public static CollisionInfo CircleVsCircle(Vector2f p1, float r1, Vector2f p2, float r2)
 	{
-		Vector2 diff = p2 - p1;
+		Vector2f diff = p2 - p1;
 		float distance = diff.Length;
 		float sumRadius = r1 + r2;
 
 		if (distance >= sumRadius)
 			return CollisionInfo.None;
 
-		Vector2 normal = distance < 0.0001f 
-			? Vector2.UnitX 
+		Vector2f normal = distance < 0.0001f 
+			? Vector2f.UnitX 
 			: diff / distance;
 
 		return new CollisionInfo(true, normal, sumRadius - distance);
 	}
 
-	public static CollisionInfo CircleVsAabb(Vector2 circlePos, float radius, Box2 aabb)
+	public static CollisionInfo CircleVsAabb(Vector2f circlePos, float radius, Box2f aabb)
 	{
-		Vector2 closestPoint = Vector2.Clamp(circlePos, aabb.Min, aabb.Max);
-		Vector2 diff = circlePos - closestPoint;
+		Vector2f closestPoint = Vector2.Clamp(circlePos, aabb.Min, aabb.Max);
+		Vector2f diff = circlePos - closestPoint;
 		float distanceSquared = diff.LengthSquared;
 
 		if (distanceSquared > radius * radius)
@@ -33,9 +31,9 @@ public static class CollisionHelpers
 		
 		if (distance < 0.0001f)
 		{
-			Vector2 aabbCenter = (aabb.Min + aabb.Max) * 0.5f;
-			Vector2 aabbHalfSize = (aabb.Max - aabb.Min) * 0.5f;
-			Vector2 circleToCenter = circlePos - aabbCenter;
+			Vector2f aabbCenter = (aabb.Min + aabb.Max) * 0.5f;
+			Vector2f aabbHalfSize = (aabb.Max - aabb.Min) * 0.5f;
+			Vector2f circleToCenter = circlePos - aabbCenter;
 			
 			float xRatio = MathF.Abs(circleToCenter.X) / aabbHalfSize.X;
 			float yRatio = MathF.Abs(circleToCenter.Y) / aabbHalfSize.Y;
@@ -46,7 +44,7 @@ public static class CollisionHelpers
 				return new CollisionInfo
 				{
 					HasCollision = true,
-					Normal = new Vector2(sign, 0),
+					Normal = new Vector2f(sign, 0),
 					Penetration = radius
 				};
 			}
@@ -56,7 +54,7 @@ public static class CollisionHelpers
 				return new CollisionInfo
 				{
 					HasCollision = true,
-					Normal = new Vector2(0, sign),
+					Normal = new Vector2f(0, sign),
 					Penetration = radius
 				};
 			}
@@ -70,7 +68,7 @@ public static class CollisionHelpers
 		};
 	}
 
-	public static CollisionInfo AabbVsAabb(Box2 a, Box2 b)
+	public static CollisionInfo AabbVsAabb(Box2f a, Box2f b)
 	{
 		float overlapX = MathF.Min(a.Max.X, b.Max.X) - MathF.Max(a.Min.X, b.Min.X);
 		float overlapY = MathF.Min(a.Max.Y, b.Max.Y) - MathF.Max(a.Min.Y, b.Min.Y);
@@ -78,19 +76,19 @@ public static class CollisionHelpers
 		if (overlapX <= 0 || overlapY <= 0)
 			return CollisionInfo.None;
 
-		Vector2 normal;
+		Vector2f normal;
 		float penetration;
 
 		if (overlapX < overlapY)
 		{
 			float sign = (a.Center.X < b.Center.X) ? -1 : 1;
-			normal = new Vector2(sign, 0);
+			normal = new Vector2f(sign, 0);
 			penetration = overlapX;
 		}
 		else
 		{
 			float sign = (a.Center.Y < b.Center.Y) ? -1 : 1;
-			normal = new Vector2(0, sign);
+			normal = new Vector2f(0, sign);
 			penetration = overlapY;
 		}
 

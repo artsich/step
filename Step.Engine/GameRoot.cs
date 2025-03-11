@@ -1,4 +1,5 @@
 ﻿using Step.Engine.Collisions;
+using Step.Engine.Graphics;
 
 namespace Step.Engine;
 
@@ -18,6 +19,14 @@ public sealed class GameRoot
 	public float ScaledDt { get; private set; }
 
 	public GameObject Scene => _scene ?? throw new InvalidOperationException("Scene is null");
+
+	private ICamera2d? _currentCamera;
+
+	public ICamera2d? CurrentCamera
+	{
+		get => _currentCamera;
+		set => _currentCamera = value;
+	}
 
 	public void SetScene(GameObject scene)
 	{

@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 
@@ -28,7 +27,7 @@ public class CrtEffect(
 	[EditorProperty(speed: 0.01f)]
 	public float VignetteRoundness { get; set; } = 0.5f;
 
-	public Vector2 VignetteTarget { get; set; } = new Vector2(0.5f);
+	public Vector2f VignetteTarget { get; set; } = new(0.5f);
 
 	public void Apply(Texture2d input, out Texture2d output)
 	{
@@ -44,7 +43,7 @@ public class CrtEffect(
 		shader.SetFloat("vignetteIntensity", VignetteIntensity);
 		shader.SetFloat("vignetteRoundness", VignetteRoundness);
 		shader.SetVector2("vignetteTarget", VignetteTarget);
-		shader.SetVector2("texSize", new Vector2(renderTarget.Width, renderTarget.Height));
+		shader.SetVector2("texSize", new(renderTarget.Width, renderTarget.Height));
 
 		input.Bind(0);
 		shader.SetInt("sourceTexture", 0);

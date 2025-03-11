@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine.Editor;
+﻿using Step.Engine.Editor;
 
 namespace Step.Engine.Graphics;
 
@@ -8,7 +7,7 @@ public abstract class CanvasItem(string name = nameof(CanvasItem)) : GameObject(
 	[EditorProperty]
 	public virtual int Layer { get; set; } = 1;
 
-	public Color4<Rgba> Color { get; set; } = Color4.White;
+	public Vector4f Color { get; set; } = Vector4f.One;
 
 	public Shader? Shader { get; set; }
 

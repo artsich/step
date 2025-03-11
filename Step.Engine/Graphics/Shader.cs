@@ -1,17 +1,17 @@
-﻿using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
-using Serilog;
+﻿using Silk.NET.OpenGL;
 
 namespace Step.Engine.Graphics;
 
-public class Shader
+public unsafe class Shader
 {
-	public readonly int Handle;
+	public readonly uint Handle;
 
-	private readonly Dictionary<string, int> _uniformLocations;
+	private readonly Dictionary<string, int> _uniformLocations = [];
+	private readonly GL GL;
 
 	public Shader(string vertPath, string fragPath)
 	{
+		GL = Ctx.GL;
 		var vertexShader = LoadShader(vertPath, ShaderType.VertexShader);
 		var fragmentShader = LoadShader(fragPath, ShaderType.FragmentShader);
 
@@ -26,19 +26,10 @@ public class Shader
 		GL.DeleteShader(fragmentShader);
 		GL.DeleteShader(vertexShader);
 
-		GL.GetProgrami(Handle, ProgramProperty.ActiveUniforms, out var numberOfUniforms);
-
-		_uniformLocations = new Dictionary<string, int>();
-
-		for (uint i = 0; i < numberOfUniforms; i++)
-		{
-			var key = GL.GetActiveUniformName(Handle, i, 50, out _);
-			var location = GL.GetUniformLocation(Handle, key);
-			_uniformLocations.Add(key, location);
-		}
+		GL.GetProgram(Handle, ProgramPropertyARB.ActiveUniforms, out var numberOfUniforms);
 	}
 
-	private static int LoadShader(string vertPath, ShaderType type)
+	private uint LoadShader(string vertPath, ShaderType type)
 	{
 		var shaderSource = File.ReadAllText(vertPath);
 		var vertexShader = GL.CreateShader(type);
@@ -48,12 +39,12 @@ public class Shader
 		return vertexShader;
 	}
 
-	private static void CompileShader(int shader)
+	private void CompileShader(uint shader)
 	{
 		GL.CompileShader(shader);
 
-		GL.GetShaderi(shader, ShaderParameterName.CompileStatus, out var code);
-		if (code == (int)All.True)
+		GL.GetShader(shader, ShaderParameterName.CompileStatus, out var code);
+		if (code == (int)GLEnum.True)
 			return;
 
 		GL.GetShaderInfoLog(shader, out var infoLog);
@@ -63,12 +54,12 @@ public class Shader
 		}
 	}
 
-	private static void LinkProgram(int program)
+	private void LinkProgram(uint program)
 	{
 		GL.LinkProgram(program);
 
-		GL.GetProgrami(program, ProgramProperty.LinkStatus, out var code);
-		if (code != (int)All.True)
+		GL.GetProgram(program, ProgramPropertyARB.LinkStatus, out var code);
+		if (code != (int)GLEnum.True)
 		{
 			throw new Exception($"Error occurred whilst linking Program({program})");
 		}
@@ -87,66 +78,54 @@ public class Shader
 	public void SetInt(string name, int data)
 	{
 		GL.UseProgram(Handle);
-		GL.Uniform1i(GetUniformLocation(name), data);
+		GL.Uniform1(GetUniformLocation(name), data);
 	}
 
 	private int GetUniformLocation(string name)
 	{
-		if (_uniformLocations.TryGetValue(name, out var index))
+		if (!_uniformLocations.TryGetValue(name, out var index))
 		{
-			return index;
+			_uniformLocations[name] = index = GL.GetUniformLocation(Handle, name);
 		}
-		else
-		{
-			return -1;
-		}
+
+		return index;
 	}
 
 	public void SetFloat(string name, float data)
 	{
 		GL.UseProgram(Handle);
-		GL.Uniform1f(GetUniformLocation(name), data);
+		GL.Uniform1(GetUniformLocation(name), data);
 	}
 
-	public void SetMatrix4(string name, Matrix4 data, bool transpose = false)
+	public void SetMatrix4(string name, Matrix4f data, bool transpose = false)
 	{
 		GL.UseProgram(Handle);
-		GL.UniformMatrix4f(GetUniformLocation(name), 1, transpose, ref data);
+		GL.UniformMatrix4(GetUniformLocation(name), 1, transpose, (float*)&data);
 	}
 
-	public void SetVector2(string name, Vector2 data)
+	public void SetVector2(string name, Vector2f v)
 	{
 		GL.UseProgram(Handle);
-		GL.Uniform2f(GetUniformLocation(name), 1, ref data);
+		GL.Uniform2(GetUniformLocation(name), v.X, v.Y);
 	}
 
-	public void SetVector3(string name, Vector3 data)
+	public void SetVector3(string name, Vector3f v)
 	{
 		GL.UseProgram(Handle);
-		GL.Uniform3f(GetUniformLocation(name), 1, ref data);
+		GL.Uniform3(GetUniformLocation(name), v.X, v.Y, v.Z);
 	}
 
-	public void SetVector4(string name, Vector4 data)
+	public void SetVector4(string name, Vector4f v)
 	{
 		GL.UseProgram(Handle);
-		GL.Uniform4f(GetUniformLocation(name), 1, ref data);
-	}
-
-	public void SetColor(string name, Color4<Rgba> data)
-	{
-		Vector4 color = new(data.X, data.Y, data.Z, data.W);
-		SetVector4(name, color);
+		GL.Uniform4(GetUniformLocation(name), v.X, v.Y,	v.Z, v.W);
 	}
 
 	public unsafe void Set(string name, Span<int> values)
 	{
-		fixed (int* ptr = values)
-		{
-			GL.ProgramUniform1iv(
-				Handle,
-				GetUniformLocation(name),
-				values.Length,
-				ptr);
-		}
+		GL.ProgramUniform1(
+			Handle,
+			GetUniformLocation(name),
+			values);
 	}
 }

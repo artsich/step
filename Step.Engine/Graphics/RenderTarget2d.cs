@@ -1,14 +1,17 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using Silk.NET.OpenGL;
+using System.Reflection.Metadata;
 
 namespace Step.Engine.Graphics;
 
 public class RenderTarget2d : IDisposable
 {
-	public int Framebuffer { get; private set; }
+	private readonly GL GL;
+
+	public uint Framebuffer { get; private set; }
 
 	public Texture2d Color { get; private set; }
 
-	public int DepthStencil { get; private set; }
+	public uint DepthStencil { get; private set; }
 
 	public int Width { get; private set; }
 
@@ -16,6 +19,7 @@ public class RenderTarget2d : IDisposable
 
 	public RenderTarget2d(int width, int height, bool useDepthStencil = false)
 	{
+		GL = Ctx.GL;
 		Initialize(width, height, useDepthStencil);
 	}
 
@@ -33,15 +37,36 @@ public class RenderTarget2d : IDisposable
 	public void Begin()
 	{
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, Framebuffer);
-		GL.Viewport(0, 0, Width, Height);
+		GL.Viewport(0, 0, (uint)Width, (uint)Height);
 	}
 
 	public void End(int screenWidth, int screenHeight)
 	{
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-		GL.Viewport(0, 0, screenWidth, screenHeight);
+		GL.Viewport(0, 0, (uint)screenWidth, (uint)screenHeight);
 	}
 
+	public void Clear(Vector4f color)
+	{
+		GL.GetInteger(GLEnum.FramebufferBinding, out var previousFramebuffer);
+
+		if (previousFramebuffer != Framebuffer)
+		{
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, Framebuffer);
+			GL.ClearColor(color.X, color.Y, color.Z, color.W);
+			GL.Clear(ClearBufferMask.ColorBufferBit
+				| ClearBufferMask.DepthBufferBit
+				| ClearBufferMask.StencilBufferBit);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, (uint)previousFramebuffer);
+		}
+		else
+		{
+			GL.ClearColor(color.X, color.Y, color.Z, color.W);
+			GL.Clear(ClearBufferMask.ColorBufferBit
+				| ClearBufferMask.DepthBufferBit
+				| ClearBufferMask.StencilBufferBit);
+		}
+	}
 	public void Dispose()
 	{
 		DisposeAttachments();
@@ -73,7 +98,7 @@ public class RenderTarget2d : IDisposable
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, Framebuffer);
 
 		Color = CreateColorTexture(width, height);
-		GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2d, Color.Handle, 0);
+		GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, Color.Handle, 0);
 
 		if (useDepthStencil)
 		{
@@ -82,17 +107,17 @@ public class RenderTarget2d : IDisposable
 		}
 
 		var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
-		if (status != FramebufferStatus.FramebufferComplete)
+		if (status != GLEnum.FramebufferComplete)
 			throw new Exception("Framebuffer not complete: " + status);
 
 		GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 	}
 
-	private static int CreateDepthStencil(int width, int height)
+	private uint CreateDepthStencil(int width, int height)
 	{
 		var depthStencil = GL.GenRenderbuffer();
 		GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, depthStencil);
-		GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, width, height);
+		GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, (uint)width, (uint)height);
 		return depthStencil;
 	}
 

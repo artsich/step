@@ -1,10 +1,9 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Editor;
 
 namespace Step.Main.Gameplay;
 
-public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject(nameof(Spawner))
+public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObject(nameof(Spawner))
 {
 	[EditorProperty]
 	public float InitialEntitiesPerSecond { get; set; } = 1f;
@@ -66,14 +65,14 @@ public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject
 	private void TryRemoveChild()
 	{
 		float margin = 50f;
-		var removalBox = new Box2(
-			spawnArea.Min - new Vector2(margin),
-			spawnArea.Max + new Vector2(margin)
+		var removalBox = new Box2f(
+			spawnArea.Min - new Vector2f(margin),
+			spawnArea.Max + new Vector2f(margin)
 		);
 
 		foreach (var enemy in children)
 		{
-			if (!removalBox.ContainsInclusive(enemy.GlobalPosition))
+			if (!removalBox.Contains(enemy.GlobalPosition))
 			{
 				CallDeferred(enemy.QueueFree);
 			}
@@ -110,20 +109,20 @@ public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject
 		}
 	}
 
-	private Vector2 GenerateSpawnPosition(SpawnRule rule)
+	private Vector2f GenerateSpawnPosition(SpawnRule rule)
 	{
 		if (rule.SpawnLocation == SpawnLocationType.Interior)
 		{
-			return new Vector2(
+			return new Vector2f(
 				(float)_random.NextDouble() * spawnArea.Size.X + spawnArea.Min.X,
 				(float)_random.NextDouble() * spawnArea.Size.Y + spawnArea.Min.Y
 			);
 		}
 
 		float margin = 50f;
-		var expandedBox = new Box2(
-			spawnArea.Min - new Vector2(margin),
-			spawnArea.Max + new Vector2(margin)
+		var expandedBox = new Box2f(
+			spawnArea.Min - new Vector2f(margin),
+			spawnArea.Max + new Vector2f(margin)
 		);
 
 		float perimeter = 2 * (expandedBox.Size.X + expandedBox.Size.Y);
@@ -131,23 +130,23 @@ public sealed class Spawner(Box2 spawnArea, SpawnRule[] spawnRules) : GameObject
 
 		if (randomPoint < expandedBox.Size.X) // Top edge
 		{
-			return new Vector2(expandedBox.Min.X + randomPoint, expandedBox.Min.Y);
+			return new Vector2f(expandedBox.Min.X + randomPoint, expandedBox.Min.Y);
 		}
 		randomPoint -= expandedBox.Size.X;
 
 		if (randomPoint < expandedBox.Size.Y)
 		{
-			return new Vector2(expandedBox.Max.X, expandedBox.Min.Y + randomPoint);
+			return new Vector2f(expandedBox.Max.X, expandedBox.Min.Y + randomPoint);
 		}
 		randomPoint -= expandedBox.Size.Y;
 
 		if (randomPoint < expandedBox.Size.X) // Bottom edge
 		{
-			return new Vector2(expandedBox.Max.X - randomPoint, expandedBox.Max.Y);
+			return new Vector2f(expandedBox.Max.X - randomPoint, expandedBox.Max.Y);
 		}
 		randomPoint -= expandedBox.Size.X;
 
 		// Left edge
-		return new Vector2(expandedBox.Min.X, expandedBox.Max.Y - randomPoint);
+		return new Vector2f(expandedBox.Min.X, expandedBox.Max.Y - randomPoint);
 	}
 }

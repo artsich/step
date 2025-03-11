@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Serilog;
+﻿using Silk.NET.Maths;
 using Step.Engine;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
@@ -49,7 +48,7 @@ public class PlayerShield : GameObject
 				"Assets/Shaders/Shield/shader.frag"),
 			LocalTransform = new()
 			{
-				Scale = new Vector2(Radius * 2f)
+				Scale = new (Radius * 2f)
 			},
 		};
 		AddChild(_sprite);
@@ -93,7 +92,7 @@ public class PlayerShield : GameObject
 
 	private float GetCurrentArc()
 	{
-		Vector2 arcDir = (_input.MouseWorldPosition - GlobalPosition).Normalized();
+		Vector2f arcDir = Vector2D.Normalize(_input.MouseWorldPosition - GlobalPosition);
 		return MathF.Atan2(arcDir.Y, arcDir.X);
 	}
 
@@ -103,7 +102,7 @@ public class PlayerShield : GameObject
 		{
 			float collisionAngle = MathF.Atan2(info.Normal.Y, info.Normal.X);
 
-			Vector2 arcDir = GlobalPosition - _input.MouseWorldPosition;
+			Vector2f arcDir = GlobalPosition - _input.MouseWorldPosition;
 			float arcAngle = MathF.Atan2(arcDir.Y, arcDir.X);
 
 			if (MathF.Abs(collisionAngle - arcAngle) <= MathF.PI / 4f)

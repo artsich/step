@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Graphics;
 
 namespace Step.Main.Gameplay.Actors;
@@ -23,6 +22,6 @@ public class PlayerSprite() : GameObject(name: "Player Health Sprite")
 	{
 		var hpScale = _initialHeightScale * (_player.Hp / _player.MaxHp);
 		var spriteScale = _spriteHp.LocalTransform.Scale;
-		_spriteHp.LocalTransform.Scale = new Vector2(spriteScale.X, hpScale);
+		_spriteHp.LocalTransform.Scale = new (spriteScale.X, hpScale);
 	}
 }

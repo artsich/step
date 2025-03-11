@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Collisions;
 using Step.Engine.Graphics;
 using Step.Engine.Physics;
@@ -16,13 +15,13 @@ public class Frame : GameObject
 	{
 		float totalWidth = Thickness * 2f + InnerWidth;
 
-		AddWall(renderer, "Left", new Vector2(-InnerWidth / 2 - Thickness / 2, 0), new Vector2(Thickness, totalWidth));
-		AddWall(renderer, "Top", new Vector2(0, -InnerWidth / 2 - Thickness / 2), new Vector2(totalWidth, Thickness));
-		AddWall(renderer, "Right", new Vector2(InnerWidth / 2 + Thickness / 2, 0), new Vector2(Thickness, totalWidth));
-		AddWall(renderer, "Bottom", new Vector2(0, InnerWidth / 2 + Thickness / 2), new Vector2(totalWidth, Thickness));
+		AddWall(renderer, "Left", new Vector2f(-InnerWidth / 2 - Thickness / 2, 0), new Vector2f(Thickness, totalWidth));
+		AddWall(renderer, "Top", new Vector2f(0, -InnerWidth / 2 - Thickness / 2), new Vector2f(totalWidth, Thickness));
+		AddWall(renderer, "Right", new Vector2f(InnerWidth / 2 + Thickness / 2, 0), new Vector2f(Thickness, totalWidth));
+		AddWall(renderer, "Bottom", new Vector2f(0, InnerWidth / 2 + Thickness / 2), new Vector2f(totalWidth, Thickness));
 	}
 
-	private void AddWall(Renderer renderer, string name, Vector2 position, Vector2 size)
+	private void AddWall(Renderer renderer, string name, Vector2f position, Vector2f size)
 	{
 		var wall = new StaticBody2d(
 			new RectangleShape2d(renderer)

@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine.Editor;
+﻿using Step.Engine.Editor;
 using System.Text.Json.Serialization;
 
 namespace Step.Engine.Graphics.Particles;
@@ -10,7 +9,7 @@ public class Emitter
 	public int Amount { get; set; }
 
 	[EditorProperty(1f, 100f)]
-	public Vector2 Size { get; set; } = Vector2.One;
+	public Vector2f Size { get; set; } = Vector2f.One;
 
 	[EditorProperty(from: 0f, to: 100f, speed: 0.01f)]
 	public float Lifetime { get; set; }
@@ -31,7 +30,7 @@ public class Emitter
 	public float DirectionAngle { get; set; }
 
 	[JsonIgnore]
-	public Vector2 DirectionSign { get; set; } = Vector2.One;
+	public Vector2f DirectionSign { get; set; } = Vector2f.One;
 
 	[EditorProperty(0f, 3.14f, speed: 0.01f)]
 	public float Spread { get; set; }
@@ -44,18 +43,18 @@ public class Emitter
 public class ParticlesMaterial
 {
 	[EditorProperty(isColor: true)]
-	public Vector4 ColorMin { get; set; }
+	public Vector4f ColorMin { get; set; }
 
 	[EditorProperty(isColor: true)]
-	public Vector4 ColorMax { get; set; }
+	public Vector4f ColorMax { get; set; }
 
 	[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 	public Texture2d? Texture { get; set; }
 
 	public static readonly ParticlesMaterial Default = new()
 	{
-		ColorMin = Vector4.One,
-		ColorMax = Vector4.One,
+		ColorMin = Vector4f.One,
+		ColorMax = Vector4f.One,
 		Texture = null
 	};
 }

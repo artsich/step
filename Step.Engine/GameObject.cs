@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using OpenTK.Mathematics;
 using Serilog;
 using Step.Engine.Editor;
 
@@ -18,21 +17,21 @@ public class GameObject(string name = nameof(GameObject))
 
 	private bool _markedAsFree;
 
-	public Vector2 LocalPosition
+	public Vector2f LocalPosition
 	{
 		get => LocalTransform.Position;
 		set => LocalTransform.Position = value;
 	}
 
-	public Vector2 GlobalPosition
+	public Vector2f GlobalPosition
 	{
-		get => GetGlobalMatrix().ExtractTranslation().Xy;
+		get => GetGlobalMatrix().ExtractTranslation().Xy();
 		set
 		{
 			if (_parent != null)
 			{
 				var parentInverse = _parent.GetGlobalMatrix().Inverted();
-				LocalTransform.Position = (new Vector4(value) * parentInverse).Xy;
+				LocalTransform.Position = (new Vector4f(value, 0f, 0f) * parentInverse).Xy();
 			}
 			else
 			{
@@ -127,9 +126,9 @@ public class GameObject(string name = nameof(GameObject))
 		}
 	}
 
-	public Matrix4 GetGlobalMatrix()
+	public Matrix4f GetGlobalMatrix()
 	{
-		Matrix4 localMat = LocalTransform.GetLocalMatrix();
+		Matrix4f localMat = LocalTransform.GetLocalMatrix();
 
 		if (_parent == null)
 		{

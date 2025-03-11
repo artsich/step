@@ -1,4 +1,5 @@
-﻿using Step.Engine.Audio;
+﻿using Silk.NET.OpenGL;
+using Step.Engine.Audio;
 using Step.Engine.Converters;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;

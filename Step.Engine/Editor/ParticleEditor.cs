@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using Serilog;
+using Silk.NET.Maths;
+using Silk.NET.OpenGL;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
 
@@ -10,8 +10,8 @@ namespace Step.Engine.Editor;
 public sealed class ParticlesEditor : IEditorView, IDisposable
 {
 	private readonly string _baseFolder = Path.Combine(Assets.AssetsFolder, "Particles");
-	private readonly RenderTarget2d _particlesRenderTarget = new(1280, 720);
-
+	private readonly RenderTarget2d _particlesRenderTarget;
+	private readonly GL GL = Ctx.GL;
 	private readonly Renderer _renderer;
 	private readonly Selector _fileSelector;
 	private readonly Timer _timer;
@@ -27,7 +27,8 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 
 	public ParticlesEditor(Vector2i clientSize, ICamera2d camera)
 	{
-		_renderer = new Renderer(clientSize.X, clientSize.Y);
+		_particlesRenderTarget = new(1280, 720);
+		_renderer = new Renderer(clientSize.X, clientSize.Y, GL);
 		_renderer.Load();
 		_renderer.SetCamera(camera);
 		_files = GetParticleFiles(_baseFolder);
@@ -113,7 +114,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 				ImGui.GetContentRegionAvail().FromSystem())
 			.ToSystem();
 
-			ImGui.Image(_particlesRenderTarget.Color.Handle, imgSize, new(0f, 1f), new(1f, 0f));
+			ImGui.Image((nint)_particlesRenderTarget.Color.Handle, imgSize, new(0f, 1f), new(1f, 0f));
 
 			ImGui.End();
 		}

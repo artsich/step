@@ -1,6 +1,4 @@
-﻿using OpenTK.Mathematics;
-
-namespace Step.Engine;
+﻿namespace Step.Engine;
 
 public static class StepMath
 {
@@ -10,11 +8,11 @@ public static class StepMath
 		return from + diff * t;
 	}
 
-	public static Vector2 AdjustToAspect(float targetAspect, Vector2 size)
+	public static Vector2f AdjustToAspect(float targetAspect, Vector2f size)
 	{
 		float aspect = size.X / size.Y;
 
-		Vector2 result = Vector2.One;
+		Vector2f result = Vector2f.One;
 		if (aspect > targetAspect)
 		{
 			result.Y = size.Y;

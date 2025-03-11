@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine.Editor;
+﻿using Step.Engine.Editor;
 using Step.Engine.Graphics;
 
 namespace Step.Engine.Collisions;
@@ -49,7 +48,7 @@ public sealed class CircleCollisionShape : CollisionShape
 			_renderer.DrawCircle(
 				GlobalPosition,
 				Radius,
-				new Color4<Rgba>(0f, 0.6f, 0.7f, 0.42f),
+				new Vector4f(0f, 0.6f, 0.7f, 0.42f),
 				layer: 1000);
 		}
 	}

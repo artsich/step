@@ -1,7 +1,7 @@
-﻿using OpenTK.Windowing.GraphicsLibraryFramework;
-using Step.Engine.Audio;
+﻿using Step.Engine.Audio;
 using Step.Engine;
 using Step.Engine.Graphics;
+using Silk.NET.Input;
 
 namespace Step.Main.Gameplay.Actors;
 
@@ -239,7 +239,7 @@ public class PlayerAbilities(Input input, Player player)
 
 	private void ProcessInput()
 	{
-		TryAbility<ShieldAbility>(Keys.Space);
+		TryAbility<ShieldAbility>(Key.Space);
 		TryAbility<SizeChangerAbility>(MouseButton.Left);
 		TryAbility<TimeFreezeAbility>(MouseButton.Right);
 	}
@@ -264,17 +264,17 @@ public class PlayerAbilities(Input input, Player player)
 			return;
 		}
 
-		if (input.MouseState.IsButtonPressed(btn))
+		if (input.IsMouseButtonPressed(btn))
 		{
 			ability.Activate();
 		}
-		else if (input.MouseState.IsButtonReleased(btn))
+		else if (input.IsMouseButtonReleased(btn))
 		{
 			ability.Deactivate();
 		}
 	}
 
-	private void TryAbility<T>(Keys key) where T : IAbility
+	private void TryAbility<T>(Key key) where T : IAbility
 	{
 		var ability = FindActiveAbility<T>();
 		if (ability is null)
@@ -282,11 +282,11 @@ public class PlayerAbilities(Input input, Player player)
 			return;
 		}
 
-		if (input.KeyboardState.IsKeyPressed(key))
+		if (input.IsKeyPressed(key))
 		{
 			ability.Activate();
 		}
-		else if (input.KeyboardState.IsKeyReleased(key))
+		else if (input.IsKeyReleased(key))
 		{
 			ability.Deactivate();
 		}

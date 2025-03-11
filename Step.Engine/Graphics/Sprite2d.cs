@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine.Editor;
+﻿using Step.Engine.Editor;
 
 namespace Step.Engine.Graphics;
 
@@ -12,7 +11,7 @@ public sealed class Sprite2d : CanvasItem
 	public GeometryType GType = GeometryType.Quad;
 
 	[EditorProperty]
-	public Vector2 Pivot { get; set; } = new Vector2(0.5f);
+	public Vector2f Pivot { get; set; } = new(0.5f);
 
 	public Sprite2d(Renderer renderer, Texture2d atlas, Rect? region = null)
 		: base(nameof(Sprite2d))
@@ -20,7 +19,7 @@ public sealed class Sprite2d : CanvasItem
 		_renderer = renderer;
 		_atlas = atlas;
 		_region = region ?? new Rect(0f, 0f, atlas.Width, atlas.Height);
-		LocalTransform.Scale = new Vector2(_atlas.Width, _atlas.Height);
+		LocalTransform.Scale = new Vector2f(_atlas.Width, _atlas.Height);
 	}
 
 	protected override void OnRender()

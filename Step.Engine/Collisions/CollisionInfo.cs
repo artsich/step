@@ -1,10 +1,8 @@
-﻿using OpenTK.Mathematics;
-
-namespace Step.Engine.Collisions;
+﻿namespace Step.Engine.Collisions;
 
 public readonly record struct CollisionInfo(
 	bool HasCollision,
-	Vector2 Normal,
+	Vector2f Normal,
 	float Penetration)
 {
 	public static CollisionInfo None => new() { HasCollision = false };

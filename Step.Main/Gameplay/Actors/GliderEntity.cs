@@ -1,5 +1,4 @@
-﻿using OpenTK.Mathematics;
-using Step.Engine;
+﻿using Step.Engine;
 using Step.Engine.Editor;
 
 namespace Step.Main.Gameplay.Actors;
@@ -13,7 +12,7 @@ public class GliderEntity(ITarget target)
 	public float MinFollowDistance { get; set; } = 25f;
 
 	private bool _isFollowing = true;
-	private Vector2 _constantDir;
+	private Vector2f _constantDir;
 
 	protected override void OnUpdate(float deltaTime)
 	{
@@ -43,7 +42,7 @@ public class GliderEntity(ITarget target)
 		}
 	}
 
-	private void Follow(float deltaTime, Vector2 pos, Vector2 dir)
+	private void Follow(float deltaTime, Vector2f pos, Vector2f dir)
 	{
 		pos += dir * Speed * deltaTime;
 		GlobalPosition = pos;

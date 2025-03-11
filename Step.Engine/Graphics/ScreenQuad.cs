@@ -1,14 +1,16 @@
-using OpenTK.Graphics.OpenGL;
+using Silk.NET.OpenGL;
 
 namespace Step.Engine.Graphics;
 
 public class ScreenQuad : IDisposable
 {
-	private readonly int _vao;
+	private readonly uint _vao;
+	private readonly GL GL;
 	private bool _disposed;
 
-	public ScreenQuad()
+	public ScreenQuad(GL gl)
 	{
+		GL = gl;
 		_vao = GL.GenVertexArray();
 	}
 

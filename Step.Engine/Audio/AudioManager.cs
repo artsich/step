@@ -1,12 +1,15 @@
-﻿using OpenTK.Audio.OpenAL;
-using Serilog;
+﻿using Serilog;
+using Silk.NET.OpenAL;
 
 namespace Step.Engine.Audio;
 
-public class AudioManager : IDisposable
+public unsafe class AudioManager : IDisposable
 {
-	private ALDevice _device;
-	private ALContext _context;
+	private readonly ALContext _alc;
+	private readonly AL _al;
+
+	private Device* _device;
+	private Context* _context;
 
 	private readonly Dictionary<string, Sound> _loadedSounds = [];
 
@@ -14,30 +17,35 @@ public class AudioManager : IDisposable
 
 	public static AudioManager Ins => _instance ??= new AudioManager();
 
+	public static AL Al => _instance!._al;
+
 	private AudioManager()
 	{
-		_device = ALC.OpenDevice(null);
-		if (_device == IntPtr.Zero)
+		_alc = ALContext.GetApi();
+		_al = AL.GetApi();
+
+		_device = _alc.OpenDevice(null);
+		if (_device == null)
 		{
 			Log.Logger.Warning("Failed to open the default OpenAL device.");
 			return;
 		}
 
-		_context = ALC.CreateContext(_device, (int[]?)null);
-		if (_context == IntPtr.Zero)
+		_context = _alc.CreateContext(_device, null);
+		if (_context == null)
 		{
 			Log.Logger.Warning("Failed to create an OpenAL audio context.");
 			return;
 		}
 
-		ALC.MakeContextCurrent(_context);
+		_alc.MakeContextCurrent(_context);
 		PrintOpenALInfo();
 	}
 
 	public void SetMasterVolume(float volume)
 	{
 		volume = Math.Clamp(volume, 0.0f, 1.0f);
-		AL.Listener(ALListenerf.Gain, volume);
+		_al.SetListenerProperty(ListenerFloat.Gain, volume);
 	}
 
 	public void SlowDown(float pitch)
@@ -114,29 +122,29 @@ public class AudioManager : IDisposable
 
 		UnloadSounds();
 
-		ALC.MakeContextCurrent(ALContext.Null);
-		if (_context != IntPtr.Zero)
+		_alc.MakeContextCurrent(null);
+		if (_context != null)
 		{
-			ALC.DestroyContext(_context);
-			_context = ALContext.Null;
+			_alc.DestroyContext(_context);
+			_context = null;
 		}
 
-		if (_device != IntPtr.Zero)
+		if (_device != null)
 		{
-			ALC.CloseDevice(_device);
-			_device = ALDevice.Null;
+			_alc.CloseDevice(_device);
+			_device = null;
 		}
 
 		_instance = null;
 	}
 
-	private static void PrintOpenALInfo()
+	private void PrintOpenALInfo()
 	{
 		// Assumes an AL context is already current.
-		string vendor = AL.Get(ALGetString.Vendor) ?? "Vendor not found...";
-		string renderer = AL.Get(ALGetString.Renderer) ?? "Renderer not found...";
-		string version = AL.Get(ALGetString.Version) ?? "OpenAL version not found...";
-		string extensionsStr = AL.Get(ALGetString.Extensions) ?? "Extensions not found...";
+		string vendor = _al.GetStateProperty(StateString.Vendor) ?? "Vendor not found...";
+		string renderer = _al.GetStateProperty(StateString.Renderer) ?? "Renderer not found...";
+		string version = _al.GetStateProperty(StateString.Version) ?? "OpenAL version not found...";
+		string extensionsStr = _al.GetStateProperty(StateString.Extensions) ?? "Extensions not found...";
 
 		var extensions = extensionsStr.Split(' ');
 		extensionsStr = string.Join('\n', extensions);

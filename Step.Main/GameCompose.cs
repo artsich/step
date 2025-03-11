@@ -1,11 +1,5 @@
 ﻿using ImGuiNET;
-using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 using Serilog;
-using StbImageSharp;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
@@ -13,12 +7,15 @@ using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Actors;
+using Silk.NET.Maths;
+using Silk.NET.Input;
+using Silk.NET.Windowing;
 
 namespace Step.Main;
 
 public interface IGameWindow
 {
-	Vector2 Size { get; }
+	Vector2f Size { get; }
 }
 
 public enum PhysicLayers : int
@@ -30,79 +27,58 @@ public enum PhysicLayers : int
 	Shield = 1 << 4,
 }
 
-public class GameCompose : GameWindow, IGameWindow
+// todo: shield is visible on after game reload.....
+public class GameCompose : IGameWindow, IGame
 {
+	#region CameraSettings
 	private const float TargetAspectRatio = 16f / 9f;
 	private const float InverseTargetAspectRatio = 1f / TargetAspectRatio;
 
 	private const float GameCameraWidth = 320f;
 	private const float GameCameraHeight = GameCameraWidth * InverseTargetAspectRatio;
+	#endregion
 
-	private bool _paused = false;
-	private bool _showImGui = true;
-
-	private float _lastUpdateTime;
-	private float _audioMasterVolume = 0.15f;
-
+	#region Assets
 	private Texture2d _gliderTexture;
 	private Texture2d _circleTexture;
 	private Texture2d _playerTexture;
 	private Texture2d _crossTexture;
-	private Renderer _renderer;
-	private ImGuiController _controller;
-	private RenderTarget2d _gameRenderTarget;
-
-	private Texture2d _finalImage;
-
-	private readonly List<IEditorView> _editors = [];
-
-	private Camera2d _mainCamera;
-
-	private Vector2 _currentWindowSize;
-
-	private Input _input;
 	private CrtEffect _crtEffect;
+	#endregion
 
-	Vector2 IGameWindow.Size => _currentWindowSize;
+	private RenderTarget2d _gameRenderTarget;
+	private Renderer _renderer;
+	private Texture2d _finalImage;
+	private IWindow _window;
 
-	public GameCompose(
-		GameWindowSettings gameWindowSettings,
-		NativeWindowSettings nativeWindowSettings)
-		: base(gameWindowSettings, nativeWindowSettings)
+	Vector2f IGameWindow.Size => (Vector2f)_window.FramebufferSize;
+
+	Engine.Engine _engine;
+
+	public void Load(Engine.Engine engine)
 	{
-	}
+		_engine = engine;
+		_renderer = engine.Renderer;
+		_window = engine.Window;
+		engine.Mouse.Scroll += GameMouseWheel;
 
-	protected override void OnLoad()
-	{
-		base.OnLoad();
-		MouseWheel += GameMouseWheel;
-
-		StbImage.stbi_set_flip_vertically_on_load(1);
-
-		_controller = new ImGuiController(
-			ClientSize.X, ClientSize.Y,
-			"Assets\\ProggyClean.ttf", 13.0f, this.GetDpi());
-
-		_renderer = new Renderer(ClientSize.X, ClientSize.Y);
-		_renderer.Load();
-
-		_gameRenderTarget = new RenderTarget2d(ClientSize.X, ClientSize.Y, true);
+		var screenSize = engine.Window.FramebufferSize;
+		_gameRenderTarget = new RenderTarget2d(screenSize.X, screenSize.Y, true);
 
 		_crtEffect = new CrtEffect(
 			new Shader(
 				".\\Assets\\Shaders\\CRT\\shader.vert",
 				".\\Assets\\Shaders\\CRT\\shader.frag"
 			),
-			new RenderTarget2d(ClientSize.X, ClientSize.Y, true),
-			_renderer
+			new RenderTarget2d(screenSize.X, screenSize.Y, true),
+			engine.Renderer
 		);
 
-		_renderer.SetBackground(new Color4<Rgba>(0.737f, 0.718f, 0.647f, 1.0f));
 		LoadAssets();
 		ReloadGame();
 
-		_editors.Add(new ParticlesEditor(ClientSize, _mainCamera));
-		_currentWindowSize = ClientSize;
+		engine.AddEditor(new ParticlesEditor(screenSize, GameRoot.I.Scene.GetChildOf<Camera2d>()));
+		engine.AddEditor(new EffectsEditor(_crtEffect));
 	}
 
 	private void LoadAssets()
@@ -119,26 +95,22 @@ public class GameCompose : GameWindow, IGameWindow
 		_circleTexture = Assets.LoadTexture2d("Textures\\circle-enemy.png");
 		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
 		_crossTexture = Assets.LoadTexture2d("Textures\\cross-enemy.png");
-
-		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 	}
 
 	private void ReloadGame()
 	{
 		var width = GameCameraWidth;
 		var height = GameCameraHeight;
-		var camera = new Camera2d(width, height, this);
-
-		_input = new Input(MouseState, KeyboardState, camera, this);
+		var camera = new Camera2d(width, height);
 
 		var root = new Gameplay.Main(_renderer);
 		root.AddChild(camera);
 
 		var player = new Player(
-			_input,
+			_engine.Input,
 			new RectangleShape2d(_renderer)
 			{
-				Size = new Vector2(16f),
+				Size = new Vector2f(16f),
 				CollisionLayers = (int)PhysicLayers.Player,
 				CollisionMask = (int)(PhysicLayers.Enemy | PhysicLayers.Frame)
 			});
@@ -147,18 +119,18 @@ public class GameCompose : GameWindow, IGameWindow
 		playerSprite.AddChild(new Sprite2d(_renderer, _playerTexture)
 		{
 			Name = "Frame",
-			Color = Colors.Player,
+			Color = GameColors.Player,
 		});
 
 		playerSprite.AddChild(new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
 		{
 			Name = "Health",
-			Color = Color4.Lightgreen,
-			Pivot = new Vector2(0f),
+			Color = Color.LightGreen,
+			Pivot = new Vector2f(0f),
 			LocalTransform = new Transform()
 			{
-				Position = new Vector2(-8f, -8f),
-				Scale = new Vector2(16f),
+				Position = new Vector2f(-8f, -8f),
+				Scale = new Vector2f(16f),
 			}
 		});
 
@@ -169,7 +141,7 @@ public class GameCompose : GameWindow, IGameWindow
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 		player.AddAbility(new MagnetAbility(50f, player, _renderer));
-		player.AddAbility(new ShieldAbility(player, new PlayerShield(_input, _renderer)) { Duration = 3f });
+		player.AddAbility(new ShieldAbility(player, new PlayerShield(_engine.Input, _renderer)) { Duration = 3f });
 
 		var enemyFactory = new EnemyFactory(
 			_renderer,
@@ -178,7 +150,7 @@ public class GameCompose : GameWindow, IGameWindow
 			_crossTexture,
 			player);
 
-		var spawner = new Spawner(new Box2(-width / 2f, -height / 2f, width / 2f, height / 2f),
+		var spawner = new Spawner(new Box2f(-width / 2f, -height / 2f, width / 2f, height / 2f),
 			[
 				new SpawnRule
 				{
@@ -215,67 +187,43 @@ public class GameCompose : GameWindow, IGameWindow
 		};
 
 		GameRoot.I.SetScene(root);
-		_mainCamera = root.GetChildOf<Camera2d>();
+		GameRoot.I.CurrentCamera = camera;
 	}
 
-	protected override void OnRenderFrame(FrameEventArgs e)
+	public void Render(float dt)
 	{
-		base.OnRenderFrame(e);
-		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
 		_renderer.PushRenderTarget(_gameRenderTarget);
-		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+		_gameRenderTarget.Clear(GameColors.Background);
 		GameRoot.I.Draw();
-
 		_renderer.Flush();
 		_renderer.PopRenderTarget();
 
+		PostProcessing();
+
+		_renderer.DrawScreenRectNow(_finalImage);
+	}
+
+	private void PostProcessing()
+	{
 		var player = GameRoot.I.Scene.GetChildOf<Player>();
 		var camera = GameRoot.I.Scene.GetChildOf<Camera2d>();
 
 		if (player != null && camera != null)
 		{
-			Vector2 playerWorldPos = player.GlobalPosition;
-
-			Vector4 clipSpace = new Vector4(playerWorldPos.X, playerWorldPos.Y, 0, 1) * camera.ViewProj;
-			var pos = new Vector2(
-				(clipSpace.X / clipSpace.W + 1.0f) * 0.5f,
-				(clipSpace.Y / clipSpace.W + 1.0f) * 0.5f);
-
-			_crtEffect.VignetteTarget = pos;
+			_crtEffect.VignetteTarget = camera.ToClipSpace(player.GlobalPosition);
 		}
 		else
 		{
-			_crtEffect.VignetteTarget = new Vector2(0.5f);
+			_crtEffect.VignetteTarget = new(0.5f);
 		}
 
 		_crtEffect.Apply(_gameRenderTarget.Color, out _finalImage);
-
-		if (_showImGui)
-		{
-			ImGuiRender(e);
-		}
-		else
-		{
-			_renderer.DrawScreenRectNow(_finalImage);
-		}
-
-		SwapBuffers();
 	}
 
-	private void ImGuiRender(FrameEventArgs e)
+	public void ImGuiRender(float dt)
 	{
-		_controller.Update(this, (float)e.Time);
-
-		ImGui.DockSpaceOverViewport();
-
-		if (ImGui.Begin("Some"))
+		if (ImGui.Begin("Game controls"))
 		{
-			if (ImGui.Button("Clear console"))
-			{
-				Console.Clear();
-			}
-
 			if (ImGui.Button("Game & Assets reload"))
 			{
 				UnloadAssets();
@@ -285,64 +233,8 @@ public class GameCompose : GameWindow, IGameWindow
 				ReloadGame();
 			}
 
-			if (ImGui.Button(_paused ? "Paused" : "Un pause"))
-			{
-				_paused = !_paused;
-			}
-
 			ImGui.End();
 		}
-
-		if (ImGui.Begin("Audio Settings"))
-		{
-			ImGui.SliderFloat("Master volume", ref _audioMasterVolume, 0f, 1f);
-			ImGui.End();
-		}
-
-		if (ImGui.Begin("Assets"))
-		{
-			if (ImGui.BeginTabBar("Main Tabs"))
-			{
-				foreach (var editor in _editors)
-				{
-					if (ImGui.BeginTabItem(editor.Name))
-					{
-						editor.Draw();
-						ImGui.EndTabItem();
-					}
-				}
-
-
-				if (ImGui.BeginTabItem("Shaders"))
-				{
-					_crtEffect.DebugDraw();
-					ImGui.EndTabItem();
-				}
-
-				ImGui.EndTabBar();
-			}
-
-			ImGui.End();
-		}
-
-		if (ImGui.Begin("Performance"))
-		{
-			var ms = e.Time * 1000;
-			var fps = 1000 / ms;
-			ImGui.Text($"Render time: {ms:F2}ms | {fps:F2}fps");
-			ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}ms");
-
-			ImGui.Separator();
-			ImGui.Text($"Collision shapes: {CollisionSystem.Ins.Count}");
-
-			ImGui.Separator();
-			ImGui.Text($"GPU Draw time: {_renderer.Stats.GpuTimeMs:F5} ms");
-			ImGui.Text($"Shaders used: {_renderer.Stats.ActiveShaders}");
-
-			ImGui.End();
-		}
-
-		ImGui.ShowDebugLogWindow();
 
 		if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
 		{
@@ -353,15 +245,15 @@ public class GameCompose : GameWindow, IGameWindow
 					availRegion)
 				.ToSystem();
 
-			var headerOffset = new Vector2(
+			var headerOffset = new Vector2f(
 				(ImGui.GetWindowSize().X - availRegion.X) / 2f,
 				ImGui.GetWindowSize().Y - availRegion.Y);
+
+			ImGui.Image((nint)_finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
+
 			var windowPos = ImGui.GetWindowPos().FromSystem();
-			_input.SetMouseOffset(windowPos + headerOffset);
-
-			ImGui.Image(_finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
-
-			_currentWindowSize = imgSize.FromSystem();
+			_engine.Input.SetMouseOffset(windowPos + headerOffset);
+			_engine.Input.SetWindowSize(imgSize.FromSystem());
 			ImGui.End();
 		}
 
@@ -370,98 +262,11 @@ public class GameCompose : GameWindow, IGameWindow
 			GameRoot.I.DebugDraw();
 			ImGui.End();
 		}
-
-		_controller.Render();
-		ImGuiController.CheckGLError("End of frame");
 	}
 
-	protected override void OnUpdateFrame(FrameEventArgs e)
+	public void Update(float dt)
 	{
-		base.OnUpdateFrame(e);
-		float dt = (float)e.Time;
-		_lastUpdateTime = dt;
-
-		if (KeyboardState.IsKeyDown(Keys.Escape))
-		{
-			Close();
-		}
-
-		if (KeyboardState.IsKeyPressed(Keys.P))
-		{
-			_paused = !_paused;
-		}
-
-		if (KeyboardState.IsKeyPressed(Keys.GraveAccent))
-		{
-			_showImGui = !_showImGui;
-		}
-
-		CheckWindowStateToggle();
-
-		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
-
-		if (_showImGui)
-		{
-			foreach (var editor in _editors)
-			{
-				editor.Update(dt);
-			}
-		}
-		else
-		{
-			_currentWindowSize = ClientSize;
-			_input.SetMouseOffset(Vector2.Zero);
-		}
-
-		if (!_paused)
-		{
-			_input.Update(dt);
-			GameRoot.I.Update(dt);
-		}
-	}
-
-	private void CheckWindowStateToggle()
-	{
-		if (KeyboardState.IsKeyDown(Keys.LeftAlt))
-		{
-			if (KeyboardState.IsKeyPressed(Keys.Enter))
-			{
-				if (WindowState == WindowState.Fullscreen)
-				{
-					WindowState = WindowState.Normal;
-				}
-				else
-				{
-					WindowState = WindowState.Fullscreen;
-				}
-			}
-		}
-	}
-
-	protected override void OnTextInput(TextInputEventArgs e)
-	{
-		base.OnTextInput(e);
-
-		if (_showImGui)
-		{
-			_controller.PressChar((char)e.Unicode);
-		}
-	}
-
-	protected override void OnMouseWheel(MouseWheelEventArgs e)
-	{
-		base.OnMouseWheel(e);
-		if (_showImGui)
-		{
-			_controller.MouseScroll(e.Offset);
-		}
-	}
-
-	protected override void OnResize(ResizeEventArgs e)
-	{
-		base.OnResize(e);
-		GL.Viewport(0, 0, e.Width, e.Height);
-		_controller.WindowResized(e.Width, e.Height);
+		GameRoot.I.Update(dt);
 	}
 
 	private void UnloadAssets()
@@ -469,22 +274,21 @@ public class GameCompose : GameWindow, IGameWindow
 		AudioManager.Ins.UnloadSounds();
 	}
 
-	protected override void OnUnload()
+	public void Unload()
 	{
 		UnloadAssets();
 
 		AudioManager.Ins.Dispose();
 		_renderer.Unload();
-		base.OnUnload();
 	}
 
-	private void GameMouseWheel(MouseWheelEventArgs obj)
+	private void GameMouseWheel(IMouse _, ScrollWheel scroll)
 	{
 		var scale = 0.1f;
-		if (obj.OffsetY != 0f)
+		if (scroll.Y != 0f)
 		{
-			scale *= Math.Sign(obj.OffsetY);
-			_mainCamera.Zoom(scale);
+			scale *= Math.Sign(scroll.Y);
+			GameRoot.I.Scene.GetChildOf<Camera2d>().Zoom(scale);
 		}
 	}
 }

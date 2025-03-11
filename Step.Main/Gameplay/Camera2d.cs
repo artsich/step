@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using OpenTK.Mathematics;
 using Step.Engine;
 using Step.Engine.Graphics;
 
@@ -8,16 +7,15 @@ namespace Step.Main.Gameplay;
 public sealed class Camera2d : GameObject, ICamera2d
 {
 	private static readonly Random Random = new(244554);
-	private readonly IGameWindow _window;
-	private Matrix4 proj;
-	private Vector2 shakeOffset;
+	private Matrix4f proj;
+	private Vector2f shakeOffset;
 
-	public Matrix4 ViewProj { get; private set; }
+	public Matrix4f ViewProj { get; private set; }
 
 	private float shakeDuration = 0f;
 	private float shakeMagnitude = 0f;
 
-	public Camera2d(float width, float height, IGameWindow window)
+	public Camera2d(float width, float height)
 		: base(nameof(Camera2d))
 	{
 		proj = Matrix4.CreateOrthographicOffCenter(
@@ -25,21 +23,9 @@ public sealed class Camera2d : GameObject, ICamera2d
 			-height / 2f, height / 2f,
 			-1f, 100f
 		);
-		_window = window;
 
-		LocalTransform.Position = Vector2.Zero;
+		LocalTransform.Position = Vector2f.Zero;
 		UpdateViewProj();
-	}
-
-	public Vector2 ScreenToWorld(Vector2 screenPos)
-	{
-		Vector2 normalizedScreenPos = new(
-			screenPos.X / _window.Size.X * 2 - 1,
-			-(screenPos.Y / _window.Size.Y * 2 - 1)
-		);
-
-		var inverseViewProj = Matrix4.Invert(ViewProj);
-		return (new Vector4(normalizedScreenPos, 0f, 1f) * inverseViewProj).Xy;
 	}
 
 	public void Shake(float magnitude, float duration)
@@ -76,14 +62,14 @@ public sealed class Camera2d : GameObject, ICamera2d
 			shakeOffset.X = (float)(Random.NextDouble() * 2 - 1) * shakeMagnitude;
 			shakeOffset.Y = (float)(Random.NextDouble() * 2 - 1) * shakeMagnitude;
 
-			shakeMagnitude = MathHelper.Lerp(shakeMagnitude, 0.0f, 5f * dt);
+			shakeMagnitude = float.Lerp(shakeMagnitude, 0.0f, 5f * dt);
 			shakeDuration -= dt;
 
 			if (shakeDuration <= 0f)
 			{
 				shakeDuration = 0f;
 				shakeMagnitude = 0f;
-				shakeOffset = Vector2.Zero;
+				shakeOffset = Vector2f.Zero;
 			}
 		}
 	}
