@@ -7,16 +7,9 @@ using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Actors;
-using Silk.NET.Maths;
 using Silk.NET.Input;
-using Silk.NET.Windowing;
 
 namespace Step.Main;
-
-public interface IGameWindow
-{
-	Vector2f Size { get; }
-}
 
 public enum PhysicLayers : int
 {
@@ -27,8 +20,11 @@ public enum PhysicLayers : int
 	Shield = 1 << 4,
 }
 
-// todo: shield is visible on after game reload.....
-public class GameCompose : IGameWindow, IGame
+// todo:
+// shield is visible on after game reload
+// getDpi function does not work
+// do not create second renderer for editor
+public class GameCompose : IGame
 {
 	#region CameraSettings
 	private const float TargetAspectRatio = 16f / 9f;
@@ -48,18 +44,13 @@ public class GameCompose : IGameWindow, IGame
 
 	private RenderTarget2d _gameRenderTarget;
 	private Renderer _renderer;
-	private Texture2d _finalImage;
-	private IWindow _window;
 
-	Vector2f IGameWindow.Size => (Vector2f)_window.FramebufferSize;
-
-	Engine.Engine _engine;
+	private Engine.Engine _engine;
 
 	public void Load(Engine.Engine engine)
 	{
 		_engine = engine;
 		_renderer = engine.Renderer;
-		_window = engine.Window;
 		engine.Mouse.Scroll += GameMouseWheel;
 
 		var screenSize = engine.Window.FramebufferSize;
@@ -75,9 +66,9 @@ public class GameCompose : IGameWindow, IGame
 		);
 
 		LoadAssets();
-		ReloadGame();
+		ReloadGameTree();
 
-		engine.AddEditor(new ParticlesEditor(screenSize, GameRoot.I.Scene.GetChildOf<Camera2d>()));
+		engine.AddEditor(new ParticlesEditor(screenSize, new Camera2d(GameCameraWidth, GameCameraHeight)));
 		engine.AddEditor(new EffectsEditor(_crtEffect));
 	}
 
@@ -97,7 +88,7 @@ public class GameCompose : IGameWindow, IGame
 		_crossTexture = Assets.LoadTexture2d("Textures\\cross-enemy.png");
 	}
 
-	private void ReloadGame()
+	private void ReloadGameTree()
 	{
 		var width = GameCameraWidth;
 		var height = GameCameraHeight;
@@ -183,14 +174,14 @@ public class GameCompose : IGameWindow, IGame
 		{
 			Console.Clear();
 			Log.Logger.Information("Reloading...");
-			ReloadGame();
+			ReloadGameTree();
 		};
 
 		GameRoot.I.SetScene(root);
 		GameRoot.I.CurrentCamera = camera;
 	}
 
-	public void Render(float dt)
+	public Texture2d Render(float dt)
 	{
 		_renderer.PushRenderTarget(_gameRenderTarget);
 		_gameRenderTarget.Clear(GameColors.Background);
@@ -198,12 +189,11 @@ public class GameCompose : IGameWindow, IGame
 		_renderer.Flush();
 		_renderer.PopRenderTarget();
 
-		PostProcessing();
-
-		_renderer.DrawScreenRectNow(_finalImage);
+		return PostProcessing();
 	}
 
-	private void PostProcessing()
+	// todo: this is separate game object!!!
+	private Texture2d PostProcessing()
 	{
 		var player = GameRoot.I.Scene.GetChildOf<Player>();
 		var camera = GameRoot.I.Scene.GetChildOf<Camera2d>();
@@ -217,69 +207,17 @@ public class GameCompose : IGameWindow, IGame
 			_crtEffect.VignetteTarget = new(0.5f);
 		}
 
-		_crtEffect.Apply(_gameRenderTarget.Color, out _finalImage);
-	}
-
-	public void ImGuiRender(float dt)
-	{
-		if (ImGui.Begin("Game controls"))
-		{
-			if (ImGui.Button("Game & Assets reload"))
-			{
-				UnloadAssets();
-				LoadAssets();
-
-				//UnloadGame();
-				ReloadGame();
-			}
-
-			ImGui.End();
-		}
-
-		if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
-		{
-			var availRegion = ImGui.GetContentRegionAvail().FromSystem();
-			var imgSize = StepMath
-				.AdjustToAspect(
-					TargetAspectRatio,
-					availRegion)
-				.ToSystem();
-
-			var headerOffset = new Vector2f(
-				(ImGui.GetWindowSize().X - availRegion.X) / 2f,
-				ImGui.GetWindowSize().Y - availRegion.Y);
-
-			ImGui.Image((nint)_finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
-
-			var windowPos = ImGui.GetWindowPos().FromSystem();
-			_engine.Input.SetMouseOffset(windowPos + headerOffset);
-			_engine.Input.SetWindowSize(imgSize.FromSystem());
-			ImGui.End();
-		}
-
-		if (ImGui.Begin("Scene"))
-		{
-			GameRoot.I.DebugDraw();
-			ImGui.End();
-		}
-	}
-
-	public void Update(float dt)
-	{
-		GameRoot.I.Update(dt);
-	}
-
-	private void UnloadAssets()
-	{
-		AudioManager.Ins.UnloadSounds();
+		_crtEffect.Apply(_gameRenderTarget.Color, out var _finalImage);
+		return _finalImage;
 	}
 
 	public void Unload()
 	{
-		UnloadAssets();
+		AudioManager.Ins.UnloadSounds();
 
-		AudioManager.Ins.Dispose();
-		_renderer.Unload();
+		_crtEffect.Dispose();
+		_gameRenderTarget.Dispose();
+		_engine.ClearEditors();
 	}
 
 	private void GameMouseWheel(IMouse _, ScrollWheel scroll)

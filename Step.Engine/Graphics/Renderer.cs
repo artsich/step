@@ -80,8 +80,6 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 
 	public void Load()
 	{
-		PrintOpenGLInfo();
-
 		_batchSpriteShader = new Shader(
 			"Assets/Shaders/SpriteBatch/shader.vert",
 			"Assets/Shaders/SpriteBatch/shader.frag");
@@ -285,27 +283,5 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 		int aTexId = a.Atlas == null ? -1 : (int)a.Atlas.Handle;
 		int bTexId = b.Atlas == null ? -1 : (int)b.Atlas.Handle;
 		return bTexId.CompareTo(aTexId);
-	}
-
-	private void PrintOpenGLInfo()
-	{
-		string vendor = GL.GetStringS(StringName.Vendor) ?? "Vendor not found...";
-		string renderer = GL.GetStringS(StringName.Renderer) ?? "Renderer not found...";
-		string version = GL.GetStringS(StringName.Version) ?? "Opengl version is not found...";
-		string glslVersion = GL.GetStringS(StringName.ShadingLanguageVersion) ?? "GLSL version not found...";
-
-		// TODO: OpenGL: GL_INVALID_ENUM error generated.
-		string extensionsStr = GL.GetStringS(StringName.Extensions) ?? "NotFound...";
-		var extensions = extensionsStr.Split(' ');
-		extensionsStr = string.Join('\n', extensions);
-
-		Log.Logger.Information("---------------------------------------");
-		Log.Logger.Information("OpenGL Information:");
-		Log.Logger.Information($"Vendor: {vendor}");
-		Log.Logger.Information($"Renderer: {renderer}");
-		Log.Logger.Information($"OpenGL Version: {version}");
-		Log.Logger.Information($"GLSL Version: {glslVersion}");
-		Log.Logger.Information($"Extensions:\n{extensionsStr}");
-		Log.Logger.Information("---------------------------------------");
 	}
 }

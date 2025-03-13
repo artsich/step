@@ -2,7 +2,7 @@
 
 namespace Step.Engine.Graphics;
 
-public unsafe class Shader
+public sealed unsafe class Shader : IDisposable
 {
 	public readonly uint Handle;
 
@@ -127,5 +127,10 @@ public unsafe class Shader
 			Handle,
 			GetUniformLocation(name),
 			values);
+	}
+
+	public void Dispose()
+	{
+		GL.DeleteProgram(Handle);
 	}
 }

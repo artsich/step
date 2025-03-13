@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Serilog;
 using Silk.NET.Input;
+using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.OpenGL.Extensions.ImGui;
 using Silk.NET.Windowing;
@@ -10,6 +11,7 @@ using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace Step.Engine;
 
@@ -19,19 +21,17 @@ public interface IGame
 
 	void Unload();
 
-	void Render(float dt);
-
-	void Update(float dt);
-
-	void ImGuiRender(float dt);
+	Texture2d Render(float dt);
 }
 
 public class Engine(WindowOptions windowOptions)
 {
+	private const float TargetAspectRatio = 16f / 9f;
+
 	private ImGuiController _imGuiController;
 
 	private IWindow _window;
-	private GL GL;
+	private static GL GL => Ctx.GL;
 
 	private IInputContext _inputContext;
 
@@ -56,6 +56,8 @@ public class Engine(WindowOptions windowOptions)
 
 	public void AddEditor(IEditorView editor) => _editors.Add(editor);
 
+	public void ClearEditors() => _editors.Clear();
+
 	public void Run(IGame game)
 	{
 		using (_window = Silk.NET.Windowing.Window.Create(windowOptions))
@@ -77,7 +79,7 @@ public class Engine(WindowOptions windowOptions)
 				Ctx.GL.Clear(ClearBufferMask.ColorBufferBit
 					| ClearBufferMask.DepthBufferBit
 					| ClearBufferMask.StencilBufferBit);
-				game.Render((float)dt);
+				var finalImage = game.Render((float)dt);
 
 				if (_showImGui)
 				{
@@ -98,6 +100,17 @@ public class Engine(WindowOptions windowOptions)
 							}
 							ImGui.EndTabBar();
 						}
+						ImGui.End();
+					}
+
+					if (ImGui.Begin("Game controls"))
+					{
+						if (ImGui.Button("Game & Assets reload"))
+						{
+							game.Unload();
+							game.Load(this);
+						}
+
 						ImGui.End();
 					}
 
@@ -141,8 +154,38 @@ public class Engine(WindowOptions windowOptions)
 						ImGui.End();
 					}
 
-					game.ImGuiRender((float)dt);
+					if (ImGui.Begin("Scene"))
+					{
+						GameRoot.I.DebugDraw();
+						ImGui.End();
+					}
+
+					if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
+					{
+						var availRegion = ImGui.GetContentRegionAvail().FromSystem();
+						var imgSize = StepMath
+							.AdjustToAspect(
+								TargetAspectRatio,
+								availRegion)
+							.ToSystem();
+
+						var headerOffset = new Vector2f(
+							(ImGui.GetWindowSize().X - availRegion.X) / 2f,
+							ImGui.GetWindowSize().Y - availRegion.Y);
+
+						ImGui.Image((nint)finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
+
+						var windowPos = ImGui.GetWindowPos().FromSystem();
+						Input.SetMouseOffset(windowPos + headerOffset);
+						Input.SetWindowSize(imgSize.FromSystem());
+						ImGui.End();
+					}
+
 					_imGuiController.Render();
+				}
+				else
+				{
+					Renderer.DrawScreenRectNow(finalImage);
 				}
 			};
 
@@ -186,7 +229,9 @@ public class Engine(WindowOptions windowOptions)
 				if (!_gameLoopPaused)
 				{
 					_gameInput.Update((float)dt);
-					game.Update((float)dt);
+					GameRoot.I.Update((float)dt);
+
+					//game.Update((float)dt);
 				}
 			};
 
@@ -203,15 +248,7 @@ public class Engine(WindowOptions windowOptions)
 	{
 		StbImage.stbi_set_flip_vertically_on_load(1);
 
-		Ctx.GL = GL = _window.CreateOpenGL();
-
-		if (OperatingSystem.IsWindows())
-		{
-			GL.Enable(EnableCap.DebugOutput);
-			GL.Enable(EnableCap.DebugOutputSynchronous);
-			GL.DebugMessageCallback(GlDebugCallback.FuncPtr, in IntPtr.Zero);
-		}
-
+		Ctx.Init(_window);
 		_imGuiController = new ImGuiController(
 			GL,
 			_window,
@@ -223,6 +260,7 @@ public class Engine(WindowOptions windowOptions)
 				io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 			}
 		);
+		Ctx.PrintOpenGLInfo();
 
 		var screenSize = new Vector2i(_window.FramebufferSize.X, _window.FramebufferSize.Y);
 		Renderer = new Renderer(screenSize.X, screenSize.Y, Ctx.GL);
@@ -235,6 +273,7 @@ public class Engine(WindowOptions windowOptions)
 
 	private void UnloadSystems()
 	{
+		AudioManager.Ins.Dispose();
 		Renderer.Unload();
 	}
 
@@ -244,49 +283,14 @@ public class Engine(WindowOptions windowOptions)
 		{
 			if (Input.IsKeyJustReleased(Key.Enter))
 			{
-				if (_window.WindowState == WindowState.Fullscreen)
+				if (_window.WindowState == WindowState.Maximized)
 				{
 					_window.WindowState = WindowState.Normal;
 				}
 				else
 				{
-					_window.WindowState = WindowState.Fullscreen;
+					_window.WindowState = WindowState.Maximized;
 				}
-			}
-		}
-	}
-
-	private static class GlDebugCallback
-	{
-		public readonly static DebugProc FuncPtr = GLDebugCallback;
-		private const uint GL_DEBUG_CALLBACK_APP_MAKER_ID = 0;
-
-		private static void GLDebugCallback(GLEnum source, GLEnum type, int id, GLEnum severity, int length, nint message, nint userParam)
-		{
-			if (source == GLEnum.DebugSourceApplication && id == GL_DEBUG_CALLBACK_APP_MAKER_ID)
-			{
-				return;
-			}
-
-			string text = "OpenGL: " + Marshal.PtrToStringAnsi(message, length);
-			switch (severity)
-			{
-				case GLEnum.DebugSeverityLow:
-					Log.Logger.Information(text);
-					break;
-				case GLEnum.DebugSeverityMedium:
-					Log.Logger.Warning(text);
-					break;
-				case GLEnum.DebugSeverityHigh:
-					Log.Logger.Error(text);
-					break;
-				case GLEnum.DebugSeverityNotification:
-					if (id == 131185) return; // Buffer detailed info, NVIDIA
-					Log.Logger.Information(text);
-					break;
-				case GLEnum.DontCare:
-				default:
-					break;
 			}
 		}
 	}

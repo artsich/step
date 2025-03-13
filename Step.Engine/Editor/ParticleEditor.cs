@@ -27,7 +27,7 @@ public sealed class ParticlesEditor : IEditorView, IDisposable
 
 	public ParticlesEditor(Vector2i clientSize, ICamera2d camera)
 	{
-		_particlesRenderTarget = new(1280, 720);
+		_particlesRenderTarget = new(1920, 1080);
 		_renderer = new Renderer(clientSize.X, clientSize.Y, GL);
 		_renderer.Load();
 		_renderer.SetCamera(camera);

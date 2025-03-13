@@ -4,11 +4,11 @@ using Step.Engine.Graphics;
 
 namespace Step.Main;
 
-public class CrtEffect(
+public sealed class CrtEffect(
 	Shader shader,
 	RenderTarget2d renderTarget,
 	Renderer renderer
-) : IPostEffect
+) : IPostEffect, IDisposable
 {
 	private float _time;
 
@@ -57,5 +57,11 @@ public class CrtEffect(
 	public void DebugDraw()
 	{
 		EditOf.Render(this);
+	}
+
+	public void Dispose()
+	{
+		shader.Dispose();
+		renderTarget.Dispose();
 	}
 }
