@@ -253,7 +253,9 @@ public class Engine(WindowOptions windowOptions)
 			GL,
 			_window,
 			_inputContext = _window.CreateInput(),
-			new ImGuiFontConfig("Assets\\ProggyClean.ttf", fontSize: 13 * 2),
+			new ImGuiFontConfig(
+				"Assets\\ProggyClean.ttf", 
+				(int)(13 * WindowExt.GetScale())),
 			() =>
 			{
 				var io = ImGui.GetIO();
