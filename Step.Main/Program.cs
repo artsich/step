@@ -30,7 +30,7 @@ var windowOptions = WindowOptions.Default with
 		ContextAPI.OpenGL,
 		ContextProfile.Core,
 		ContextFlags.ForwardCompatible | ContextFlags.Debug,
-		new APIVersion(4, 6))
+		new APIVersion(4, 1))
 	//PreferredDepthBufferBits = 8;
 };
 

@@ -88,7 +88,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 			"Assets/Shaders/ScreenQuad/shader.vert",
 			"Assets/Shaders/ScreenQuad/shader.frag");
 
-		DefaultWhiteTexture = new Texture2d(".\\Assets\\Textures\\white.png").Load();
+		DefaultWhiteTexture = new Texture2d("Assets/Textures/white.png").Load();
 		DefaultWhiteTexture.Bind(0);
 	}
 

@@ -20,7 +20,7 @@ public class Assets
 		}
 	};
 
-	public const string AssetsFolder = ".\\Assets\\";
+	public const string AssetsFolder = "Assets";
 
 	public static Emitter LoadEmitter(string path)
 	{

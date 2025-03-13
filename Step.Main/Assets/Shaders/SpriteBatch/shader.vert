@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 
 layout (location = 0) in int aTexId;
 layout (location = 1) in int aGType;
@@ -6,8 +6,8 @@ layout (location = 2) in vec2 aPos;
 layout (location = 3) in vec2 aTexCoord;
 layout (location = 4) in vec4 aColor;
 
-out flat int TexId;
-out flat int GType;
+flat out int TexId;
+flat out int GType;
 out vec2 TexCoord;
 out vec4 Color;
 

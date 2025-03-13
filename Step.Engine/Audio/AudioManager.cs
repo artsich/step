@@ -3,7 +3,59 @@ using Silk.NET.OpenAL;
 
 namespace Step.Engine.Audio;
 
-public unsafe class AudioManager : IDisposable
+public interface IAudioManager
+{
+	void SetMasterVolume(float volume);
+	void SlowDown(float pitch);
+	void LoadSound(string key, string filePath);
+	void PlaySound(string key, bool loop = false);
+	void PauseSound(string key);
+	void StopSound(string key);
+	void UnloadSound(string key);
+	void UnloadSounds();
+	void Dispose();
+}
+
+public class FakeAudioManager : IAudioManager
+{
+	public void SetMasterVolume(float volume)
+	{
+	}
+
+	public void SlowDown(float pitch)
+	{
+	}
+
+	public void LoadSound(string key, string filePath)
+	{
+	}
+
+	public void PlaySound(string key, bool loop = false)
+	{
+	}
+
+	public void PauseSound(string key)
+	{
+	}
+
+	public void StopSound(string key)
+	{
+	}
+
+	public void UnloadSound(string key)
+	{
+	}
+
+	public void UnloadSounds()
+	{
+	}
+
+	public void Dispose()
+	{
+	}
+}
+
+public unsafe class AudioManager : IDisposable, IAudioManager
 {
 	private readonly ALContext _alc;
 	private readonly AL _al;
@@ -13,11 +65,23 @@ public unsafe class AudioManager : IDisposable
 
 	private readonly Dictionary<string, Sound> _loadedSounds = [];
 
-	private static AudioManager? _instance;
+	private static IAudioManager? _instance;
 
-	public static AudioManager Ins => _instance ??= new AudioManager();
+	public static IAudioManager Ins
+	{
+		get
+		{
+			if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+			{
+				return _instance ??= new AudioManager();
+			}
 
-	public static AL Al => _instance!._al;
+			_instance ??= new FakeAudioManager();
+			return _instance;
+		}
+	}
+
+	internal static AL Al => (_instance as AudioManager)!._al;
 
 	private AudioManager()
 	{

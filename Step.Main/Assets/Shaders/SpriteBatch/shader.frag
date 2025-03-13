@@ -1,13 +1,13 @@
-#version 460 core
+#version 410 core
 
-in flat int TexId;
-in flat int GType; // 0 - quad, 1 - circle
+flat in int TexId;
+flat in int GType; // 0 - quad, 1 - circle
 in vec2 TexCoord;
 in vec4 Color;
 
 out vec4 outputColor;
 
-uniform sampler2D diffuseTextures[32];
+uniform sampler2D diffuseTextures[16]; // for mac 16 max
 
 void main()
 {

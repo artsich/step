@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 
 vec2 positions[4] = vec2[4](
     vec2(-0.5, -0.5), // Bottom-left

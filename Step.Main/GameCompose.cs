@@ -22,7 +22,6 @@ public enum PhysicLayers : int
 
 // todo:
 // shield is visible on after game reload
-// getDpi function does not work
 // do not create second renderer for editor
 public class GameCompose : IGame
 {
@@ -58,8 +57,8 @@ public class GameCompose : IGame
 
 		_crtEffect = new CrtEffect(
 			new Shader(
-				".\\Assets\\Shaders\\CRT\\shader.vert",
-				".\\Assets\\Shaders\\CRT\\shader.frag"
+				"Assets/Shaders/CRT/shader.vert",
+				"Assets/Shaders/CRT/shader.frag"
 			),
 			new RenderTarget2d(screenSize.X, screenSize.Y, true),
 			engine.Renderer
@@ -74,18 +73,18 @@ public class GameCompose : IGame
 
 	private void LoadAssets()
 	{
-		AudioManager.Ins.LoadSound("start", "Music\\ok_lets_go.mp3");
-		AudioManager.Ins.LoadSound("main_theme", "Music\\air-ambience-234180.mp3");
-		AudioManager.Ins.LoadSound("player_hurt_glider", "Music\\hurt.wav");
-		AudioManager.Ins.LoadSound("player_hurt_circle", "Music\\hurt2.wav");
-		AudioManager.Ins.LoadSound("player_pickup", "Music\\pickup.wav");
+		AudioManager.Ins.LoadSound("start", "Music/ok_lets_go.mp3");
+		AudioManager.Ins.LoadSound("main_theme", "Music/air-ambience-234180.mp3");
+		AudioManager.Ins.LoadSound("player_hurt_glider", "Music/hurt.wav");
+		AudioManager.Ins.LoadSound("player_hurt_circle", "Music/hurt2.wav");
+		AudioManager.Ins.LoadSound("player_pickup", "Music/pickup.wav");
 
-		AudioManager.Ins.LoadSound("wall_collision", "Music\\wall_collision.mp3");
+		AudioManager.Ins.LoadSound("wall_collision", "Music/wall_collision.mp3");
 
-		_gliderTexture = Assets.LoadTexture2d("Textures\\glider-enemy.png");
-		_circleTexture = Assets.LoadTexture2d("Textures\\circle-enemy.png");
-		_playerTexture = Assets.LoadTexture2d("Textures\\player.png");
-		_crossTexture = Assets.LoadTexture2d("Textures\\cross-enemy.png");
+		_gliderTexture = Assets.LoadTexture2d("Textures/glider-enemy.png");
+		_circleTexture = Assets.LoadTexture2d("Textures/circle-enemy.png");
+		_playerTexture = Assets.LoadTexture2d("Textures/player.png");
+		_crossTexture = Assets.LoadTexture2d("Textures/cross-enemy.png");
 	}
 
 	private void ReloadGameTree()

@@ -61,7 +61,8 @@ public sealed unsafe class Shader : IDisposable
 		GL.GetProgram(program, ProgramPropertyARB.LinkStatus, out var code);
 		if (code != (int)GLEnum.True)
 		{
-			throw new Exception($"Error occurred whilst linking Program({program})");
+			var infoLog = GL.GetProgramInfoLog(program);
+			throw new Exception($"Error occurred whilst linking Program({program}): {infoLog}");
 		}
 	}
 
