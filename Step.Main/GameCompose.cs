@@ -1,13 +1,13 @@
-﻿using ImGuiNET;
-using Serilog;
+﻿using Serilog;
+using Silk.NET.Input;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
+using Step.Engine.Graphics.UI;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Actors;
-using Silk.NET.Input;
 
 namespace Step.Main;
 
@@ -125,13 +125,20 @@ public class GameCompose : IGame
 		});
 
 		player.AddChild(playerSprite);
-
 		player.AddAbility(new SpeedIncreaseAbility(player));
 		player.AddAbility(new RegenerationAbility(player));
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 		player.AddAbility(new MagnetAbility(50f, player, _renderer));
 		player.AddAbility(new ShieldAbility(player, new PlayerShield(_engine.Input, _renderer)) { Duration = 3f });
+		player.AddChild(new Label(_engine.Renderer)
+		{
+			Text = @"Player",
+			FontPath = "Assets/Fonts/Pixellari.ttf",
+			FontSize = 16f,
+			Color = Color.Red,
+			LocalPosition = new Vector2f(0f, 10f)
+		});
 
 		var enemyFactory = new EnemyFactory(
 			_renderer,
@@ -141,27 +148,27 @@ public class GameCompose : IGame
 			player);
 
 		var spawner = new Spawner(new Box2f(-width / 2f, -height / 2f, width / 2f, height / 2f),
-			[
-				new SpawnRule
-				{
-					StartTime = 0f,
-					SpawnWeight = 1f,
-					CreateEntity = enemyFactory.CreateCircle
-				},
-				new SpawnRule
-				{
-					StartTime = 60f,
-					SpawnWeight = 0.05f,
-					CreateEntity = enemyFactory.CreateGlider
-				},
-				new SpawnRule
-				{
-					StartTime = 30f,
-					SpawnWeight = 0.1f,
-					CreateEntity = enemyFactory.CreateCross,
-					SpawnLocation = SpawnLocationType.Interior,
-				}
-			]);
+		[
+			new SpawnRule
+			{
+				StartTime = 0f,
+				SpawnWeight = 1f,
+				CreateEntity = enemyFactory.CreateCircle
+			},
+			new SpawnRule
+			{
+				StartTime = 60f,
+				SpawnWeight = 0.05f,
+				CreateEntity = enemyFactory.CreateGlider
+			},
+			new SpawnRule
+			{
+				StartTime = 30f,
+				SpawnWeight = 0.1f,
+				CreateEntity = enemyFactory.CreateCross,
+				SpawnLocation = SpawnLocationType.Interior,
+			}
+		]);
 
 		var frame = new Frame(_renderer);
 
@@ -188,6 +195,7 @@ public class GameCompose : IGame
 		_renderer.Flush();
 		_renderer.PopRenderTarget();
 
+		//return _gameRenderTarget.Color;
 		return PostProcessing();
 	}
 

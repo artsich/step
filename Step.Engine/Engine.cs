@@ -10,8 +10,7 @@ using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
+using Step.Engine.Logging;
 
 namespace Step.Engine;
 
@@ -248,13 +247,21 @@ public class Engine(WindowOptions windowOptions)
 	{
 		StbImage.stbi_set_flip_vertically_on_load(1);
 
+		Log.Logger = new LoggerConfiguration()
+			.WriteTo.Async(wt =>
+			{
+				wt.Console();
+				wt.ImGuiDebugLog();
+			})
+			.CreateLogger();
+
 		Ctx.Init(_window);
 		_imGuiController = new ImGuiController(
 			GL,
 			_window,
 			_inputContext = _window.CreateInput(),
 			new ImGuiFontConfig(
-				"Assets\\ProggyClean.ttf", 
+				"EngineData/Fonts/ProggyClean.ttf", 
 				(int)(13 * WindowExt.GetScale())),
 			() =>
 			{

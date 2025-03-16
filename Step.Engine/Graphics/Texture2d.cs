@@ -3,29 +3,22 @@ using StbImageSharp;
 
 namespace Step.Engine.Graphics;
 
-public class Texture2d(string path = "") : IDisposable
+public class Texture2d : IDisposable
 {
-	private readonly GL GL = Ctx.GL;
+	private static GL GL => Ctx.GL;
 
-	public uint Handle { get; private set; } = Ctx.GL.GenTexture();
-
-	public string Path { get; } = path;
+	public uint Handle { get; private set; } = GL.GenTexture();
 
 	public int Width { get; private set; }
 
 	public int Height { get; private set; }
 
-	public Texture2d Load()
+	public static Texture2d LoadFromStream(Stream stream)
 	{
-		if (string.IsNullOrEmpty(Path))
-		{
-			throw new InvalidOperationException("[Texture 2d] - Nothing to load");
-		}
+		var imageResult = ImageResult.FromStream(stream);
 
-		using var fileStream = File.OpenRead(Path);
-		var imageResult = ImageResult.FromStream(fileStream);
-
-		SetImageData(
+		var result = new Texture2d();
+		result.SetImageData(
 			imageResult.Width,
 			imageResult.Height,
 			InternalFormat.Rgba,
@@ -41,7 +34,18 @@ public class Texture2d(string path = "") : IDisposable
 			imageResult.Data,
 			false);
 
-		return this;
+		return result;
+	}
+
+	public static Texture2d LoadFromFile(string path)
+	{
+		if (string.IsNullOrEmpty(path))
+		{
+			throw new InvalidOperationException("[Texture 2d] - Nothing to load");
+		}
+
+		using var file = File.Open(path, FileMode.Open);
+		return LoadFromStream(file);
 	}
 
 	public unsafe void SetImageData(

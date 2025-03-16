@@ -9,10 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Step.Engine\Step.Engine.csproj" />
     </ItemGroup>
 
@@ -24,6 +20,12 @@
     <Compile Include="..\Global\Usings.cs">
       <Link>External\Usings.cs</Link>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="EngineData\Fonts\ProggyClean.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

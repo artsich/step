@@ -1,5 +1,4 @@
-﻿using Silk.NET.OpenGL;
-using Step.Engine.Audio;
+﻿using Step.Engine.Audio;
 using Step.Engine.Converters;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;
@@ -38,7 +37,7 @@ public class Assets
 
 	public static Texture2d LoadTexture2d(string path)
 	{
-		return new Texture2d(FullPath(path)).Load();
+		return Texture2d.LoadFromFile(FullPath(path));
 	}
 
 	public static Sound LoadSound(string path)

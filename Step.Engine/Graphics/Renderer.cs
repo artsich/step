@@ -88,7 +88,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 			"Assets/Shaders/ScreenQuad/shader.vert",
 			"Assets/Shaders/ScreenQuad/shader.frag");
 
-		DefaultWhiteTexture = new Texture2d("Assets/Textures/white.png").Load();
+		DefaultWhiteTexture = Texture2d.LoadFromFile("Assets/Textures/white.png");
 		DefaultWhiteTexture.Bind(0);
 	}
 
@@ -196,7 +196,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 			BlendingFactor.SrcAlpha,
 			BlendingFactor.OneMinusSrcAlpha);
 
-		//_gpuTimer.Start();
+		_gpuTimer.Start();
 
 		Shader currentShader = _batchSpriteShader!;
 		SetDefaultShaderVariables(currentShader);
@@ -225,7 +225,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 		_spriteBatch.Flush();
 		GL.Disable(EnableCap.Blend);
 
-		//Stats.GpuTimeMs = _gpuTimer.Stop();
+		Stats.GpuTimeMs = _gpuTimer.Stop();
 
 		_commands.Clear();
 	}

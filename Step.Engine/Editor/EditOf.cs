@@ -59,7 +59,22 @@ public static class EditOf
 
 			var propertyType = property.PropertyType;
 
-			if (propertyType == typeof(int))
+			if (propertyType == typeof(string))
+			{
+				handlers.Add(new PropertyHandler
+				{
+					Name = property.Name,
+					RenderAction = target =>
+					{
+						string value = (string)property.GetValue(target);
+						if (ImGui.InputText(property.Name, ref value, 1000))
+						{
+							property.SetValue(target, value);
+						}
+					}
+				});
+			}
+			else if (propertyType == typeof(int))
 			{
 				handlers.Add(new PropertyHandler
 				{
@@ -104,7 +119,7 @@ public static class EditOf
 					}
 				});
 			}
-			else if (propertyType == typeof(Vector2))
+			else if (propertyType == typeof(Vector2f))
 			{
 				handlers.Add(new PropertyHandler
 				{
