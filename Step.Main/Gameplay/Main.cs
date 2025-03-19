@@ -1,10 +1,13 @@
-﻿using Step.Engine.Graphics;
+﻿using ImGuiNET;
 using Step.Engine;
 using Step.Engine.Audio;
+using Step.Engine.Graphics;
+using Step.Engine.Graphics.UI;
 using Step.Main.Gameplay.Actors;
-using ImGuiNET;
-using System.Text.Json.Serialization;
+using Step.Main.Gameplay.UI;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Step.Main.Gameplay;
 
@@ -20,7 +23,7 @@ public class GameInfo
 	[JsonInclude]
 	public Dictionary<Coin, int> Coins { get; private set; } = [];
 
-	public void AddCoin(Coin coin, int count) 
+	public void AddCoin(Coin coin, int count)
 	{
 		Coins.TryAdd(coin, 0);
 		Coins[coin] += count;
@@ -51,6 +54,7 @@ public class Main(Renderer renderer) : GameObject("Root")
 	private Camera2d? _camera;
 	private Player? _player;
 	private Spawner? _spawner;
+	private GameHud? _hud;
 
 	private GameInfo _gameInfo;
 
@@ -73,6 +77,10 @@ public class Main(Renderer renderer) : GameObject("Root")
 
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
+
+		_hud = new GameHud(renderer, _gameInfo);
+		_hud.Start();
+		AddChild(_hud);
 	}
 
 	private void OnEnemySpawn(GameObject obj)

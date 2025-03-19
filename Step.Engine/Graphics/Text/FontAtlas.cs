@@ -1,3 +1,5 @@
+using Serilog;
+using Silk.NET.GLFW;
 using SixLabors.Fonts;
 using SixLabors.Fonts.Unicode;
 using SixLabors.ImageSharp;
@@ -10,6 +12,8 @@ namespace Step.Engine.Graphics.Text;
 
 public sealed class FontAtlas
 {
+	private readonly static Dictionary<string, FontAtlas> Atlases = [];
+
 	private bool _debug = false;
 	private int _cellSize;
 	private int _charsPerRow;
@@ -29,7 +33,11 @@ public sealed class FontAtlas
 
 	public FontAtlas(string fontPath, float fontSize)
 	{
+		Log.Logger.Information("------------------");
+		Log.Logger.Information($"Generating Font Atlas for: {fontPath} with {fontSize}px");
+
 		GenerateAtlas(fontPath, fontSize);
+		Log.Logger.Information("------------------");
 	}
 
 	private void GenerateAtlas(string fontPath, float fontSize)
@@ -51,7 +59,6 @@ public sealed class FontAtlas
 		int atlasHeight = _cellSize * rows;
 
 		Console.WriteLine($"Creating font atlas: {atlasWidth}x{atlasHeight}, Cell size: {_cellSize}px");
-		Console.WriteLine($"Max bearingY: {_maxBearingY}");
 
 		using var atlasImage = new Image<Rgba32>(atlasWidth, atlasHeight);
 
@@ -291,6 +298,13 @@ public sealed class FontAtlas
 
 	public static FontAtlas CreateFromFile(string fontPath, float fontSize)
 	{
-		return new FontAtlas(fontPath, fontSize);
+		var key = $"{fontPath}_{fontSize}";
+		if (!Atlases.TryGetValue(key, out var fontAtlas))
+		{
+			fontAtlas = new FontAtlas(fontPath, fontSize);
+			Atlases[key] = fontAtlas;
+		}
+
+		return fontAtlas;
 	}
 }

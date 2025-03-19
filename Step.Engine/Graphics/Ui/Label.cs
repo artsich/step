@@ -4,7 +4,7 @@ using Step.Engine.Graphics.Text;
 
 namespace Step.Engine.Graphics.UI;
 
-public sealed class Label : CanvasItem
+public sealed class Label : Control
 {
 	private readonly Renderer renderer;
 	private FontAtlas? _font;
@@ -13,6 +13,7 @@ public sealed class Label : CanvasItem
 	private bool _isDirty = true;
 	private float _fontSize = 16f;
 	private string _fontPath = "EngineData/Fonts/ProggyClean.ttf";
+	private Vector2f _cachedSize = Vector2f.Zero;
 
 	[EditorProperty]
 	public string Text
@@ -23,6 +24,7 @@ public sealed class Label : CanvasItem
 			if (_text != value)
 			{
 				_text = value;
+				_isDirty = true;
 			}
 		}
 	}
@@ -49,10 +51,42 @@ public sealed class Label : CanvasItem
 		{
 			if (_fontSize != value)
 			{
-				_fontSize = value;
+				_fontSize = value > 0 ? value : 1;
 				_isDirty = true;
 			}
 		}
+	}
+
+	public override Vector2f Size
+	{
+		get
+		{
+			if (_font == null || string.IsNullOrEmpty(_text))
+				return Vector2f.Zero;
+
+			// TODO: Cache it?
+			return CalculateTextSize();
+		}
+	}
+
+	private Vector2f CalculateTextSize()
+	{
+		if (_font == null || string.IsNullOrEmpty(_text))
+			return Vector2f.Zero;
+
+		float width = 0f;
+		float height = 0f;
+
+		foreach (var c in _text)
+		{
+			if (_font.GlyphMetrics.TryGetValue(c, out var metrics))
+			{
+				width += metrics.Advance;
+				height = Math.Max(height, metrics.Size.Y);
+			}
+		}
+
+		return new Vector2f(width, height) * LocalTransform.Scale;
 	}
 
 	public Label(Renderer renderer) : base(nameof(Label))
@@ -60,6 +94,7 @@ public sealed class Label : CanvasItem
 		this.renderer = renderer;
 		Layer = 100;
 	}
+
 	protected override void OnDebugDraw()
 	{
 		EditOf.Render(this);
@@ -71,7 +106,10 @@ public sealed class Label : CanvasItem
 
 		if (_isDirty)
 		{
-			LoadFont();
+			if (string.IsNullOrEmpty(FontPath))
+				return;
+			_font = FontAtlas.CreateFromFile(FontPath, _fontSize);
+
 			_isDirty = false;
 		}
 	}
@@ -112,13 +150,5 @@ public sealed class Label : CanvasItem
 				Log.Logger.Warning($"Invlaid character: '{c} - '{(int)c}'");
 			}
 		}
-	}
-
-	private void LoadFont()
-	{
-		if (string.IsNullOrEmpty(FontPath))
-			return;
-
-		_font = FontAtlas.CreateFromFile(FontPath, _fontSize);
 	}
 }

@@ -131,14 +131,6 @@ public class GameCompose : IGame
 		player.AddAbility(new TimeFreezeAbility() { Duration = 2f });
 		player.AddAbility(new MagnetAbility(50f, player, _renderer));
 		player.AddAbility(new ShieldAbility(player, new PlayerShield(_engine.Input, _renderer)) { Duration = 3f });
-		player.AddChild(new Label(_engine.Renderer)
-		{
-			Text = @"Player",
-			FontPath = "Assets/Fonts/Pixellari.ttf",
-			FontSize = 16f,
-			Color = Color.Red,
-			LocalPosition = new Vector2f(0f, 10f)
-		});
 
 		var enemyFactory = new EnemyFactory(
 			_renderer,
@@ -175,6 +167,14 @@ public class GameCompose : IGame
 		root.AddChild(frame);
 		root.AddChild(player);
 		root.AddChild(spawner);
+		//root.AddChild(new Label(_engine.Renderer)
+		//{
+		//	Text = string.Join("",Enumerable.Range(32, 127).Select(x => (char)x).ToArray()),
+		//	FontPath = "Assets/Fonts/Pixellari.ttf",
+		//	FontSize = 16f,
+		//	Color = Color.Red,
+		//	LocalPosition = new Vector2f(-400f, 10f)
+		//});
 
 		root.OnFinish += () =>
 		{

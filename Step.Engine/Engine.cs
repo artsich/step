@@ -23,6 +23,9 @@ public interface IGame
 	Texture2d Render(float dt);
 }
 
+/*
+  Input must be decoupled from engine cycle.
+ */
 public class Engine(WindowOptions windowOptions)
 {
 	private const float TargetAspectRatio = 16f / 9f;
@@ -109,6 +112,8 @@ public class Engine(WindowOptions windowOptions)
 							game.Unload();
 							game.Load(this);
 						}
+
+						ImGui.Text($"Mouse: {_gameInput.MouseWorldPosition.X:F0}, {_gameInput.MouseWorldPosition.Y:F0}");
 
 						ImGui.End();
 					}

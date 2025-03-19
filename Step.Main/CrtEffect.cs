@@ -22,7 +22,7 @@ public sealed class CrtEffect(
 	public float BendScale { get; set; } = 1.5f;
 
 	[EditorProperty(speed: 0.01f)]
-	public float VignetteIntensity { get; set; } = 1.5f;
+	public float VignetteIntensity { get; set; } = 2.77f;
 
 	[EditorProperty(speed: 0.01f)]
 	public float VignetteRoundness { get; set; } = 0.5f;

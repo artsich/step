@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Serilog;
 using Step.Engine.Editor;
+using System.Diagnostics;
 
 namespace Step.Engine;
 
@@ -64,6 +65,7 @@ public class GameObject(string name = nameof(GameObject))
 
 	public void AddChild(GameObject child)
 	{
+		Debug.Assert(this != child, "WTF??");
 		child._parent?.RemoveChild(child);
 		child._parent = this;
 		children.Add(child);
@@ -71,6 +73,7 @@ public class GameObject(string name = nameof(GameObject))
 
 	public void RemoveChild(GameObject child)
 	{
+		Debug.Assert(this != child, "WTF??");
 		if (!children.Contains(child))
 		{
 			return;

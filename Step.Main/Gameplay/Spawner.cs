@@ -15,7 +15,7 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 	public float SpawnRateIncreaseFactor { get; set; } = 0.5f;
 
 	[EditorProperty]
-	public bool On { get; set; } = false;
+	public bool On { get; set; } = true;
 
 	public event Action<GameObject>? OnSpawn;
 
