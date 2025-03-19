@@ -19,6 +19,8 @@ public class Assets
 		}
 	};
 
+	private static readonly Dictionary<string, Texture2d> _textureCache = [];
+
 	public const string AssetsFolder = "Assets";
 
 	public static Emitter LoadEmitter(string path)
@@ -37,7 +39,15 @@ public class Assets
 
 	public static Texture2d LoadTexture2d(string path)
 	{
-		return Texture2d.LoadFromFile(FullPath(path));
+		var fullPath = FullPath(path);
+		if (_textureCache.TryGetValue(fullPath, out var cachedTexture))
+		{
+			return cachedTexture;
+		}
+
+		var texture = Texture2d.LoadFromFile(fullPath);
+		_textureCache[fullPath] = texture;
+		return texture;
 	}
 
 	public static Sound LoadSound(string path)
