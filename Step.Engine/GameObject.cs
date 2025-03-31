@@ -9,6 +9,8 @@ public class GameObject(string name = nameof(GameObject))
 {
 	public string Name { get; init; } = name;
 
+	public bool Enabled { get; set; } = true;
+
 	public Transform LocalTransform = new();
 
 	public GameObject? Parent => _parent;
@@ -84,7 +86,7 @@ public class GameObject(string name = nameof(GameObject))
 
 	public void Update(float deltaTime)
 	{
-		if (_markedAsFree)
+		if (_markedAsFree || !Enabled)
 		{
 			return;
 		}
@@ -98,6 +100,11 @@ public class GameObject(string name = nameof(GameObject))
 
 	public void Draw()
 	{
+		if (!Enabled)
+		{
+			return;
+		}
+
 		OnRender();
 		foreach (var child in children)
 		{

@@ -2,12 +2,10 @@
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Graphics;
-using Step.Engine.Graphics.UI;
 using Step.Main.Gameplay.Actors;
 using Step.Main.Gameplay.UI;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Step.Main.Gameplay;
 
@@ -47,23 +45,28 @@ public class GameInfo
 	}
 }
 
-public class Main(Renderer renderer) : GameObject("Root")
+public class GameLoop(Renderer renderer) : GameObject("Root")
 {
 	private const string PathToSaveFile = "./Assets/GameSave.json";
 
 	private Camera2d? _camera;
 	private Player? _player;
 	private Spawner? _spawner;
-	private GameHud? _hud;
 
 	private GameInfo _gameInfo;
 
 	public Action? OnFinish;
 
-	protected override void OnStart()
+	public GameLoop(Engine.Engine engine)
+		: this(engine.Renderer)
 	{
 		_gameInfo = GameInfo.FromFile(PathToSaveFile);
 
+		AddChild(new GameHud(engine.Renderer, _gameInfo));
+	}
+
+	protected override void OnStart()
+	{
 		_camera = GetChildOf<Camera2d>();
 		_player = GetChildOf<Player>();
 		_spawner = GetChildOf<Spawner>();
@@ -77,10 +80,6 @@ public class Main(Renderer renderer) : GameObject("Root")
 
 		AudioManager.Ins.PlaySound("start");
 		AudioManager.Ins.PlaySound("main_theme", true);
-
-		_hud = new GameHud(renderer, _gameInfo);
-		_hud.Start();
-		AddChild(_hud);
 	}
 
 	private void OnEnemySpawn(GameObject obj)
@@ -119,10 +118,6 @@ public class Main(Renderer renderer) : GameObject("Root")
 	private void OnPlayerDeath()
 	{
 		OnFinish?.Invoke();
-	}
-
-	protected override void OnUpdate(float deltaTime)
-	{
 	}
 
 	protected override void OnRender()

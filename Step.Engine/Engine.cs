@@ -37,14 +37,14 @@ public class Engine(WindowOptions windowOptions)
 
 	private IInputContext _inputContext;
 
-	private IKeyboard Keyboard => _inputContext.Keyboards.First(x => x.IsConnected);
+	public IKeyboard Keyboard => _inputContext.Keyboards.First(x => x.IsConnected);
 
 	public IMouse Mouse => _inputContext.Mice.First(x => x.IsConnected);
 
 	private Input _gameInput;
 
 	private bool _gameLoopPaused;
-	private bool _showImGui = true;
+	private bool _editorEnabled = false;
 	private float _lastUpdateTime;
 
 	private List<IEditorView> _editors = [];
@@ -83,7 +83,7 @@ public class Engine(WindowOptions windowOptions)
 					| ClearBufferMask.StencilBufferBit);
 				var finalImage = game.Render((float)dt);
 
-				if (_showImGui)
+				if (_editorEnabled)
 				{
 					_imGuiController.Update((float)dt);
 					ImGui.DockSpaceOverViewport();
@@ -196,7 +196,7 @@ public class Engine(WindowOptions windowOptions)
 			_window.Update += (dt) =>
 			{
 				_lastUpdateTime = (float)dt;
-				if (Input.IsKeyJustPressed(Key.Escape))
+				if (Input.IsKeyJustPressed(Key.F1))
 				{
 					_window.Close();
 					return;
@@ -210,14 +210,14 @@ public class Engine(WindowOptions windowOptions)
 
 				if (Input.IsKeyJustPressed(Key.GraveAccent))
 				{
-					_showImGui = !_showImGui;
+					_editorEnabled = !_editorEnabled;
 				}
 
 				CheckWindowStateToggle();
 
 				AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
-				if (_showImGui)
+				if (_editorEnabled)
 				{
 					foreach (var editor in _editors)
 					{
@@ -283,6 +283,21 @@ public class Engine(WindowOptions windowOptions)
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
 		_gameInput = new Input(Mouse, Keyboard);
+
+		Mouse.Scroll += GameMouseWheel;
+	}
+
+	private void GameMouseWheel(IMouse _, ScrollWheel scroll)
+	{
+		if (_editorEnabled)
+		{
+			var scale = 0.1f;
+			if (scroll.Y != 0f)
+			{
+				scale *= Math.Sign(scroll.Y);
+				GameRoot.I.Scene.GetChildOf<Camera2d>().Zoom(scale);
+			}
+		}
 	}
 
 	private void UnloadSystems()

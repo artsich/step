@@ -74,7 +74,7 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 		{
 			LocalTransform = new Transform()
 			{
-				Position = new Vector2f(-150f, 60f),
+				Position = new Vector2f(-150f, 55f),
 				Scale = new(0.5f),
 			}
 		});

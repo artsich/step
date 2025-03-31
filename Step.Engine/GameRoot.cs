@@ -37,6 +37,14 @@ public sealed class GameRoot
 		_scene.Start();
 	}
 
+	public void SwapScene(GameObject scene)
+	{
+		Defer(() =>
+		{
+			_scene = scene;
+		});
+	}
+
 	public void Update(float dt)
 	{
 		RealDt = dt;

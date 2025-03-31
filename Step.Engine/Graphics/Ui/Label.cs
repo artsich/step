@@ -8,12 +8,12 @@ public sealed class Label : Control
 {
 	private readonly Renderer renderer;
 	private FontAtlas? _font;
+	private Vector2f _minSize;
 
 	private string _text = string.Empty;
 	private bool _isDirty = true;
 	private float _fontSize = 16f;
 	private string _fontPath = "EngineData/Fonts/ProggyClean.ttf";
-	private Vector2f _cachedSize = Vector2f.Zero;
 
 	[EditorProperty]
 	public string Text
@@ -57,15 +57,23 @@ public sealed class Label : Control
 		}
 	}
 
+	// TODO: CalculateTextSize happens twice...
 	public override Vector2f Size
 	{
-		get
+		get => _minSize;
+		set
 		{
 			if (_font == null || string.IsNullOrEmpty(_text))
-				return Vector2f.Zero;
-
-			// TODO: Cache it?
-			return CalculateTextSize();
+			{
+				_minSize = Vector2f.Zero;
+				return;
+			}
+			else {
+				var textSize = CalculateTextSize();
+				_minSize = new Vector2f(
+					Math.Max(value.X, textSize.X),
+					Math.Max(value.Y, textSize.Y));
+			}
 		}
 	}
 
@@ -109,6 +117,7 @@ public sealed class Label : Control
 			if (string.IsNullOrEmpty(FontPath))
 				return;
 			_font = FontAtlas.CreateFromFile(FontPath, _fontSize);
+			Size = CalculateTextSize();
 
 			_isDirty = false;
 		}

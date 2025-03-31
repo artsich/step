@@ -1,8 +1,6 @@
 ﻿using ImGuiNET;
-using Step.Engine;
-using Step.Engine.Graphics;
 
-namespace Step.Main.Gameplay;
+namespace Step.Engine.Graphics;
 
 public sealed class Camera2d : GameObject, ICamera2d
 {

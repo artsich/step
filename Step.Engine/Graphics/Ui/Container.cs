@@ -6,6 +6,7 @@ public abstract class Container : Control
 {
 	[EditorProperty]
 	public float Spacing { get; set; } = 5f;
+	public bool UniformSize { get; set; } = false;
 
 	protected Container(string name) : base(name)
 	{

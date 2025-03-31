@@ -14,13 +14,28 @@ public class HContainer(string name = nameof(HContainer)) : Container(name)
 	protected override void UpdateChildrenLayout()
 	{
 		float currentX = 0f;
+		float maxHeight = 0f;
 
-		var maxHeight = children.OfType<Control>().Max(x => x.Size.Y);
-
+		// First pass: calculate max dimensions
 		foreach (var child in children.OfType<Control>())
 		{
+			if (!child.Enabled)
+			{
+				continue;
+			}
+			maxHeight = Math.Max(maxHeight, child.Size.Y);
+		}
+
+		// Second pass: position children
+		foreach (var child in children.OfType<Control>())
+		{
+			if (!child.Enabled)
+			{
+				continue;
+			}
+
 			float yOffset = 0f;
-			if (maxHeight > child.Size.Y)
+			if (UniformSize)
 			{
 				yOffset = (maxHeight - child.Size.Y) / 2f;
 			}
