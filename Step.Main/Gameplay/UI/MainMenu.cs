@@ -23,18 +23,21 @@ public class MainMenu : GameObject
 		_playButton = new Button("Play", () => OnPlayPressed?.Invoke(), engine.Input, engine.Renderer)
 		{
 			TextColor = Color.Red,
+			FontPath = "Assets/Fonts/Pixellari.ttf",
 			TextAlignment = TextAlignment.Center
 		};
 
 		_continueButton = new Button("Continue", () => OnContinuePressed?.Invoke(), engine.Input, engine.Renderer)
 		{
 			TextColor = Color.Red,
+			FontPath = "Assets/Fonts/Pixellari.ttf",
 			Enabled = false,
 			TextAlignment = TextAlignment.Center
 		};
 
 		var exitButton = new Button("Exit", () => OnExitPressed?.Invoke(), engine.Input, engine.Renderer)
 		{
+			FontPath = "Assets/Fonts/Pixellari.ttf",
 			TextColor = Color.Red,
 			TextAlignment = TextAlignment.Center
 		};

@@ -16,7 +16,6 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 		{
 			Text = $"{gameInfo.Coins[Coin.Circle]}",
 			FontPath = "Assets/Fonts/Pixellari.ttf",
-			FontSize = 16f,
 			Color = GameColors.Circle,
 		};
 
@@ -24,7 +23,6 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 		{
 			Text = gameInfo.Coins[Coin.Cross].ToString(),
 			FontPath = "Assets/Fonts/Pixellari.ttf",
-			FontSize = 16f,
 			Color = GameColors.Cross,
 		};
 
@@ -32,7 +30,6 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 		{
 			Text = gameInfo.Coins[Coin.Glider].ToString(),
 			FontPath = "Assets/Fonts/Pixellari.ttf",
-			FontSize = 16f,
 			Color = GameColors.Glider,
 		};
 

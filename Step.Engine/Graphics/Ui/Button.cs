@@ -51,6 +51,14 @@ public class Button : Control
 		}
 	}
 
+	public string FontPath
+	{
+		set
+		{
+			_label.FontPath = value;
+		}
+	}
+
 	public override Vector2f Size 
 	{ 
 		get => _size;
@@ -75,7 +83,6 @@ public class Button : Control
 		_label = new Label(renderer)
 		{
 			Text = text,
-			FontSize = 16f,
 			Layer = 101,
 		};
 		AddChild(_label);

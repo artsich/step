@@ -105,6 +105,10 @@ public class GameStateManager
 		_gameLoop.AddChild(frame);
 		_gameLoop.AddChild(player);
 		_gameLoop.AddChild(spawner);
+		_gameLoop.AddChild(new GameTimer(_engine.Renderer)
+		{
+			LocalPosition = new(0f, 70f)
+		});
 
 		_gameLoop.OnFinish += OnGameFinish;
 	}
