@@ -1,6 +1,6 @@
 using Silk.NET.OpenGL;
 
-namespace Step.Engine.Graphics;
+namespace Step.Engine.Graphics.PostProcessing;
 
 public sealed class BlurEffect : IDisposable, IPostEffect
 {
@@ -23,7 +23,7 @@ public sealed class BlurEffect : IDisposable, IPostEffect
 	public void Apply(Texture2d sourceTexture, out Texture2d output)
 	{
 		var gl = Ctx.GL;
-		
+
 		if (_tempTexture.Width != sourceTexture.Width || _tempTexture.Height != sourceTexture.Height)
 		{
 			_tempTexture.SetImageData(
@@ -46,7 +46,7 @@ public sealed class BlurEffect : IDisposable, IPostEffect
 		uint groupSizeY = 8;
 		uint numGroupsX = (uint)Math.Ceiling(sourceTexture.Width / (float)groupSizeX);
 		uint numGroupsY = (uint)Math.Ceiling(sourceTexture.Height / (float)groupSizeY);
-		
+
 		_blurShader.Dispatch(numGroupsX, numGroupsY, 1);
 		_blurShader.MemoryBarrier(MemoryBarrierMask.ShaderImageAccessBarrierBit);
 
@@ -63,4 +63,4 @@ public sealed class BlurEffect : IDisposable, IPostEffect
 	{
 		throw new NotImplementedException();
 	}
-} 
+}

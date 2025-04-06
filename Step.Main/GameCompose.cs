@@ -1,6 +1,7 @@
 ﻿using Step.Engine;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
+using Step.Engine.Graphics.PostProcessing;
 using Step.Main.Gameplay;
 
 namespace Step.Main;
@@ -36,10 +37,10 @@ public class GameCompose : IGame
 	private const float GameCameraHeight = GameCameraWidth * InverseTargetAspectRatio;
 	#endregion
 
-	private CrtEffect _crtEffect;
-
 	private Engine.Engine _engine;
 	private GameScene _gameScene;
+
+	private CrtEffect _crtEffect;
 	private BlurEffect _blurEffect;
 
 	public void Load(Engine.Engine engine)
@@ -50,13 +51,8 @@ public class GameCompose : IGame
 		var screenSize = engine.Window.FramebufferSize;
 
 		_crtEffect = new CrtEffect(
-			new Shader(
-				"Assets/Shaders/CRT/shader.vert",
-				"Assets/Shaders/CRT/shader.frag"
-			),
 			new RenderTarget2d(screenSize.X, screenSize.Y, true),
-			engine.Renderer
-		);
+			engine.Renderer);
 
 #if DEBUG
 		engine.AddEditor(new ParticlesEditor(screenSize, new Camera2d(GameCameraWidth, GameCameraHeight)));
@@ -93,9 +89,8 @@ public class GameCompose : IGame
 			_crtEffect.VignetteTarget = new(0.5f);
 		}
 
-		_crtEffect.Apply(renderResult, out var _finalImage);
-		_blurEffect.Apply(_finalImage, out var blurred);
-
+		_crtEffect.Apply(renderResult, out var finalImage);
+		_blurEffect.Apply(finalImage, out var blurred);
 		return blurred;
 	}
 

@@ -7,13 +7,12 @@ public sealed unsafe class Shader : IDisposable
 	public readonly uint Handle;
 
 	private readonly Dictionary<string, int> _uniformLocations = [];
-	private readonly GL GL;
+	private static GL GL => Ctx.GL;
 
 	public Shader(string vertPath, string fragPath)
 	{
-		GL = Ctx.GL;
-		var vertexShader = LoadShader(vertPath, ShaderType.VertexShader);
-		var fragmentShader = LoadShader(fragPath, ShaderType.FragmentShader);
+		var vertexShader = LoadShader(File.ReadAllText(vertPath), ShaderType.VertexShader);
+		var fragmentShader = LoadShader(File.ReadAllText(fragPath), ShaderType.FragmentShader);
 
 		Handle = GL.CreateProgram();
 		GL.AttachShader(Handle, vertexShader);
@@ -29,9 +28,38 @@ public sealed unsafe class Shader : IDisposable
 		GL.GetProgram(Handle, ProgramPropertyARB.ActiveUniforms, out var numberOfUniforms);
 	}
 
-	private uint LoadShader(string vertPath, ShaderType type)
+	private Shader(uint handle) 
 	{
-		var shaderSource = File.ReadAllText(vertPath);
+		Handle = handle;
+	}
+
+	public static Shader FromSource(string vertSource, string fragSource)
+	{
+		uint vertexShader = LoadShader(vertSource, ShaderType.VertexShader);
+		uint fragmentShader = LoadShader(fragSource, ShaderType.FragmentShader);
+		var handle = GL.CreateProgram();
+		GL.AttachShader(handle, vertexShader);
+		GL.AttachShader(handle, fragmentShader);
+
+		LinkProgram(handle);
+
+		GL.DetachShader(handle, vertexShader);
+		GL.DetachShader(handle, fragmentShader);
+		GL.DeleteShader(fragmentShader);
+		GL.DeleteShader(vertexShader);
+
+		GL.GetProgram(handle, ProgramPropertyARB.ActiveUniforms, out var numberOfUniforms);
+		return new Shader(handle);
+
+	}
+
+	public static Shader FromFiles(string vertPath, string fragPath)
+	{
+		return new Shader(vertPath, fragPath);
+	}
+
+	private static uint LoadShader(string shaderSource, ShaderType type)
+	{
 		var vertexShader = GL.CreateShader(type);
 		GL.ShaderSource(vertexShader, shaderSource);
 
@@ -39,7 +67,7 @@ public sealed unsafe class Shader : IDisposable
 		return vertexShader;
 	}
 
-	private void CompileShader(uint shader)
+	private static void CompileShader(uint shader)
 	{
 		GL.CompileShader(shader);
 
@@ -54,7 +82,7 @@ public sealed unsafe class Shader : IDisposable
 		}
 	}
 
-	private void LinkProgram(uint program)
+	private static void LinkProgram(uint program)
 	{
 		GL.LinkProgram(program);
 
@@ -119,7 +147,7 @@ public sealed unsafe class Shader : IDisposable
 	public void SetVector4(string name, Vector4f v)
 	{
 		GL.UseProgram(Handle);
-		GL.Uniform4(GetUniformLocation(name), v.X, v.Y,	v.Z, v.W);
+		GL.Uniform4(GetUniformLocation(name), v.X, v.Y, v.Z, v.W);
 	}
 
 	public unsafe void Set(string name, Span<int> values)
