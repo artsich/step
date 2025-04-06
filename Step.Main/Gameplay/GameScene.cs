@@ -1,4 +1,6 @@
+using Serilog;
 using Silk.NET.Input;
+using Silk.NET.OpenGL;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Graphics;
@@ -40,6 +42,7 @@ public class GameScene : RenderResult
 	private readonly float _cameraHeight;
 	private readonly Camera2d _menuCamera;
 	private readonly Camera2d _gameCamera;
+	private readonly BlendPostEffect _blendPostEffect;
 	private readonly CrtEffect _crtEffect;
 	private readonly BlurEffect _blurEffect;
 
@@ -55,11 +58,18 @@ public class GameScene : RenderResult
 			}
 			else
 			{
-				_crtEffect.VignetteTarget = new(0.5f);
 				Debug.Assert(_uiViewport != null);
+				finalImage = _uiViewport!.ColorTexture;
 
-				_blurEffect.Apply(_uiViewport.ColorTexture, out var blurred);
-				_crtEffect.Apply(blurred, out finalImage);
+				if (_gameViewport != null)
+				{
+					_blurEffect.Apply(_gameViewport!.ColorTexture, out var blurredGame);
+					_blendPostEffect.Blend(
+						blurredGame,
+						_uiViewport!.ColorTexture, out finalImage);
+				}
+
+				_crtEffect.Apply(finalImage, out finalImage);
 			}
 
 			return finalImage;
@@ -84,6 +94,7 @@ public class GameScene : RenderResult
 			new RenderTarget2d(screenSize.X, screenSize.Y, true),
 			engine.Renderer);
 		_blurEffect = new BlurEffect();
+		_blendPostEffect = new BlendPostEffect();
 
 		InitializeMainMenu();
 	}
@@ -167,6 +178,7 @@ public class GameScene : RenderResult
 				gameView.End();
 				gameView.Dispose();
 			});
+			Log.Logger.Information("Reload game");
 		}
 
 		_gameLoop = new GameBuilder(_engine, _cameraWidth, _cameraHeight).Build();

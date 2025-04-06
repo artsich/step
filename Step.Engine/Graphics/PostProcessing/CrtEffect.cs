@@ -6,9 +6,11 @@ public sealed class CrtEffect(
 	RenderTarget2d _renderTarget,
 	Renderer _renderer) : IPostEffect, IDisposable
 {
+	private const string PathToResource = "Step.Engine.Graphics.PostProcessing.Shaders";
+
 	private readonly Shader _shader = Shader.FromSource(
-			EmbeddedResourceLoader.LoadAsString("Step.Engine.Graphics.Shaders.CRT.shader.vert"),
-			EmbeddedResourceLoader.LoadAsString("Step.Engine.Graphics.Shaders.CRT.shader.frag"));
+			EmbeddedResourceLoader.LoadAsString($"{PathToResource}.CRT.shader.vert"),
+			EmbeddedResourceLoader.LoadAsString($"{PathToResource}.CRT.shader.frag"));
 
 	private float _time;
 

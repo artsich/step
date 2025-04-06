@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Graphics\Shaders\**" />
+    <EmbeddedResource Include="Graphics\PostProcessing\Shaders\**" />
   </ItemGroup>
 
 </Project>

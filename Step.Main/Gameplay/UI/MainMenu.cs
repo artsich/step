@@ -60,7 +60,7 @@ public class MainMenu : GameObject
 	{
 		if (enabled)
 		{
-			_playButton.Text = "Try again";
+			_playButton.Text = "Restart";
 		}
 		else
 		{
