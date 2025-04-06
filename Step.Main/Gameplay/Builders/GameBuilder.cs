@@ -7,14 +7,8 @@ using Step.Main.Gameplay.UI;
 
 namespace Step.Main.Gameplay.Builders;
 
-public class GameBuilder(Engine.Engine engine)
+public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float gameCameraHeight)
 {
-	private const float TargetAspectRatio = 16f / 9f;
-	private const float InverseTargetAspectRatio = 1f / TargetAspectRatio;
-
-	private const float GameCameraWidth = 320f;
-	private const float GameCameraHeight = GameCameraWidth * InverseTargetAspectRatio;
-
 	private Texture2d? _gliderTexture;
 	private Texture2d? _circleTexture;
 	private Texture2d? _playerTexture;
@@ -90,7 +84,7 @@ public class GameBuilder(Engine.Engine engine)
 			_crossTexture!,
 			player);
 
-		return new Spawner(new Box2f(-GameCameraWidth / 2f, -GameCameraHeight / 2f, GameCameraWidth / 2f, GameCameraHeight / 2f),
+		return new Spawner(new Box2f(-gameCameraWidth / 2f, -gameCameraHeight / 2f, gameCameraWidth / 2f, gameCameraHeight / 2f),
 		[
 			new SpawnRule
 			{

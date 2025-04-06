@@ -8,9 +8,9 @@ public sealed class BlurEffect : IDisposable, IPostEffect
 	private readonly Texture2d _tempTexture;
 	private readonly uint _outputImageBinding = 1;
 
-	public float Quality { get; set; } = 3.0f;
-	public float Directions { get; set; } = 16.0f;
-	public float Size { get; set; } = 8.0f;
+	public float Quality { get; set; } = 10.0f;
+	public float Directions { get; set; } = 32.0f;
+	public float Size { get; set; } = 25.0f;
 
 	public BlurEffect()
 	{

@@ -11,16 +11,20 @@ using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Engine.Logging;
+using System.Diagnostics;
 
 namespace Step.Engine;
 
 public interface IGame
 {
 	void Load(Engine engine);
-
 	void Unload();
+	GameObject GetRoot();
+}
 
-	Texture2d Render(float dt);
+public abstract class RenderResult(string name) : GameObject(name)
+{
+	public abstract Texture2d ResultTexture { get; }
 }
 
 /*
@@ -48,6 +52,8 @@ public class Engine(WindowOptions windowOptions)
 	private float _lastUpdateTime;
 
 	private List<IEditorView> _editors = [];
+	private List<Func<Engine, IEditorView>> _editorFactories = [];
+
 	private float _audioMasterVolume = 0.15f;
 
 	public IWindow Window => _window;
@@ -56,23 +62,27 @@ public class Engine(WindowOptions windowOptions)
 
 	public Renderer Renderer { get; private set; }
 
-	public void AddEditor(IEditorView editor) => _editors.Add(editor);
+	public Engine AddEditor(Func<Engine, IEditorView> factory)
+	{
+		_editorFactories.Add(factory);
+		return this;
+	}
 
-	public void ClearEditors() => _editors.Clear();
-
-	public void Run(IGame game)
+	public void Run(Func<Engine, RenderResult> gameCreator)
 	{
 		using (_window = Silk.NET.Windowing.Window.Create(windowOptions))
 		{
 			_window.Load += () =>
 			{
 				InitSystems();
-				game.Load(this);
+				var game = gameCreator(this);
+				GameRoot.I.SetScene(game);
+				_editorFactories.ForEach(fact => _editors.Add(fact(this)));
 			};
 
 			_window.Closing += () =>
 			{
-				game.Unload();
+				GameRoot.I.Scene.End();
 				UnloadSystems();
 			};
 
@@ -81,7 +91,10 @@ public class Engine(WindowOptions windowOptions)
 				Ctx.GL.Clear(ClearBufferMask.ColorBufferBit
 					| ClearBufferMask.DepthBufferBit
 					| ClearBufferMask.StencilBufferBit);
-				var finalImage = game.Render((float)dt);
+				GameRoot.I.Draw();
+
+				var renderResult = (GameRoot.I.Scene as RenderResult);
+				Debug.Assert(renderResult != null);
 
 				if (_editorEnabled)
 				{
@@ -109,8 +122,7 @@ public class Engine(WindowOptions windowOptions)
 					{
 						if (ImGui.Button("Game & Assets reload"))
 						{
-							game.Unload();
-							game.Load(this);
+							GameRoot.I.SetScene(gameCreator(this));
 						}
 
 						ImGui.Text($"Mouse: {_gameInput.MouseWorldPosition.X:F0}, {_gameInput.MouseWorldPosition.Y:F0}");
@@ -164,6 +176,7 @@ public class Engine(WindowOptions windowOptions)
 						ImGui.End();
 					}
 
+
 					if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
 					{
 						var availRegion = ImGui.GetContentRegionAvail().FromSystem();
@@ -177,7 +190,7 @@ public class Engine(WindowOptions windowOptions)
 							(ImGui.GetWindowSize().X - availRegion.X) / 2f,
 							ImGui.GetWindowSize().Y - availRegion.Y);
 
-						ImGui.Image((nint)finalImage.Handle, imgSize, new(0f, 1f), new(1f, 0f));
+						ImGui.Image((nint)renderResult.ResultTexture.Handle, imgSize, new(0f, 1f), new(1f, 0f));
 
 						var windowPos = ImGui.GetWindowPos().FromSystem();
 						Input.SetMouseOffset(windowPos + headerOffset);
@@ -189,7 +202,7 @@ public class Engine(WindowOptions windowOptions)
 				}
 				else
 				{
-					Renderer.DrawScreenRectNow(finalImage);
+					Renderer.DrawScreenRectNow(renderResult.ResultTexture);
 				}
 			};
 

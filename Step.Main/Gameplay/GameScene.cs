@@ -2,12 +2,31 @@ using Silk.NET.Input;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Graphics;
+using Step.Engine.Graphics.PostProcessing;
 using Step.Main.Gameplay.Builders;
 using Step.Main.Gameplay.UI;
+using System.Diagnostics;
 
 namespace Step.Main.Gameplay;
 
-public class GameScene : GameObject
+public enum PhysicLayers : int
+{
+	Player = 1 << 0,
+	Enemy = 1 << 1,
+	Magnet = 1 << 2,
+	Frame = 1 << 3,
+	Shield = 1 << 4,
+}
+
+public enum GameState
+{
+	Game,
+	Start,
+	Paused,
+	Exit,
+}
+
+public class GameScene : RenderResult
 {
 	private GameState _currentState = GameState.Start;
 	private readonly Engine.Engine _engine;
@@ -17,19 +36,55 @@ public class GameScene : GameObject
 	private Viewport? _uiViewport;
 	private Viewport? _gameViewport;
 
+	private readonly float _cameraWidth;
+	private readonly float _cameraHeight;
 	private readonly Camera2d _menuCamera;
 	private readonly Camera2d _gameCamera;
+	private readonly CrtEffect _crtEffect;
+	private readonly BlurEffect _blurEffect;
 
-	public Viewport MainViewport => _currentState == GameState.Game ? _gameViewport! : _uiViewport!;
+	public override Texture2d ResultTexture
+	{
+		get
+		{
+			Texture2d? finalImage;
+			if (_currentState == GameState.Game)
+			{
+				Debug.Assert(_gameViewport != null);
+				_crtEffect.Apply(_gameViewport!.ColorTexture, out finalImage);
+			}
+			else
+			{
+				_crtEffect.VignetteTarget = new(0.5f);
+				Debug.Assert(_uiViewport != null);
 
-	public GameScene(Engine.Engine engine, float cameraWidth, float cameraHeight) : base("GameRoot")
+				_blurEffect.Apply(_uiViewport.ColorTexture, out var blurred);
+				_crtEffect.Apply(blurred, out finalImage);
+			}
+
+			return finalImage;
+		}
+	}
+
+	public GameScene(Engine.Engine engine, float cameraWidth, float cameraHeight)
+		: base("GameRoot")
 	{
 		_engine = engine;
+
+		_cameraWidth = cameraWidth;
+		_cameraHeight = cameraHeight;
 
 		_menuCamera = new Camera2d(cameraWidth, cameraHeight);
 		_gameCamera = new Camera2d(cameraWidth, cameraHeight);
 
 		_engine.Keyboard.KeyDown += HandleKeyDown;
+
+		var screenSize = engine.Window.FramebufferSize;
+		_crtEffect = new CrtEffect(
+			new RenderTarget2d(screenSize.X, screenSize.Y, true),
+			engine.Renderer);
+		_blurEffect = new BlurEffect();
+
 		InitializeMainMenu();
 	}
 
@@ -42,7 +97,7 @@ public class GameScene : GameObject
 			_mainMenu.CallDeferred(() =>
 			{
 				_mainMenu.SetContinueButtonEnabled(true);
-				ToPlayNewState();
+				PlayNewGame();
 			});
 		};
 
@@ -50,7 +105,7 @@ public class GameScene : GameObject
 		{
 			_mainMenu.CallDeferred(() =>
 			{
-				ToGameState();
+				ResumeGame();
 			});
 		};
 
@@ -84,6 +139,9 @@ public class GameScene : GameObject
 				case GameState.Game:
 					ToPausedState();
 					break;
+				case GameState.Paused:
+					ResumeGame(); 
+					break;
 				default:
 					break;
 			}
@@ -98,7 +156,7 @@ public class GameScene : GameObject
 		_mainMenu!.Enabled = true;
 	}
 
-	public void ToPlayNewState()
+	public void PlayNewGame()
 	{
 		if (_gameViewport != null)
 		{
@@ -111,7 +169,7 @@ public class GameScene : GameObject
 			});
 		}
 
-		_gameLoop = new GameBuilder(_engine).Build();
+		_gameLoop = new GameBuilder(_engine, _cameraWidth, _cameraHeight).Build();
 		_gameLoop.AddChild(_gameCamera);
 		_gameLoop.OnFinish += OnGameFinish;
 
@@ -121,7 +179,6 @@ public class GameScene : GameObject
 		};
 		_gameViewport.AddChild(_gameLoop);
 
-		_gameViewport.Enabled = true;
 		_mainMenu!.Enabled = false;
 
 		_mainMenu.NewGameInstead(true);
@@ -132,7 +189,7 @@ public class GameScene : GameObject
 		_gameViewport.Start();
 	}
 
-	public void ToGameState()
+	public void ResumeGame()
 	{
 		_currentState = GameState.Game;
 
@@ -146,14 +203,13 @@ public class GameScene : GameObject
 		_engine.Window.Close();
 	}
 
-	public GameState GetCurrentState()
+	protected override void OnEnd()
 	{
-		return _currentState;
-	}
-
-	public void Unload()
-	{
+		base.OnEnd();
 		_engine.Keyboard.KeyDown -= HandleKeyDown;
 		AudioManager.Ins.UnloadSounds();
+
+		_blurEffect.Dispose();
+		_crtEffect.Dispose();
 	}
 }
