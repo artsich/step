@@ -15,27 +15,27 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 		_statCircleLabel = new Label(renderer)
 		{
 			Text = $"{gameInfo.Coins[Coin.Circle]}",
-			FontPath = "Assets/Fonts/Pixellari.ttf",
-			Color = GameColors.Circle,
+			FontPath = Constants.Font.UiFontPath,
+			Color = Constants.GameColors.Circle,
 		};
 
 		_statCrossLabel = new Label(renderer)
 		{
 			Text = gameInfo.Coins[Coin.Cross].ToString(),
-			FontPath = "Assets/Fonts/Pixellari.ttf",
-			Color = GameColors.Cross,
+			FontPath = Constants.Font.UiFontPath,
+			Color = Constants.GameColors.Cross,
 		};
 
 		_gliderCrossLabel = new Label(renderer)
 		{
 			Text = gameInfo.Coins[Coin.Glider].ToString(),
-			FontPath = "Assets/Fonts/Pixellari.ttf",
-			Color = GameColors.Glider,
+			FontPath = Constants.Font.UiFontPath,
+			Color = Constants.GameColors.Glider,
 		};
 
 		var r1 = new TextureRect(renderer)
 		{
-			Color = GameColors.Glider,
+			Color = Constants.GameColors.Glider,
 			LocalTransform = new Transform()
 			{
 				Scale = new(0.8f)
@@ -45,7 +45,7 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 
 		var r2 = new TextureRect(renderer)
 		{
-			Color = GameColors.Cross,
+			Color = Constants.GameColors.Cross,
 			LocalTransform = new Transform()
 			{
 				Scale = new(0.8f)
@@ -55,7 +55,7 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 
 		var r3 = new TextureRect(renderer)
 		{
-			Color = GameColors.Circle,
+			Color = Constants.GameColors.Circle,
 			Type = GeometryType.Circle,
 			LocalTransform = new Transform()
 			{

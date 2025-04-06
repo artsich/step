@@ -96,6 +96,7 @@ public class GameObject(string name = nameof(GameObject))
 		{
 			child.Update(deltaTime);
 		}
+		OnUpdateEnd();
 	}
 
 	public void Draw()
@@ -110,6 +111,7 @@ public class GameObject(string name = nameof(GameObject))
 		{
 			child.Draw();
 		}
+		OnRenderEnd();
 	}
 
 	public void DebugDraw()
@@ -210,5 +212,9 @@ public class GameObject(string name = nameof(GameObject))
 
 	protected virtual void OnUpdate(float deltaTime) { }
 
+	protected internal virtual void OnUpdateEnd() { }
+
 	protected virtual void OnRender() { }
+
+	protected internal virtual void OnRenderEnd() { }
 }

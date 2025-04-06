@@ -7,21 +7,21 @@ namespace Step.Main.Gameplay.UI;
 public sealed class GameTimer : GameObject
 {
 	private readonly Label _label;
-	private float _ellapsed;
+	private float _elapsed;
 
 	public GameTimer(Renderer renderer)
 	{
 		_label = new Label(renderer)
 		{
-			FontPath = "Assets/Fonts/Pixellari.ttf",
+			FontPath = Constants.Font.UiFontPath,
 		};
 		AddChild(_label);
 	}
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		_ellapsed += deltaTime;
-		var span = TimeSpan.FromSeconds(_ellapsed);
+		_elapsed += deltaTime;
+		var span = TimeSpan.FromSeconds(_elapsed);
 
 		_label.LocalPosition = _label.LocalPosition with
 		{

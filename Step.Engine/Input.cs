@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using Silk.NET.Input;
+using Silk.NET.Input.Extensions;
 using Silk.NET.Maths;
 using Step.Engine.Graphics;
 
@@ -30,27 +31,28 @@ public sealed class Input
 		_keyboardState.KeyUp += OnKeyboardKeyUp;
 	}
 
-	public Vector2f MouseWorldPosition { get; private set; }
+	public Vector2f MouseWorldPosition
+	{
+		get
+		{
+			var camera = GameRoot.I.CurrentCamera;
+			if (camera is not null)
+			{
+				return camera.ScreenToWorld(MouseScreenPosition, _windowSize);
+			}
+			return MouseScreenPosition;
+		}
+	}
 
 	public Vector2f MouseScreenPosition01 { get; private set; }
 
+	public Vector2f MouseScreenPosition => _mouseState.Position.ToGeneric() - _mouseOffset;
+
 	public void Update(float _)
 	{
-		var mousePosition = _mouseState.Position.ToGeneric() - _mouseOffset;
-		var camera = GameRoot.I.CurrentCamera;
-		if (camera is not null)
-		{
-			MouseWorldPosition = camera.ScreenToWorld(mousePosition, _windowSize);
-		}
-		else
-		{
-			Log.Logger.Warning("No active camera!!!");
-		}
-
 		MouseScreenPosition01 = new(
-			mousePosition.X / _windowSize.X,
-			1f - mousePosition.Y / _windowSize.Y
-		);
+			MouseScreenPosition.X / _windowSize.X,
+			1f - MouseScreenPosition.Y / _windowSize.Y);
 
 		foreach (var button in MouseButtons)
 		{

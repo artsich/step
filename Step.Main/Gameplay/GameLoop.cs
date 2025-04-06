@@ -45,7 +45,7 @@ public class GameInfo
 	}
 }
 
-public class GameLoop(Renderer renderer) : GameObject("Root")
+public class GameLoop : GameObject
 {
 	private const string PathToSaveFile = "./Assets/GameSave.json";
 
@@ -57,8 +57,7 @@ public class GameLoop(Renderer renderer) : GameObject("Root")
 
 	public Action? OnFinish;
 
-	public GameLoop(Engine.Engine engine)
-		: this(engine.Renderer)
+	public GameLoop(Engine.Engine engine) : base("Root")
 	{
 		_gameInfo = GameInfo.FromFile(PathToSaveFile);
 
@@ -118,11 +117,6 @@ public class GameLoop(Renderer renderer) : GameObject("Root")
 	private void OnPlayerDeath()
 	{
 		OnFinish?.Invoke();
-	}
-
-	protected override void OnRender()
-	{
-		renderer.SetCamera(_camera!);
 	}
 
 	protected override void OnDebugDraw()

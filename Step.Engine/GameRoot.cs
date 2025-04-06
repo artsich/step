@@ -20,13 +20,13 @@ public sealed class GameRoot
 
 	public GameObject Scene => _scene ?? throw new InvalidOperationException("Scene is null");
 
-	private ICamera2d? _currentCamera;
+	public ICamera2d? CurrentCamera => _cameras.TryPeek(out var result) ? result : null;
 
-	public ICamera2d? CurrentCamera
-	{
-		get => _currentCamera;
-		set => _currentCamera = value;
-	}
+	private Stack<ICamera2d> _cameras = [];
+
+	public void PushCamera(ICamera2d camera) => _cameras.Push(camera);
+
+	public void PopCamera() => _cameras.Pop();
 
 	public void SetScene(GameObject scene)
 	{
@@ -35,14 +35,6 @@ public sealed class GameRoot
 
 		_scene = scene;
 		_scene.Start();
-	}
-
-	public void SwapScene(GameObject scene)
-	{
-		Defer(() =>
-		{
-			_scene = scene;
-		});
 	}
 
 	public void Update(float dt)

@@ -73,7 +73,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 		GL.ClearColor(color);
 	}
 
-	public void SetCamera(ICamera2d camera)
+	public void SetCamera(ICamera2d? camera)
 	{
 		_camera = camera;
 	}

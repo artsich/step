@@ -126,9 +126,11 @@ public unsafe class AudioManager : IDisposable, IAudioManager
 		{
 			Log.Logger.Warning($"AudioManager: Sound with key '{key}' already exists.");
 		}
-
-		Sound sound = Assets.LoadSound(filePath);
-		_loadedSounds[key] = sound;
+		else
+		{
+			Sound sound = Assets.LoadSound(filePath);
+			_loadedSounds[key] = sound;
+		}
 	}
 
 	public void PlaySound(string key, bool loop = false)

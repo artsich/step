@@ -2,7 +2,6 @@
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Main.Gameplay;
-using Step.Main.Gameplay.Actors;
 
 namespace Step.Main;
 
@@ -37,20 +36,16 @@ public class GameCompose : IGame
 	private const float GameCameraHeight = GameCameraWidth * InverseTargetAspectRatio;
 	#endregion
 
-	private RenderTarget2d _gameRenderTarget;
-	private Renderer _renderer;
 	private CrtEffect _crtEffect;
 
 	private Engine.Engine _engine;
-	private GameStateManager _stateManager;
+	private GameScene _gameScene;
 
 	public void Load(Engine.Engine engine)
 	{
 		_engine = engine;
-		_renderer = engine.Renderer;
 
 		var screenSize = engine.Window.FramebufferSize;
-		_gameRenderTarget = new RenderTarget2d(screenSize.X, screenSize.Y, true);
 
 		_crtEffect = new CrtEffect(
 			new Shader(
@@ -61,54 +56,49 @@ public class GameCompose : IGame
 			engine.Renderer
 		);
 
+#if DEBUG
 		engine.AddEditor(new ParticlesEditor(screenSize, new Camera2d(GameCameraWidth, GameCameraHeight)));
 		engine.AddEditor(new EffectsEditor(_crtEffect));
-
-		_stateManager = new GameStateManager(engine, GameCameraWidth, GameCameraHeight);
+#endif
+		_gameScene = new GameScene(engine, GameCameraWidth, GameCameraHeight);
+		GameRoot.I.SetScene(_gameScene);
 	}
 
 	public Texture2d Render(float dt)
 	{
-		_renderer.PushRenderTarget(_gameRenderTarget);
-		_gameRenderTarget.Clear(GameColors.Background);
-		GameRoot.I.Draw();
-		_renderer.Flush();
-		_renderer.PopRenderTarget();
-
-		//return _gameRenderTarget.Color;
-		return PostProcessing();
+		_gameScene.MainViewport.Draw();
+		return PostProcessing(_gameScene.MainViewport.ColorTexture);
 	}
 
-	private Texture2d PostProcessing()
+	private Texture2d PostProcessing(Texture2d renderResult)
 	{
-		if (_stateManager.GetCurrentState() == GameState.Game)
-		{
-			var player = GameRoot.I.Scene.GetChildOf<Player>();
-			var camera = GameRoot.I.Scene.GetChildOf<Camera2d>();
+		//if (_stateManager.GetCurrentState() == GameState.Game)
+		//{
+		//	var player = GameRoot.I.Scene.GetChildOf<Player>();
+		//	var camera = GameRoot.I.Scene.GetChildOf<Camera2d>();
 
-			if (player != null && camera != null)
-			{
-				_crtEffect.VignetteTarget = camera.ToClipSpace(player.GlobalPosition);
-			}
-			else
-			{
-				_crtEffect.VignetteTarget = new(0.5f);
-			}
-		}
-		else
+		//	if (player != null && camera != null)
+		//	{
+		//		_crtEffect.VignetteTarget = camera.ToClipSpace(player.GlobalPosition);
+		//	}
+		//	else
+		//	{
+		//		_crtEffect.VignetteTarget = new(0.5f);
+		//	}
+		//}
+		//else
 		{
 			_crtEffect.VignetteTarget = new(0.5f);
 		}
 
-		_crtEffect.Apply(_gameRenderTarget.Color, out var _finalImage);
+		_crtEffect.Apply(renderResult, out var _finalImage);
 		return _finalImage;
 	}
 
 	public void Unload()
 	{
-		_stateManager.Unload();
+		_gameScene.Unload();
 		_crtEffect.Dispose();
-		_gameRenderTarget.Dispose();
 		_engine.ClearEditors();
 	}
 }
