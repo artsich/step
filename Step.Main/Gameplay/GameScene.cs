@@ -3,10 +3,12 @@ using Silk.NET.Input;
 using Silk.NET.OpenGL;
 using Step.Engine;
 using Step.Engine.Audio;
+using Step.Engine.Editor;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.PostProcessing;
 using Step.Main.Gameplay.Builders;
 using Step.Main.Gameplay.UI;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
 namespace Step.Main.Gameplay;
@@ -128,7 +130,10 @@ public class GameScene : RenderResult
 			});
 		};
 
-		_uiViewport = new Viewport(_engine, _menuCamera, _engine.Window.FramebufferSize);
+		_uiViewport = new Viewport(_engine, _menuCamera, _engine.Window.FramebufferSize)
+		{
+			Name = "UI viewport"
+		};
 		_uiViewport.AddChild(_mainMenu);
 
 		AddChild(_uiViewport);
@@ -187,7 +192,8 @@ public class GameScene : RenderResult
 
 		_gameViewport = new Viewport(_engine, _gameCamera, _engine.Window.FramebufferSize)
 		{
-			ClearColor = Constants.GameColors.Background
+			ClearColor = Constants.GameColors.Background,
+			Name = "Game viewport"
 		};
 		_gameViewport.AddChild(_gameLoop);
 
@@ -223,5 +229,10 @@ public class GameScene : RenderResult
 
 		_blurEffect.Dispose();
 		_crtEffect.Dispose();
+	}
+
+	protected override void OnDebugDraw()
+	{
+		EditOf.Render(this);
 	}
 }

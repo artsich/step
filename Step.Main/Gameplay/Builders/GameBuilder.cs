@@ -18,7 +18,10 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 	{
 		LoadAssets();
 
-		var gameLoop = new GameLoop(engine);
+		var gameLoop = new GameLoop(engine)
+		{
+			Name = "Game loop"
+		};
 		var player = CreatePlayer();
 		var frame = new Frame(engine.Renderer);
 		var spawner = CreateSpawner(player);

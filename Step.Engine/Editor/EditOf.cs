@@ -74,6 +74,21 @@ public static class EditOf
 					}
 				});
 			}
+			else if (propertyType == typeof(bool))
+			{
+				handlers.Add(new PropertyHandler
+				{
+					Name = property.Name,
+					RenderAction = target =>
+					{
+						bool value = (bool)property.GetValue(target);
+						if (ImGui.Checkbox(property.Name, ref value))
+						{
+							property.SetValue(target, value);
+						}
+					}
+				});
+			}
 			else if (propertyType == typeof(int))
 			{
 				handlers.Add(new PropertyHandler
