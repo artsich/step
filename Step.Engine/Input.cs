@@ -1,6 +1,4 @@
-﻿using Serilog;
-using Silk.NET.Input;
-using Silk.NET.Input.Extensions;
+﻿using Silk.NET.Input;
 using Silk.NET.Maths;
 using Step.Engine.Graphics;
 

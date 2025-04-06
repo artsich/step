@@ -40,10 +40,12 @@ public class GameCompose : IGame
 
 	private Engine.Engine _engine;
 	private GameScene _gameScene;
+	private BlurEffect _blurEffect;
 
 	public void Load(Engine.Engine engine)
 	{
 		_engine = engine;
+		_blurEffect = new();
 
 		var screenSize = engine.Window.FramebufferSize;
 
@@ -92,7 +94,9 @@ public class GameCompose : IGame
 		}
 
 		_crtEffect.Apply(renderResult, out var _finalImage);
-		return _finalImage;
+		_blurEffect.Apply(_finalImage, out var blurred);
+
+		return blurred;
 	}
 
 	public void Unload()

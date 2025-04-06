@@ -132,4 +132,15 @@ public class Texture2d : IDisposable
 	{
 		GL.DeleteTexture(Handle);
 	}
+
+	public void CopyFrom(Texture2d sourceTexture)
+	{
+		if (sourceTexture == null)
+			throw new ArgumentNullException(nameof(sourceTexture), "Source texture is missing! 🤦‍♂️");
+
+		GL.CopyImageSubData(
+			sourceTexture.Handle, GLEnum.Texture2D, 0, 0, 0, 0,
+			Handle, GLEnum.Texture2D, 0, 0, 0, 0,
+			(uint)sourceTexture.Width, (uint)sourceTexture.Height, 1);
+	}
 }

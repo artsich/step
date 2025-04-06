@@ -32,4 +32,8 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Graphics\Shaders\blur.glsl" />
+  </ItemGroup>
+
 </Project>
