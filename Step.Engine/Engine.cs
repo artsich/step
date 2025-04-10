@@ -221,11 +221,12 @@ public class Engine(WindowOptions windowOptions)
 				//	_gameLoopPaused = !_gameLoopPaused;
 				//}
 
+#if DEBUG
 				if (Input.IsKeyJustPressed(Key.GraveAccent))
 				{
 					_editorEnabled = !_editorEnabled;
 				}
-
+#endif
 				CheckWindowStateToggle();
 
 				AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
@@ -247,8 +248,6 @@ public class Engine(WindowOptions windowOptions)
 				{
 					_gameInput.Update((float)dt);
 					GameRoot.I.Update((float)dt);
-
-					//game.Update((float)dt);
 				}
 			};
 

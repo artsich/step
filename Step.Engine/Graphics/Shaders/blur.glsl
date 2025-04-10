@@ -16,24 +16,23 @@ void main() {
 	ivec2 size = imageSize(outputImage);
 
 	if (pos.x >= size.x || pos.y >= size.y) return;
-	
+
 	vec2 texCoord = (vec2(pos) + 0.5) / vec2(size);
 	vec2 texOffset = 1.0 / vec2(size);
-	
+
 	vec2 radius = Size * texOffset;
 	
 	vec4 color = texture(inputTexture, texCoord);
 
 	for(float d = 0.0; d < TwoPi; d += TwoPi/Directions)
 	{
-		for(float i = 1.0/Quality; i <= 1.0; i += 1.0/Quality)
+		for(float i = 1.0 / Quality; i <= 1.0; i += 1.0 / Quality)
 		{
 			vec2 offset = vec2(cos(d), sin(d)) * radius * i;
 			color += texture(inputTexture, texCoord + offset);
 		}
 	}
-	
+
 	color /= Quality * Directions - 15.0;
-	
 	imageStore(outputImage, pos, color);
 }

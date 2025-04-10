@@ -4,7 +4,7 @@ namespace Step.Engine.Graphics.PostProcessing;
 
 public sealed class CrtEffect(Vector2i screenSize, Renderer renderer) : IPostEffect, IDisposable
 {
-	private const string PathToResource = "Step.Engine.Graphics.PostProcessing.Shaders";
+	private const string PathToResource = Consts.PathToShaderResource;
 
 	private readonly Shader _shader = Shader.FromSource(
 			EmbeddedResourceLoader.LoadAsString($"{PathToResource}.CRT.shader.vert"),

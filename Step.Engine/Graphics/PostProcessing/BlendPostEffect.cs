@@ -4,7 +4,7 @@ namespace Step.Engine.Graphics.PostProcessing;
 
 public class BlendPostEffect : ITextureBlendEffect
 {
-	private const string PathToResource = "Step.Engine.Graphics.PostProcessing.Shaders";
+	private const string PathToResource = Consts.PathToShaderResource;
 
 	private readonly ComputeShader _blendShader;
 	private readonly Texture2d _result;

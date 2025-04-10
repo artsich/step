@@ -66,7 +66,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 	public ScreenQuad ScreenQuad { get; } = new ScreenQuad(GL);
 
 	public RenderStats Stats;
-	private GpuTimer _gpuTimer = new(GL);
+	private readonly GpuTimer _gpuTimer = new(GL);
 
 	public void SetBackground(Vector4f color)
 	{
@@ -80,13 +80,13 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 
 	public void Load()
 	{
-		_batchSpriteShader = new Shader(
-			"Assets/Shaders/SpriteBatch/shader.vert",
-			"Assets/Shaders/SpriteBatch/shader.frag");
+		_batchSpriteShader = Shader.FromSource(
+			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.SpriteBatch.shader.vert"),
+			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.SpriteBatch.shader.frag"));
 
-		_screenQuadShader = new Shader(
-			"Assets/Shaders/ScreenQuad/shader.vert",
-			"Assets/Shaders/ScreenQuad/shader.frag");
+		_screenQuadShader = Shader.FromSource(
+			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.ScreenQuad.shader.vert"),
+			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.ScreenQuad.shader.frag"));
 
 		DefaultWhiteTexture = Texture2d.LoadFromFile("Assets/Textures/white.png");
 		DefaultWhiteTexture.Bind(0);

@@ -4,8 +4,6 @@ namespace Step.Engine.Graphics.PostProcessing;
 
 public sealed class BlurEffect : IDisposable, IPostEffect
 {
-	private const string PathToResource = "Step.Engine.Graphics.PostProcessing.Shaders";
-
 	private readonly ComputeShader _blurShader;
 	private readonly Texture2d _tempTexture;
 	private readonly uint _outputImageBinding = 1;
@@ -17,7 +15,7 @@ public sealed class BlurEffect : IDisposable, IPostEffect
 	public BlurEffect()
 	{
 		_blurShader = ComputeShader.FromSource(
-			EmbeddedResourceLoader.LoadAsString($"{PathToResource}.blur.glsl"));
+			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.blur.glsl"));
 
 		_tempTexture = new Texture2d();
 	}
