@@ -91,9 +91,8 @@ public class GameScene : RenderResult
 
 		_engine.Keyboard.KeyDown += HandleKeyDown;
 
-		var screenSize = engine.Window.FramebufferSize;
 		_crtEffect = new CrtEffect(
-			new RenderTarget2d(screenSize.X, screenSize.Y, true),
+			engine.Window.FramebufferSize,
 			engine.Renderer);
 		_blurEffect = new BlurEffect();
 		_blendPostEffect = new BlendPostEffect();
@@ -156,7 +155,7 @@ public class GameScene : RenderResult
 					ToPausedState();
 					break;
 				case GameState.Paused:
-					ResumeGame(); 
+					ResumeGame();
 					break;
 				default:
 					break;
@@ -169,7 +168,7 @@ public class GameScene : RenderResult
 		_currentState = GameState.Paused;
 
 		_gameViewport!.Enabled = false;
-		_mainMenu!.Enabled = true;
+		_uiViewport!.Enabled = true;
 	}
 
 	public void PlayNewGame()
@@ -197,9 +196,9 @@ public class GameScene : RenderResult
 		};
 		_gameViewport.AddChild(_gameLoop);
 
-		_mainMenu!.Enabled = false;
+		_uiViewport!.Enabled = false;
 
-		_mainMenu.NewGameInstead(true);
+		_mainMenu!.NewGameInstead(true);
 
 		_currentState = GameState.Game;
 
@@ -212,7 +211,7 @@ public class GameScene : RenderResult
 		_currentState = GameState.Game;
 
 		_gameViewport!.Enabled = true;
-		_mainMenu!.Enabled = false;
+		_uiViewport!.Enabled = false;
 	}
 
 	public void ToExitState()

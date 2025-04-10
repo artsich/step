@@ -2,15 +2,14 @@
 
 namespace Step.Engine.Graphics.PostProcessing;
 
-public sealed class CrtEffect(
-	RenderTarget2d _renderTarget,
-	Renderer _renderer) : IPostEffect, IDisposable
+public sealed class CrtEffect(Vector2i screenSize, Renderer renderer) : IPostEffect, IDisposable
 {
 	private const string PathToResource = "Step.Engine.Graphics.PostProcessing.Shaders";
 
 	private readonly Shader _shader = Shader.FromSource(
 			EmbeddedResourceLoader.LoadAsString($"{PathToResource}.CRT.shader.vert"),
 			EmbeddedResourceLoader.LoadAsString($"{PathToResource}.CRT.shader.frag"));
+	private readonly RenderTarget2d _renderTarget = new(screenSize.X, screenSize.Y, true);
 
 	private float _time;
 
@@ -35,7 +34,7 @@ public sealed class CrtEffect(
 	{
 		_time += GameRoot.I.ScaledDt;
 
-		_renderer.PushRenderTarget(_renderTarget);
+		renderer.PushRenderTarget(_renderTarget);
 		_shader.Use();
 
 		_shader.SetFloat("time", _time);
@@ -50,9 +49,9 @@ public sealed class CrtEffect(
 		input.Bind(0);
 		_shader.SetInt("sourceTexture", 0);
 
-		_renderer.ScreenQuad.Draw();
+		renderer.ScreenQuad.Draw();
 
-		_renderer.PopRenderTarget();
+		renderer.PopRenderTarget();
 		output = _renderTarget.Color;
 	}
 

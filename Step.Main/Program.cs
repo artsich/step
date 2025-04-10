@@ -14,6 +14,7 @@ var windowOptions = WindowOptions.Default with
 	UpdatesPerSecond = TargetFps,
 	WindowBorder = WindowBorder.Fixed,
 	WindowState = WindowState.Maximized,
+	//WindowState = WindowState.Fullscreen,
 	API = new GraphicsAPI(
 		ContextAPI.OpenGL,
 		ContextProfile.Core,

@@ -14,21 +14,21 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 	{
 		_statCircleLabel = new Label(renderer)
 		{
-			Text = $"{gameInfo.Coins[Coin.Circle]}",
+			Text = $"{gameInfo.GetCoin(Coin.Circle)}",
 			FontPath = Constants.Font.UiFontPath,
 			Color = Constants.GameColors.Circle,
 		};
 
 		_statCrossLabel = new Label(renderer)
 		{
-			Text = gameInfo.Coins[Coin.Cross].ToString(),
+			Text = gameInfo.GetCoin(Coin.Cross).ToString(),
 			FontPath = Constants.Font.UiFontPath,
 			Color = Constants.GameColors.Cross,
 		};
 
 		_gliderCrossLabel = new Label(renderer)
 		{
-			Text = gameInfo.Coins[Coin.Glider].ToString(),
+			Text = gameInfo.GetCoin(Coin.Glider).ToString(),
 			FontPath = Constants.Font.UiFontPath,
 			Color = Constants.GameColors.Glider,
 		};
@@ -79,8 +79,8 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		_gliderCrossLabel!.Text = $"{gameInfo.Coins[Coin.Glider]}";
-		_statCrossLabel!.Text = $"{gameInfo.Coins[Coin.Cross]}";
-		_statCircleLabel!.Text = $"{gameInfo.Coins[Coin.Circle]}";
+		_gliderCrossLabel!.Text = $"{gameInfo.GetCoin(Coin.Glider)}";
+		_statCrossLabel!.Text = $"{gameInfo.GetCoin(Coin.Cross)}";
+		_statCircleLabel!.Text = $"{gameInfo.GetCoin(Coin.Circle)}";
 	}
 }

@@ -19,12 +19,17 @@ public enum Coin
 public class GameInfo
 {
 	[JsonInclude]
-	public Dictionary<Coin, int> Coins { get; private set; } = [];
+	private Dictionary<Coin, int> Coins { get; set; } = [];
 
 	public void AddCoin(Coin coin, int count)
 	{
 		Coins.TryAdd(coin, 0);
 		Coins[coin] += count;
+	}
+
+	public int GetCoin(Coin coin)
+	{
+		return Coins.TryGetValue(coin, out var coinValue) ? coinValue : 0;
 	}
 
 	public void SaveToFile(string filePathJson)
@@ -37,7 +42,8 @@ public class GameInfo
 	{
 		if (!Path.Exists(filePathJson))
 		{
-			return new GameInfo();
+			var result = new GameInfo();
+			return result;
 		}
 
 		var json = File.ReadAllText(filePathJson);
@@ -47,7 +53,7 @@ public class GameInfo
 
 public class GameLoop : GameObject
 {
-	private const string PathToSaveFile = "./Assets/GameSave.json";
+	private const string PathToSaveFile = "./GameSave.json";
 
 	private Camera2d? _camera;
 	private Player? _player;
@@ -117,18 +123,5 @@ public class GameLoop : GameObject
 	private void OnPlayerDeath()
 	{
 		OnFinish?.Invoke();
-	}
-
-	protected override void OnDebugDraw()
-	{
-		if (ImGui.Begin("Game stat"))
-		{
-			foreach (var coin in _gameInfo.Coins)
-			{
-				ImGui.Text($"{coin.Key} : {coin.Value}");
-			}
-
-			ImGui.End();
-		}
 	}
 }
