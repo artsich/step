@@ -1,4 +1,5 @@
-﻿using Silk.NET.OpenGL;
+﻿using Serilog;
+using Silk.NET.OpenGL;
 
 namespace Step.Engine.Graphics;
 
@@ -15,8 +16,15 @@ public sealed class GpuTimer : IDisposable
 	public GpuTimer(GL gl)
 	{
 		_gl = gl;
-
-		_gl.CreateQueries(QueryTarget.TimeElapsed, 2, _queryObjects);
+		if (OperatingSystem.IsMacOS())
+		{
+			Log.Logger.Warning("GPU timer is not supported on Mac");
+			_gl.GenQueries(2, _queryObjects);
+		}
+		else
+		{
+			_gl.CreateQueries(QueryTarget.TimeElapsed, 2, _queryObjects);
+		}
 		_currentQueryIndex = 0;
 		_isRunning = false;
 		_disposed = false;

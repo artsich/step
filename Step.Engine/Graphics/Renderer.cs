@@ -88,7 +88,7 @@ public class Renderer(int screenWidth, int screenHeight, GL GL)
 			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.ScreenQuad.shader.vert"),
 			EmbeddedResourceLoader.LoadAsString($"{Consts.PathToShaderResource}.ScreenQuad.shader.frag"));
 
-		DefaultWhiteTexture = Texture2d.LoadFromFile("Assets/Textures/white.png");
+		DefaultWhiteTexture = Assets.LoadTexture2d("Textures/white.png");
 		DefaultWhiteTexture.Bind(0);
 	}
 

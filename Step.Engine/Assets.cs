@@ -21,7 +21,7 @@ public class Assets
 
 	private static readonly Dictionary<string, Texture2d> _textureCache = [];
 
-	public const string AssetsFolder = "Assets";
+	public const string AssetsFolder = "./Assets";
 
 	public static Emitter LoadEmitter(string path)
 	{

@@ -240,7 +240,14 @@ public class Engine(WindowOptions windowOptions)
 				}
 				else
 				{
-					_gameInput.SetWindowSize((Vector2f)_window.FramebufferSize);
+					if (OperatingSystem.IsMacOS())
+					{
+						_gameInput.SetWindowSize((Vector2f)_window.FramebufferSize/2);
+					}
+					else
+					{
+						_gameInput.SetWindowSize((Vector2f)_window.FramebufferSize);
+					}
 					_gameInput.SetMouseOffset(Vector2f.Zero);
 				}
 
@@ -273,13 +280,19 @@ public class Engine(WindowOptions windowOptions)
 			.CreateLogger();
 
 		Ctx.Init(_window);
+		var imguiFontScale = 1f;
+		if (!OperatingSystem.IsMacOS())
+		{
+			imguiFontScale = WindowExt.GetScale();
+		}
+		
 		_imGuiController = new ImGuiController(
 			GL,
 			_window,
 			_inputContext = _window.CreateInput(),
 			new ImGuiFontConfig(
 				"EngineData/Fonts/ProggyClean.ttf", 
-				(int)(13 * WindowExt.GetScale())),
+				(int)(13 * imguiFontScale)),
 			() =>
 			{
 				var io = ImGui.GetIO();

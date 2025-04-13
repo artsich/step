@@ -60,15 +60,18 @@ public class GameScene : RenderResult
 			}
 			else
 			{
+				
 				Debug.Assert(_uiViewport != null);
 				finalImage = _uiViewport!.ColorTexture;
-
-				if (_gameViewport != null)
+				if (!OperatingSystem.IsMacOS())
 				{
-					_blurEffect.Apply(_gameViewport!.ColorTexture, out var blurredGame);
-					_blendPostEffect.Blend(
-						blurredGame,
-						_uiViewport!.ColorTexture, out finalImage);
+					if (_gameViewport != null)
+					{
+						_blurEffect.Apply(_gameViewport!.ColorTexture, out var blurredGame);
+						_blendPostEffect.Blend(
+							blurredGame,
+							_uiViewport!.ColorTexture, out finalImage);
+					}
 				}
 
 				_crtEffect.Apply(finalImage, out finalImage);
