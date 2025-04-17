@@ -92,6 +92,9 @@ public class GameScene : RenderResult
 		_menuCamera = new Camera2d(cameraWidth, cameraHeight);
 		_gameCamera = new Camera2d(cameraWidth, cameraHeight);
 
+		// TODO: required for valid collision check (input.mouseWorldPosition return invalid result and leads to invalid calculation for shield)
+		GameRoot.I.PushCamera(_gameCamera);
+
 		_engine.Keyboard.KeyDown += HandleKeyDown;
 
 		_crtEffect = new CrtEffect(

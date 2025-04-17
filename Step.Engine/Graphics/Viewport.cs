@@ -1,6 +1,6 @@
 ﻿namespace Step.Engine.Graphics;
 
-public class Viewport(Engine engine, ICamera2d camera2d, Vector2i size) : CanvasItem, IDisposable
+public sealed class Viewport(Engine engine, ICamera2d camera2d, Vector2i size) : CanvasItem, IDisposable
 {
 	private readonly RenderTarget2d _renderTarget = new(size.X, size.Y, true);
 	private readonly Renderer _renderer = engine.Renderer;

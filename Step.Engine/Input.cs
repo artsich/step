@@ -38,7 +38,7 @@ public sealed class Input
 			{
 				return camera.ScreenToWorld(MouseScreenPosition, _windowSize);
 			}
-			return MouseScreenPosition;
+			throw new InvalidOperationException("Camera is not set.");
 		}
 	}
 

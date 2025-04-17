@@ -100,12 +100,10 @@ public class PlayerShield : GameObject
 	{
 		if (shape.Parent is CircleEnemy || shape.Parent is GliderEntity)
 		{
-			float collisionAngle = MathF.Atan2(info.Normal.Y, info.Normal.X);
+			float collisionAngle = MathF.Atan2(-info.Normal.Y, -info.Normal.X);
+			float arcAngle = GetCurrentArc();
 
-			Vector2f arcDir = GlobalPosition - _input.MouseWorldPosition;
-			float arcAngle = MathF.Atan2(arcDir.Y, arcDir.X);
-
-			if (MathF.Abs(collisionAngle - arcAngle) <= MathF.PI / 4f)
+			if (MathF.Abs(collisionAngle - arcAngle) < MathF.PI / 4f)
 			{
 				shape.Parent.QueueFree();
 			}

@@ -24,7 +24,6 @@ var windowOptions = WindowOptions.Default with
 };
 
 // todo:
-// shield is visible on after game reload
 // do not create second renderer for editor
 // use separate camara when in editor mode...
 
