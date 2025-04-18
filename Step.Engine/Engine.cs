@@ -320,7 +320,7 @@ public class Engine(WindowOptions windowOptions)
 			if (scroll.Y != 0f)
 			{
 				scale *= Math.Sign(scroll.Y);
-				GameRoot.I.Scene.GetChildOf<Camera2d>().Zoom(scale);
+				(GameRoot.I.CurrentCamera as Camera2d)?.Zoom(scale);
 			}
 		}
 	}

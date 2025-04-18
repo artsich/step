@@ -4,8 +4,13 @@ public static class StepMath
 {
 	public static float LerpAngle(float from, float to, float t)
 	{
-		float diff = MathF.IEEERemainder(to - from, MathF.PI * 2);
+		float diff = NormalizeAngle(to - from);
 		return from + diff * t;
+	}
+
+	public static float NormalizeAngle(float angle)
+	{
+		return MathF.IEEERemainder(angle, MathF.PI * 2);
 	}
 
 	public static Vector2f AdjustToAspect(float targetAspect, Vector2f size)

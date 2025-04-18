@@ -8,12 +8,35 @@ namespace Step.Main.Gameplay.Actors;
 
 public class PlayerShield : GameObject
 {
+	public enum ShieldTier
+	{
+		Tier1,
+		Tier2,
+		Tier3
+	}
+
 	private readonly Input _input;
 	private readonly CircleCollisionShape _collisionShape;
 	private readonly Sprite2d _sprite;
 
 	private bool _isActivated;
 	private float _arcAngle;
+
+	public ShieldTier Tier { get; set; } = ShieldTier.Tier3;
+
+	private float CircleParts
+	{
+		get
+		{
+			return Tier switch
+			{
+				ShieldTier.Tier1 => 4f,
+				ShieldTier.Tier2 => 2f,
+				ShieldTier.Tier3 => 1f,
+				_ => throw new NotImplementedException(),
+			};
+		}
+	}
 
 	[EditorProperty]
 	public float Radius
@@ -70,6 +93,7 @@ public class PlayerShield : GameObject
 		var currentArc = GetCurrentArc();
 		_arcAngle = StepMath.LerpAngle(_arcAngle, currentArc, speed * deltaTime);
 
+		_sprite.Shader!.SetFloat("circleParts", CircleParts);
 		if (_isActivated)
 		{
 			_sprite.Shader!.SetFloat("arcAngle", _arcAngle);
@@ -103,7 +127,8 @@ public class PlayerShield : GameObject
 			float collisionAngle = MathF.Atan2(-info.Normal.Y, -info.Normal.X);
 			float arcAngle = GetCurrentArc();
 
-			if (MathF.Abs(collisionAngle - arcAngle) < MathF.PI / 4f)
+			float angleDiff = StepMath.NormalizeAngle(collisionAngle - arcAngle);
+			if (MathF.Abs(angleDiff) <= MathF.PI / CircleParts)
 			{
 				shape.Parent.QueueFree();
 			}
