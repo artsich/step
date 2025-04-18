@@ -1,5 +1,6 @@
 ﻿using Step.Engine;
 using Step.Engine.Editor;
+using Step.Main.Gameplay.Actors;
 
 namespace Step.Main.Gameplay;
 
@@ -15,19 +16,32 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 	public float SpawnRateIncreaseFactor { get; set; } = 0.5f;
 
 	[EditorProperty]
+	public float InitialEnemySpeed { get; set; } = 30f;
+
+	[EditorProperty]
+	public float SpeedIncreaseInterval { get; set; } = 10f;
+
+	[EditorProperty]
+	public float SpeedIncreaseFactor { get; set; } = 5f;
+
+	[EditorProperty]
 	public bool On { get; set; } = true;
 
 	public event Action<GameObject>? OnSpawn;
 
 	private float _timeSinceLastSpawn;
 	private float _timeSinceLastIncrease;
+	private float _timeSinceLastSpeedIncrease;
 	private float _timeSinceStart;
 	private float _currentSpawnRate;
+	private float _currentEnemySpeedMultiplier;
+
 	private readonly Random _random = new();
 
 	protected override void OnStart()
 	{
 		_currentSpawnRate = InitialEntitiesPerSecond;
+		_currentEnemySpeedMultiplier = InitialEnemySpeed;
 	}
 
 	protected override void OnDebugDraw()
@@ -46,11 +60,18 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 		_timeSinceStart += deltaTime;
 		_timeSinceLastSpawn += deltaTime;
 		_timeSinceLastIncrease += deltaTime;
+		_timeSinceLastSpeedIncrease += deltaTime;
 
 		if (_timeSinceLastIncrease >= SpawnRateIncreaseInterval)
 		{
 			_currentSpawnRate += SpawnRateIncreaseFactor;
 			_timeSinceLastIncrease = 0;
+		}
+
+		if (_timeSinceLastSpeedIncrease >= SpeedIncreaseInterval)
+		{
+			_currentEnemySpeedMultiplier += SpeedIncreaseFactor;
+			_timeSinceLastSpeedIncrease = 0;
 		}
 
 		if (_timeSinceLastSpawn >= 1f / _currentSpawnRate)
@@ -99,7 +120,8 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 			{
 				var spawnPos = GenerateSpawnPosition(rule);
 
-				var enemy = rule.CreateEntity(spawnPos);
+				var enemy = rule.CreateEntity(new EnemySpawnDetails(spawnPos, _currentEnemySpeedMultiplier));
+			
 				OnSpawn?.Invoke(enemy);
 
 				CallDeferred(() => AddChild(enemy));

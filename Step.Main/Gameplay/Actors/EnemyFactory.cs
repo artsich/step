@@ -16,16 +16,17 @@ public class EnemyFactory(
 
 	private int NewId => _enemyId++;
 
-	public GliderEntity CreateGlider(Vector2f position)
+	public GliderEntity CreateGlider(EnemySpawnDetails spawnDetails)
 	{
 		var glider = new GliderEntity(target)
 		{
 			Name = $"Glider_{NewId}",
 			LocalTransform = new Transform()
 			{
-				Position = position,
+				Position = spawnDetails.Position,
 				Scale = new Vector2f(0.3f),
-			}
+			},
+			Speed = spawnDetails.Speed
 		};
 
 		glider.AddChild(
@@ -46,18 +47,19 @@ public class EnemyFactory(
 		return glider;
 	}
 
-	public CircleEnemy CreateCircle(Vector2f spawnPosition)
+	public CircleEnemy CreateCircle(EnemySpawnDetails spawnDetails)
 	{
-		var targetDir = spawnPosition.DirectionTo(target.Position);
+		var targetDir = spawnDetails.Position.DirectionTo(target.Position);
 
 		var circle = new CircleEnemy(targetDir)
 		{
 			Name = $"Circle_{NewId}",
 			LocalTransform = new Transform()
 			{
-				Position = spawnPosition,
+				Position = spawnDetails.Position,
 				Scale = new Vector2f(0.3f),
-			}
+			},
+			Speed = spawnDetails.Speed
 		};
 
 		circle.AddChild(
@@ -79,16 +81,16 @@ public class EnemyFactory(
 		return circle;
 	}
 
-	public CrossEnemy CreateCross(Vector2f position)
+	public CrossEnemy CreateCross(EnemySpawnDetails spawnDetails)
 	{
 		var cross = new CrossEnemy()
 		{
 			Name = $"Cross_{NewId}",
 			LocalTransform = new Transform()
 			{
-				Position = position,
+				Position = spawnDetails.Position,
 				Scale = new Vector2f(0.3f),
-			}
+			},
 		};
 
 		cross.AddChild(

@@ -1,10 +1,12 @@
 ﻿namespace Step.Main.Gameplay.Actors;
 
+public record struct EnemySpawnDetails(Vector2f Position, float Speed);
+
 public interface IEnemyFactory
 {
-	GliderEntity CreateGlider(Vector2f position);
+	GliderEntity CreateGlider(EnemySpawnDetails spawnDetails);
 
-	CircleEnemy CreateCircle(Vector2f position);
+	CircleEnemy CreateCircle(EnemySpawnDetails spawnDetails);
 
-	CrossEnemy CreateCross(Vector2f position);
+	CrossEnemy CreateCross(EnemySpawnDetails spawnDetails);
 }

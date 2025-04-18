@@ -1,4 +1,5 @@
 ﻿using Step.Engine;
+using Step.Main.Gameplay.Actors;
 
 namespace Step.Main.Gameplay;
 
@@ -14,7 +15,7 @@ public class SpawnRule
 
 	public float SpawnWeight { get; init; }
 
-	public Func<Vector2f, GameObject> CreateEntity { get; init; }
+	public Func<EnemySpawnDetails, GameObject> CreateEntity { get; init; }
 
 	public SpawnLocationType SpawnLocation { get; init; } = SpawnLocationType.Border;
 }

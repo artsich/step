@@ -87,28 +87,29 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 			_crossTexture!,
 			player);
 
-		return new Spawner(new Box2f(-gameCameraWidth / 2f, -gameCameraHeight / 2f, gameCameraWidth / 2f, gameCameraHeight / 2f),
-		[
-			new SpawnRule
-			{
-				StartTime = 0f,
-				SpawnWeight = 1f,
-				CreateEntity = enemyFactory.CreateCircle
-			},
-			new SpawnRule
-			{
-				StartTime = 60f,
-				SpawnWeight = 0.05f,
-				CreateEntity = enemyFactory.CreateGlider
-			},
-			new SpawnRule
-			{
-				StartTime = 30f,
-				SpawnWeight = 0.1f,
-				CreateEntity = enemyFactory.CreateCross,
-				SpawnLocation = SpawnLocationType.Interior,
-			}
-		]);
+		return new Spawner(
+			new Box2f(-gameCameraWidth / 2f, -gameCameraHeight / 2f, gameCameraWidth / 2f, gameCameraHeight / 2f),
+			[
+				new SpawnRule
+				{
+					StartTime = 0f,
+					SpawnWeight = 1f,
+					CreateEntity = enemyFactory.CreateCircle
+				},
+				new SpawnRule
+				{
+					StartTime = 60f,
+					SpawnWeight = 0.05f,
+					CreateEntity = enemyFactory.CreateGlider
+				},
+				new SpawnRule
+				{
+					StartTime = 30f,
+					SpawnWeight = 0.1f,
+					CreateEntity = enemyFactory.CreateCross,
+					SpawnLocation = SpawnLocationType.Interior,
+				}
+			]);
 	}
 
 	private void LoadAssets()
