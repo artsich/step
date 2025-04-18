@@ -4,14 +4,16 @@ using Step.Engine.Graphics.UI;
 
 namespace Step.Main.Gameplay.UI;
 
-public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud")
+public class GameHud : GameObject
 {
-	private Label? _statCircleLabel;
-	private Label? _statCrossLabel;
-	private Label? _gliderCrossLabel;
+	private readonly GameInfo _gameInfo;
+	private readonly Label _statCircleLabel;
+	private readonly Label _statCrossLabel;
+	private readonly Label _gliderCrossLabel;
 
-	protected override void OnStart()
+	public GameHud(Renderer renderer, GameInfo gameInfo) : base("GameHud")
 	{
+		_gameInfo = gameInfo;
 		_statCircleLabel = new Label(renderer)
 		{
 			Text = $"{gameInfo.GetCoin(Coin.Circle)}",
@@ -79,8 +81,8 @@ public class GameHud(Renderer renderer, GameInfo gameInfo) : GameObject("GameHud
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		_gliderCrossLabel!.Text = $"{gameInfo.GetCoin(Coin.Glider)}";
-		_statCrossLabel!.Text = $"{gameInfo.GetCoin(Coin.Cross)}";
-		_statCircleLabel!.Text = $"{gameInfo.GetCoin(Coin.Circle)}";
+		_gliderCrossLabel.Text = $"{_gameInfo.GetCoin(Coin.Glider)}";
+		_statCrossLabel.Text = $"{_gameInfo.GetCoin(Coin.Cross)}";
+		_statCircleLabel.Text = $"{_gameInfo.GetCoin(Coin.Circle)}";
 	}
 }
