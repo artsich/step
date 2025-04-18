@@ -34,5 +34,6 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Graphics\Shaders\**" />
+    <EmbeddedResource Include="EngineData\**" />
   </ItemGroup>
 </Project>

@@ -290,12 +290,10 @@ public class Engine(WindowOptions windowOptions)
 			GL,
 			_window,
 			_inputContext = _window.CreateInput(),
-			new ImGuiFontConfig(
-				"EngineData/Fonts/ProggyClean.ttf", 
-				(int)(13 * imguiFontScale)),
 			() =>
 			{
 				var io = ImGui.GetIO();
+				LoadDefaultImGuiFont(imguiFontScale, io);
 				io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 			}
 		);
@@ -346,6 +344,19 @@ public class Engine(WindowOptions windowOptions)
 					_window.WindowState = WindowState.Maximized;
 				}
 			}
+		}
+	}
+
+	private static unsafe void LoadDefaultImGuiFont(float fontScale, ImGuiIOPtr io)
+	{
+		byte[] fontData = EmbeddedResourceLoader.LoadAsBytes("Step.Engine.EngineData.Fonts.ProggyClean.ttf");
+
+		fixed (byte* fontDataPtr = fontData)
+		{
+			io.Fonts.AddFontFromMemoryTTF(
+				new IntPtr(fontDataPtr),
+				fontData.Length,
+				(int)(13 * fontScale));
 		}
 	}
 }
