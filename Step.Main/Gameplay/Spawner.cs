@@ -95,7 +95,7 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 		{
 			if (!removalBox.Contains(enemy.GlobalPosition))
 			{
-				CallDeferred(enemy.QueueFree);
+				enemy.QueueFree();
 			}
 		}
 	}
@@ -124,8 +124,10 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 			
 				OnSpawn?.Invoke(enemy);
 
-				CallDeferred(() => AddChild(enemy));
-				CallDeferred(enemy.Start);
+				CallDeferred(() => {
+					AddChild(enemy);
+					enemy.Start();
+				});
 				break;
 			}
 		}
