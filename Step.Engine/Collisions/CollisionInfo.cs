@@ -3,7 +3,8 @@
 public readonly record struct CollisionInfo(
 	bool HasCollision,
 	Vector2f Normal,
-	float Penetration)
+	float Penetration,
+	Vector2f Position)
 {
 	public static CollisionInfo None => new() { HasCollision = false };
 }

@@ -3,6 +3,7 @@ using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
+using Step.Engine.Graphics.Particles;
 using Step.Engine.Physics;
 
 namespace Step.Main.Gameplay.Actors;
@@ -28,6 +29,7 @@ public class Player : KinematicBody2D, ITarget
 	private readonly PlayerAbilities _playerAbilities;
 
 	private CollisionShape? _collisionShape;
+	private Particles2d _collisionWithEnemyParticles;
 	private readonly Input _input;
 
 	public Player(Input input, CollisionShape collisionShape)
@@ -50,6 +52,7 @@ public class Player : KinematicBody2D, ITarget
 		base.OnStart();
 		_collisionShape = GetChildOf<CollisionShape>();
 		_collisionShape.OnCollision += OnCollision;
+		_collisionWithEnemyParticles = GetChildOf<Particles2d>("ParticlesPlayerDamage");
 	}
 
 	protected override void OnEnd()
@@ -72,17 +75,21 @@ public class Player : KinematicBody2D, ITarget
 		}
 	}
 
-	private void OnCollision(CollisionShape shape, CollisionInfo _)
+	private void OnCollision(CollisionShape shape, CollisionInfo collisionInfo)
 	{
 		if (shape.Parent is GliderEntity glider)
 		{
 			AudioManager.Ins.PlaySound("player_hurt_glider");
 			TakeDamage(1);
+			_collisionWithEnemyParticles.GlobalPosition = collisionInfo.Position;
+			_collisionWithEnemyParticles.Emitting = true;
 			glider.QueueFree();
 		}
 		else if (shape.Parent is CircleEnemy circle)
 		{
 			AudioManager.Ins.PlaySound("player_hurt_circle");
+			_collisionWithEnemyParticles.GlobalPosition = collisionInfo.Position;
+			_collisionWithEnemyParticles.Emitting = true;
 			TakeDamage(1);
 			circle.QueueFree();
 		}

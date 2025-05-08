@@ -34,8 +34,8 @@ public class GameObject(string name = nameof(GameObject))
 		{
 			if (_parent != null)
 			{
-				var parentInverse = _parent.GetGlobalMatrix().Inverted();
-				LocalTransform.Position = (new Vector4f(value, 0f, 0f) * parentInverse).Xy();
+				var worldInverse = _parent.GetGlobalMatrix().Inverted();
+				LocalTransform.Position = (new Vector4f(value, 0f, 1f) * worldInverse).Xy();
 			}
 			else
 			{

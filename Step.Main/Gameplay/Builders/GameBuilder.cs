@@ -2,6 +2,7 @@ using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Collisions;
 using Step.Engine.Graphics;
+using Step.Engine.Graphics.Particles;
 using Step.Main.Gameplay.Actors;
 using Step.Main.Gameplay.UI;
 
@@ -46,6 +47,12 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 				Size = new Vector2f(16f),
 				CollisionLayers = (int)PhysicLayers.Player,
 				CollisionMask = (int)(PhysicLayers.Enemy | PhysicLayers.Frame)
+			});
+
+		player.AddChild(
+			new Particles2d(Assets.LoadEmitter("particles/collision-with-enemy.json"), engine.Renderer)
+			{
+				Name = "ParticlesPlayerDamage"
 			});
 
 		var playerSprite = new PlayerSprite();
