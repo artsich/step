@@ -1,55 +1,26 @@
-﻿using Silk.NET.OpenAL;
+﻿namespace Step.Engine.Audio;
 
-namespace Step.Engine.Audio;
-
-public class Sound : IDisposable
+public class Sound(string path) : GameObject
 {
-	private readonly uint _bufferId;
-	private readonly AL _al;
-	private readonly uint _sourceId;
+	private readonly string _soundKey = path;
 
-	private bool _isDisposed;
+	public bool AutoPlay { get; set; } = false;
 
-	public Sound(uint bufferId, AL al)
+	public bool Loop { get; set; } = false;
+
+	protected override void OnStart()
 	{
-		_bufferId = bufferId;
-		_al = al;
-		_sourceId = _al.GenSource();
-		_al.SetSourceProperty(_sourceId, SourceInteger.Buffer, _bufferId);
+		base.OnStart();
+
+		AudioManager.Ins.LoadSound(_soundKey, path);
+		if (AutoPlay)
+		{
+			Play();
+		}
 	}
 
-	public void Play(bool loop = false)
+	public void Play()
 	{
-		if (_isDisposed) return;
-
-		_al.SetSourceProperty(_sourceId, SourceBoolean.Looping, loop);
-		_al.SourcePlay(_sourceId);
-	}
-
-	public void Pause()
-	{
-		if (_isDisposed) return;
-		_al.SourcePause(_sourceId);
-	}
-
-	public void Stop()
-	{
-		if (_isDisposed) return;
-		_al.SourceStop(_sourceId);
-	}
-
-	public void Dispose()
-	{
-		if (_isDisposed) return;
-		_isDisposed = true;
-
-		_al.SourceStop(_sourceId);
-		_al.DeleteSource(_sourceId);
-		_al.DeleteBuffer(_bufferId);
-	}
-
-	public void SlowDown(float pitch)
-	{
-		_al.SetSourceProperty(_sourceId, SourceFloat.Pitch, pitch);
+		AudioManager.Ins.PlaySound(_soundKey, Loop);
 	}
 }

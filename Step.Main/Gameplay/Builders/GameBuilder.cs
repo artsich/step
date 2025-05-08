@@ -35,6 +35,9 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 			LocalPosition = new(0f, 70f)
 		});
 
+		gameLoop.AddChild(new Sound("Music/ok_lets_go.mp3") { Name = "start", AutoPlay = true });
+		gameLoop.AddChild(new Sound("Music/air-ambience-234180.mp3") { Name = "main_theme", Loop = true, AutoPlay = true });
+
 		return gameLoop;
 	}
 
@@ -75,6 +78,11 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 		});
 
 		player.AddChild(playerSprite);
+
+		player.AddChild(new Sound("Music/hurt.wav") { Name = "player_hurt_glider" });
+		player.AddChild(new Sound("Music/hurt2.wav") { Name = "player_hurt_circle" });
+		player.AddChild(new Sound("Music/pickup.wav") {  Name = "player_pickup" });
+
 		player.AddAbility(new SpeedIncreaseAbility(player));
 		player.AddAbility(new RegenerationAbility(player));
 		player.AddAbility(new SizeChangerAbility(player) { Duration = 3f });
@@ -121,13 +129,6 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 
 	private void LoadAssets()
 	{
-		AudioManager.Ins.LoadSound("start", "Music/ok_lets_go.mp3");
-		AudioManager.Ins.LoadSound("main_theme", "Music/air-ambience-234180.mp3");
-		AudioManager.Ins.LoadSound("player_hurt_glider", "Music/hurt.wav");
-		AudioManager.Ins.LoadSound("player_hurt_circle", "Music/hurt2.wav");
-		AudioManager.Ins.LoadSound("player_pickup", "Music/pickup.wav");
-		AudioManager.Ins.LoadSound("wall_collision", "Music/wall_collision.mp3");
-
 		_gliderTexture = Assets.LoadTexture2d("Textures/glider-enemy.png");
 		_circleTexture = Assets.LoadTexture2d("Textures/circle-enemy.png");
 		_playerTexture = Assets.LoadTexture2d("Textures/player.png");

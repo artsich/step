@@ -82,9 +82,6 @@ public class GameLoop : GameObject
 		_player.OnDamage += OnPlayerDamage;
 
 		_player.OnCrossCoinCollected += OnCrossCoinCollected;
-
-		AudioManager.Ins.PlaySound("start");
-		AudioManager.Ins.PlaySound("main_theme", true);
 	}
 
 	private void OnEnemySpawn(GameObject obj)

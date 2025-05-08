@@ -63,7 +63,7 @@ public unsafe class AudioManager : IDisposable, IAudioManager
 	private Device* _device;
 	private Context* _context;
 
-	private readonly Dictionary<string, Sound> _loadedSounds = [];
+	private readonly Dictionary<string, AlSound> _loadedSounds = [];
 
 	private static IAudioManager? _instance;
 
@@ -128,7 +128,7 @@ public unsafe class AudioManager : IDisposable, IAudioManager
 		}
 		else
 		{
-			Sound sound = Assets.LoadSound(filePath);
+			AlSound sound = Assets.LoadSound(filePath);
 			_loadedSounds[key] = sound;
 		}
 	}

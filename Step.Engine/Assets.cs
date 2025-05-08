@@ -50,7 +50,7 @@ public class Assets
 		return texture;
 	}
 
-	public static Sound LoadSound(string path)
+	internal static AlSound LoadSound(string path)
 	{
 		return NAudioLoader.LoadSound(FullPath(path));
 	}

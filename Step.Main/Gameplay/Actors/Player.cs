@@ -79,7 +79,7 @@ public class Player : KinematicBody2D, ITarget
 	{
 		if (shape.Parent is GliderEntity glider)
 		{
-			AudioManager.Ins.PlaySound("player_hurt_glider");
+			GetChildOf<Sound>("player_hurt_glider").Play();
 			TakeDamage(1);
 			_collisionWithEnemyParticles.GlobalPosition = collisionInfo.Position;
 			_collisionWithEnemyParticles.Emitting = true;
@@ -87,7 +87,7 @@ public class Player : KinematicBody2D, ITarget
 		}
 		else if (shape.Parent is CircleEnemy circle)
 		{
-			AudioManager.Ins.PlaySound("player_hurt_circle");
+			GetChildOf<Sound>("player_hurt_circle").Play();
 			_collisionWithEnemyParticles.GlobalPosition = collisionInfo.Position;
 			_collisionWithEnemyParticles.Emitting = true;
 			TakeDamage(1);
@@ -95,7 +95,7 @@ public class Player : KinematicBody2D, ITarget
 		}
 		else if (shape.Parent is CrossEnemy cross)
 		{
-			AudioManager.Ins.PlaySound("player_pickup");
+			GetChildOf<Sound>("player_pickup").Play();
 			cross.QueueFree();
 			OnCrossCoinCollected?.Invoke();
 		}

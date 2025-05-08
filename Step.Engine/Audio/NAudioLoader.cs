@@ -9,7 +9,7 @@ internal static class NAudioLoader
 	/// <summary>
 	/// Decodes any file NAudio can read into 16-bit PCM, then uploads it to an OpenAL buffer.
 	/// </summary>
-	public unsafe static Sound LoadSound(string filePath)
+	public unsafe static AlSound LoadSound(string filePath)
 	{
 		var al = AudioManager.Al;
 		// AudioFileReader decodes WAV, MP3, etc. into a floating-point stream (ISampleProvider).
@@ -60,6 +60,6 @@ internal static class NAudioLoader
 			al.BufferData(bufferId, alFormat, pData, pcmData.Length, sampleRate);
 		}
 
-		return new Sound(bufferId, al);
+		return new AlSound(bufferId, al);
 	}
 }
