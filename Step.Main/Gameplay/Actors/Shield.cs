@@ -22,7 +22,7 @@ public class PlayerShield : GameObject
 	private bool _isActivated;
 	private float _arcAngle;
 
-	public ShieldTier Tier { get; set; } = ShieldTier.Tier3;
+	public ShieldTier Tier { get; set; } = ShieldTier.Tier1;
 
 	private float CircleParts
 	{

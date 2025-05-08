@@ -4,6 +4,26 @@ using Step.Main.Gameplay.Actors;
 
 namespace Step.Main.Gameplay;
 
+public sealed class ProgressiveValue(float initialValue, float increaseInterval, float increaseFactor)
+{
+	public float CurrentValue { get; private set; } = initialValue;
+	public float IncreaseInterval { get; } = increaseInterval;
+	public float IncreaseFactor { get; } = increaseFactor;
+
+	private float _timeSinceLastIncrease = 0;
+
+	public void Update(float deltaTime)
+	{
+		_timeSinceLastIncrease += deltaTime;
+		
+		if (_timeSinceLastIncrease >= IncreaseInterval)
+		{
+			CurrentValue += IncreaseFactor;
+			_timeSinceLastIncrease = 0;
+		}
+	}
+}
+
 public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObject(nameof(Spawner))
 {
 	[EditorProperty]
@@ -30,18 +50,16 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 	public event Action<GameObject>? OnSpawn;
 
 	private float _timeSinceLastSpawn;
-	private float _timeSinceLastIncrease;
-	private float _timeSinceLastSpeedIncrease;
 	private float _timeSinceStart;
-	private float _currentSpawnRate;
-	private float _currentEnemySpeedMultiplier;
+	private ProgressiveValue _spawnRate;
+	private ProgressiveValue _enemySpeed;
 
 	private readonly Random _random = new();
 
 	protected override void OnStart()
 	{
-		_currentSpawnRate = InitialEntitiesPerSecond;
-		_currentEnemySpeedMultiplier = InitialEnemySpeed;
+		_spawnRate = new ProgressiveValue(InitialEntitiesPerSecond, SpawnRateIncreaseInterval, SpawnRateIncreaseFactor);
+		_enemySpeed = new ProgressiveValue(InitialEnemySpeed, SpeedIncreaseInterval, SpeedIncreaseFactor);
 	}
 
 	protected override void OnDebugDraw()
@@ -59,22 +77,11 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 
 		_timeSinceStart += deltaTime;
 		_timeSinceLastSpawn += deltaTime;
-		_timeSinceLastIncrease += deltaTime;
-		_timeSinceLastSpeedIncrease += deltaTime;
+		
+		_spawnRate.Update(deltaTime);
+		_enemySpeed.Update(deltaTime);
 
-		if (_timeSinceLastIncrease >= SpawnRateIncreaseInterval)
-		{
-			_currentSpawnRate += SpawnRateIncreaseFactor;
-			_timeSinceLastIncrease = 0;
-		}
-
-		if (_timeSinceLastSpeedIncrease >= SpeedIncreaseInterval)
-		{
-			_currentEnemySpeedMultiplier += SpeedIncreaseFactor;
-			_timeSinceLastSpeedIncrease = 0;
-		}
-
-		if (_timeSinceLastSpawn >= 1f / _currentSpawnRate)
+		if (_timeSinceLastSpawn >= 1f / _spawnRate.CurrentValue)
 		{
 			SpawnEnemy();
 			_timeSinceLastSpawn = 0;
@@ -120,7 +127,7 @@ public sealed class Spawner(Box2f spawnArea, SpawnRule[] spawnRules) : GameObjec
 			{
 				var spawnPos = GenerateSpawnPosition(rule);
 
-				var enemy = rule.CreateEntity(new EnemySpawnDetails(spawnPos, _currentEnemySpeedMultiplier));
+				var enemy = rule.CreateEntity(new EnemySpawnDetails(spawnPos, _enemySpeed.CurrentValue));
 			
 				OnSpawn?.Invoke(enemy);
 
