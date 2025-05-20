@@ -239,9 +239,9 @@ public class PlayerAbilities(Input input, Player player)
 
 	private void ProcessInput()
 	{
-		TryAbility<ShieldAbility>(Key.Space);
-		TryAbility<SizeChangerAbility>(MouseButton.Left);
-		TryAbility<TimeFreezeAbility>(MouseButton.Right);
+		TryAbility<ShieldAbility>(Key.Space, MouseButton.Unknown, ButtonName.RightBumper);
+		TryAbility<SizeChangerAbility>(Key.Unknown, MouseButton.Left, ButtonName.X);
+		TryAbility<TimeFreezeAbility>(Key.Unknown, MouseButton.Right, ButtonName.A);
 	}
 
 	private T? FindActiveAbility<T>() 
@@ -256,7 +256,7 @@ public class PlayerAbilities(Input input, Player player)
 		return default;
 	}
 
-	private void TryAbility<T>(MouseButton btn) where T : IAbility
+	private void TryAbility<T>(Key key, MouseButton mouseBtn, ButtonName gamepadBtn) where T : IAbility
 	{
 		var ability = FindActiveAbility<T>();
 		if (ability is null)
@@ -264,29 +264,19 @@ public class PlayerAbilities(Input input, Player player)
 			return;
 		}
 
-		if (input.IsMouseButtonPressed(btn))
+		bool isPressed = (key != Key.Unknown && input.IsKeyPressed(key)) ||
+			(mouseBtn != MouseButton.Unknown && input.IsMouseButtonPressed(mouseBtn)) ||
+			(gamepadBtn != ButtonName.Unknown && input.IsGamepadButtonPressed(gamepadBtn));
+
+		bool isReleased = (key != Key.Unknown && input.IsKeyReleased(key)) ||
+			(mouseBtn != MouseButton.Unknown && input.IsMouseButtonReleased(mouseBtn)) ||
+			(gamepadBtn != ButtonName.Unknown && input.IsGamepadButtonReleased(gamepadBtn));
+
+		if (isPressed)
 		{
 			ability.Activate();
 		}
-		else if (input.IsMouseButtonReleased(btn))
-		{
-			ability.Deactivate();
-		}
-	}
-
-	private void TryAbility<T>(Key key) where T : IAbility
-	{
-		var ability = FindActiveAbility<T>();
-		if (ability is null)
-		{
-			return;
-		}
-
-		if (input.IsKeyPressed(key))
-		{
-			ability.Activate();
-		}
-		else if (input.IsKeyReleased(key))
+		else if (isReleased)
 		{
 			ability.Deactivate();
 		}

@@ -3,6 +3,7 @@ using Step.Engine;
 using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
+using Step.Main.Gameplay.InputUtils;
 
 namespace Step.Main.Gameplay.Actors;
 
@@ -21,6 +22,8 @@ public class PlayerShield : GameObject
 
 	private bool _isActivated;
 	private float _arcAngle;
+
+	private readonly MouseActivityTracker _mouseActivityTracker = new();
 
 	public ShieldTier Tier { get; set; } = ShieldTier.Tier1;
 
@@ -116,7 +119,23 @@ public class PlayerShield : GameObject
 
 	private float GetCurrentArc()
 	{
-		Vector2f arcDir = Vector2D.Normalize(_input.MouseWorldPosition - GlobalPosition);
+		var rightStick = _input.GetLeftStick() * new Vector2f(1f, -1f);
+		var arcDir = Vector2f.Zero;
+
+		if (rightStick.LengthSquared > 0f)
+		{
+			arcDir = Vector2D.Normalize(rightStick);
+			_mouseActivityTracker.Reset();
+		}
+		else
+		{
+			var currentMousePos = _input.MouseWorldPosition;
+			if (_mouseActivityTracker.TryActivate(currentMousePos))
+			{
+				arcDir = Vector2D.Normalize(_input.MouseWorldPosition - GlobalPosition);
+			}
+		}
+
 		return MathF.Atan2(arcDir.Y, arcDir.X);
 	}
 

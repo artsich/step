@@ -5,6 +5,7 @@ using Step.Engine.Collisions;
 using Step.Engine.Editor;
 using Step.Engine.Graphics.Particles;
 using Step.Engine.Physics;
+using Step.Main.Gameplay.InputUtils;
 
 namespace Step.Main.Gameplay.Actors;
 
@@ -31,6 +32,8 @@ public class Player : KinematicBody2D, ITarget
 	private CollisionShape? _collisionShape;
 	private Particles2d _collisionWithEnemyParticles;
 	private readonly Input _input;
+
+	private readonly MouseActivityTracker _mouseActivityTracker = new();
 
 	public Player(Input input, CollisionShape collisionShape)
 		: base(collisionShape, nameof(Player))
@@ -111,18 +114,28 @@ public class Player : KinematicBody2D, ITarget
 
 	private void Move()
 	{
-		var mouse = _input.MouseWorldPosition;
-		var diff = mouse - GlobalPosition;
+		var leftStick = _input.GetLeftStick() * new Vector2f(1f, -1f);
+		var moveDirection = Vector2f.Zero;
 
-		if (diff.LengthSquared > 1f)
+		if (leftStick.LengthSquared > 0f)
 		{
-			var dir = Vector2D.Normalize(diff);
-			Velocity = dir * Speed;
+			moveDirection = Vector2D.Normalize(leftStick);
+			_mouseActivityTracker.Reset();
 		}
 		else
 		{
-			Velocity = Vector2f.Zero;
+			var currentMousePos = _input.MouseWorldPosition;
+			if (_mouseActivityTracker.TryActivate(currentMousePos))
+			{
+				var diff = currentMousePos - GlobalPosition;
+				if (diff.LengthSquared > 1f)
+				{
+					moveDirection = Vector2D.Normalize(diff);
+				}
+			}
 		}
+
+		Velocity = moveDirection * Speed;
 	}
 
 	protected override void OnDebugDraw()

@@ -305,7 +305,7 @@ public class Engine(WindowOptions windowOptions)
 
 		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
-		_gameInput = new Input(Mouse, Keyboard);
+		_gameInput = new Input(_inputContext);
 
 		Mouse.Scroll += GameMouseWheel;
 	}
