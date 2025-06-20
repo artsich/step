@@ -85,6 +85,14 @@ public class GameObject(string name = nameof(GameObject))
 		child._parent = null;
 	}
 
+	public void ClearChildren()
+	{
+		for (int i = 0; i < children.Count; i++)
+		{
+			RemoveChild(children[i]);
+		}
+	}
+
 	public void Update(float deltaTime)
 	{
 		if (_markedAsFree || !Enabled)

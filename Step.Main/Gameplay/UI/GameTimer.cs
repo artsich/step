@@ -11,10 +11,7 @@ public sealed class GameTimer : GameObject
 
 	public GameTimer(Renderer renderer)
 	{
-		_label = new Label(renderer)
-		{
-			FontPath = Constants.Font.UiFontPath,
-		};
+		_label = new Label(renderer, Constants.Font.UiFontPath);
 		AddChild(_label);
 	}
 

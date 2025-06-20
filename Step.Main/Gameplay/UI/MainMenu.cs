@@ -18,24 +18,21 @@ public class MainMenu : GameObject
 
 	public MainMenu(Engine.Engine engine) : base("MainMenu")
 	{
-		_playButton = new Button("Play", () => OnPlayPressed?.Invoke(), engine.Input, engine.Renderer)
+		_playButton = new Button("Play", FontPath, () => OnPlayPressed?.Invoke(), engine.Input, engine.Renderer)
 		{
 			TextColor = Color.Red,
-			FontPath = FontPath,
 			TextAlignment = TextAlignment.Center
 		};
 
-		_continueButton = new Button("Continue", () => OnContinuePressed?.Invoke(), engine.Input, engine.Renderer)
+		_continueButton = new Button("Continue", FontPath, () => OnContinuePressed?.Invoke(), engine.Input, engine.Renderer)
 		{
 			TextColor = Color.Red,
-			FontPath = FontPath,
 			Enabled = false,
 			TextAlignment = TextAlignment.Center
 		};
 
-		var exitButton = new Button("Exit", () => OnExitPressed?.Invoke(), engine.Input, engine.Renderer)
+		var exitButton = new Button("Exit", FontPath, () => OnExitPressed?.Invoke(), engine.Input, engine.Renderer)
 		{
-			FontPath = FontPath,
 			TextColor = Color.Red,
 			TextAlignment = TextAlignment.Center
 		};

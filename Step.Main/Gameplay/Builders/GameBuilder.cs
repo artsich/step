@@ -15,14 +15,22 @@ public class GameBuilder(Engine.Engine engine, float gameCameraWidth, float game
 	private Texture2d? _playerTexture;
 	private Texture2d? _crossTexture;
 
+	private const string PathToSaveFile = "./GameSave.json";
+
 	public GameLoop Build()
 	{
 		LoadAssets();
 
-		var gameLoop = new GameLoop(engine)
+		var gameInfo = GameInfo.FromFile(PathToSaveFile);
+		var gameLoop = new GameLoop(gameInfo)
 		{
-			Name = "Game loop"
+			OnFinish = () =>
+			{
+				gameInfo.SaveToFile(PathToSaveFile);
+			}
 		};
+		gameLoop.AddChild(new GameHud(engine.Renderer, gameInfo));
+
 		var player = CreatePlayer();
 		var frame = new Frame(engine.Renderer);
 		var spawner = CreateSpawner(player);

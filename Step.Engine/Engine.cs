@@ -15,13 +15,6 @@ using System.Diagnostics;
 
 namespace Step.Engine;
 
-public interface IGame
-{
-	void Load(Engine engine);
-	void Unload();
-	GameObject GetRoot();
-}
-
 public abstract class RenderResult(string name) : GameObject(name)
 {
 	public abstract Texture2d ResultTexture { get; }

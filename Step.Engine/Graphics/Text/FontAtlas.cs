@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace Step.Engine.Graphics.Text;
 
-public sealed class FontAtlas
+public sealed class FontAtlas : IFontAtlas
 {
 	private readonly static Dictionary<string, FontAtlas> Atlases = [];
 

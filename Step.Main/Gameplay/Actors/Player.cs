@@ -14,7 +14,7 @@ public class Player : KinematicBody2D, ITarget
 	[EditorProperty]
 	public float Speed { get; set; } = 30f;
 
-	public float MaxHp { get; private set; } = 10f;
+	public float MaxHp { get; init; } = 10f;
 
 	[EditorProperty]
 	public float Hp { get; private set; }

@@ -47,7 +47,19 @@ public struct RenderStats
 	}
 }
 
-public class Renderer(int screenWidth, int screenHeight, GL GL)
+public interface IRenderCommands
+{
+	void SubmitCommand(RenderCmd cmd);
+
+	public class Fake : IRenderCommands
+	{
+		public void SubmitCommand(RenderCmd cmd)
+		{
+		}
+	}
+}
+
+public class Renderer(int screenWidth, int screenHeight, GL GL) : IRenderCommands
 {
 	private Shader? _batchSpriteShader;
 	private Shader? _screenQuadShader;

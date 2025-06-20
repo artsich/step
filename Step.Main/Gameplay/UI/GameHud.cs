@@ -14,24 +14,21 @@ public class GameHud : GameObject
 	public GameHud(Renderer renderer, GameInfo gameInfo) : base("GameHud")
 	{
 		_gameInfo = gameInfo;
-		_statCircleLabel = new Label(renderer)
+		_statCircleLabel = new Label(renderer, Constants.Font.UiFontPath)
 		{
 			Text = $"{gameInfo.GetCoin(Coin.Circle)}",
-			FontPath = Constants.Font.UiFontPath,
 			Color = Constants.GameColors.Circle,
 		};
 
-		_statCrossLabel = new Label(renderer)
+		_statCrossLabel = new Label(renderer, Constants.Font.UiFontPath)
 		{
 			Text = gameInfo.GetCoin(Coin.Cross).ToString(),
-			FontPath = Constants.Font.UiFontPath,
 			Color = Constants.GameColors.Cross,
 		};
 
-		_gliderCrossLabel = new Label(renderer)
+		_gliderCrossLabel = new Label(renderer, Constants.Font.UiFontPath)
 		{
 			Text = gameInfo.GetCoin(Coin.Glider).ToString(),
-			FontPath = Constants.Font.UiFontPath,
 			Color = Constants.GameColors.Glider,
 		};
 

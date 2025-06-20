@@ -51,14 +51,6 @@ public class Button : Control
 		}
 	}
 
-	public string FontPath
-	{
-		set
-		{
-			_label.FontPath = value;
-		}
-	}
-
 	public override Vector2f Size 
 	{ 
 		get => _size;
@@ -72,7 +64,7 @@ public class Button : Control
 		}
 	}
 
-	public Button(string text, Action onClick, Input input, Renderer renderer) : base(nameof(Button))
+	public Button(string text, string fontPath, Action onClick, Input input, Renderer renderer) : base(nameof(Button))
 	{
 		Name = text;
 		_onClick = onClick;
@@ -80,12 +72,19 @@ public class Button : Control
 		_renderer = renderer;
 		Layer = 100;
 
-		_label = new Label(renderer)
+		_label = new Label(renderer, fontPath)
 		{
 			Text = text,
 			Layer = 101,
 		};
+
 		AddChild(_label);
+	}
+
+	protected override void OnStart()
+	{
+		base.OnStart();
+		Size = _label.Size + _padding * 2;
 	}
 
 	protected override void OnUpdate(float deltaTime)

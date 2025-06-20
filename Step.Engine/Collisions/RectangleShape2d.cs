@@ -55,6 +55,7 @@ public sealed class RectangleShape2d : CollisionShape
 		return CollisionInfo.None;
 	}
 
+	// todo: move this shit to debug draw
 	protected override void OnRender()
 	{
 		if (Visible && IsActive)

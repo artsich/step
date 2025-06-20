@@ -23,6 +23,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="EngineData\Fonts\ProggyClean.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Assets\**">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -4,16 +4,40 @@ using Step.Engine.Graphics.Text;
 
 namespace Step.Engine.Graphics.UI;
 
+public interface IFontProvider
+{
+	IFontAtlas Get(string fontPath, float fontSize);
+
+	class Fake(IFontAtlas atlas) : IFontProvider
+	{
+		public IFontAtlas Get(string fontPath, float fontSize)
+		{
+			return atlas;
+		}
+	}
+}
+
+public class FontProvider : IFontProvider
+{
+	public IFontAtlas Get(string fontPath, float fontSize)
+	{
+		return FontAtlas.CreateFromFile(fontPath, fontSize);
+	}
+}
+
 public sealed class Label : Control
 {
-	private readonly Renderer renderer;
-	private FontAtlas? _font;
+	private readonly IRenderCommands _renderer;
+	private readonly IFontProvider _fontProvider;
+
+	private IFontAtlas? _font;
 	private Vector2f _minSize;
 
 	private string _text = string.Empty;
+	private readonly float _fontSize = 16f;
+	private readonly string _fontPath = "EngineData/Fonts/ProggyClean.ttf";
+
 	private bool _isDirty = true;
-	private float _fontSize = 16f;
-	private string _fontPath = "EngineData/Fonts/ProggyClean.ttf";
 
 	[EditorProperty]
 	public string Text
@@ -29,35 +53,6 @@ public sealed class Label : Control
 		}
 	}
 
-	[EditorProperty]
-	public string FontPath
-	{
-		get => _fontPath;
-		set
-		{
-			if (_fontPath != value)
-			{
-				_fontPath = value;
-				_isDirty = true;
-			}
-		}
-	}
-
-	[EditorProperty]
-	public float FontSize
-	{
-		get => _fontSize;
-		set
-		{
-			if (_fontSize != value)
-			{
-				_fontSize = value > 0 ? value : 1;
-				_isDirty = true;
-			}
-		}
-	}
-
-	// TODO: CalculateTextSize happens twice...
 	public override Vector2f Size
 	{
 		get => _minSize;
@@ -69,7 +64,7 @@ public sealed class Label : Control
 				return;
 			}
 			else {
-				var textSize = CalculateTextSize();
+				var textSize = CalculateTextSize(_font!, Text);
 				_minSize = new Vector2f(
 					Math.Max(value.X, textSize.X),
 					Math.Max(value.Y, textSize.Y));
@@ -77,30 +72,31 @@ public sealed class Label : Control
 		}
 	}
 
-	private Vector2f CalculateTextSize()
+	public Label(
+		IRenderCommands renderer,
+		IFontProvider fontProvider,
+		string fontPath = "",
+		int fontSize = 0) : base(nameof(Label))
 	{
-		if (_font == null || string.IsNullOrEmpty(_text))
-			return Vector2f.Zero;
+		_renderer = renderer;
+		_fontProvider = fontProvider;
 
-		float width = 0f;
-		float height = 0f;
+		_fontPath = string.IsNullOrEmpty(fontPath) ? _fontPath : fontPath;
+		_fontSize = fontSize > 0 ? fontSize : _fontSize;
 
-		foreach (var c in _text)
-		{
-			if (_font.GlyphMetrics.TryGetValue(c, out var metrics))
-			{
-				width += metrics.Advance;
-				height = Math.Max(height, metrics.Size.Y);
-			}
-		}
-
-		return new Vector2f(width, height) * LocalTransform.Scale;
+		Layer = 100;
 	}
 
-	public Label(Renderer renderer) : base(nameof(Label))
+	public Label(IRenderCommands render, string fontPath = "", int fontSize = 0)
+		: this(render, new FontProvider(), fontPath, fontSize)
 	{
-		this.renderer = renderer;
-		Layer = 100;
+	}
+
+	protected override void OnStart()
+	{
+		base.OnStart();
+		_font = _fontProvider.Get(_fontPath, _fontSize);
+		TryFixDirty();
 	}
 
 	protected override void OnDebugDraw()
@@ -111,16 +107,7 @@ public sealed class Label : Control
 	protected override void OnUpdate(float deltaTime)
 	{
 		base.OnUpdate(deltaTime);
-
-		if (_isDirty)
-		{
-			if (string.IsNullOrEmpty(FontPath))
-				return;
-			_font = FontAtlas.CreateFromFile(FontPath, _fontSize);
-			Size = CalculateTextSize();
-
-			_isDirty = false;
-		}
+		TryFixDirty();
 	}
 
 	protected override void OnRender()
@@ -141,7 +128,7 @@ public sealed class Label : Control
 
 				var glyphModelMat = Matrix4.CreateScale(atlasRect.Width, atlasRect.Height, 1f) * Matrix4.CreateTranslation(glyphX, glyphY, 0f);
 
-				renderer.SubmitCommand(new RenderCmd
+				_renderer.SubmitCommand(new RenderCmd
 				{
 					ModelMatrix = glyphModelMat * model,
 					Atlas = _font.Atlas,
@@ -156,8 +143,31 @@ public sealed class Label : Control
 			}
 			else
 			{
-				Log.Logger.Warning($"Invlaid character: '{c} - '{(int)c}'");
+				Log.Logger.Warning($"Invalid character: '{c} - '{(int)c}'");
 			}
 		}
+	}
+
+	private void TryFixDirty()
+	{
+		if (_isDirty)
+		{
+			_minSize = CalculateTextSize(_font!, Text) * LocalTransform.Scale; // TODO: or global transform
+			_isDirty = false;
+		}
+	}
+
+	private static Vector2f CalculateTextSize(IFontAtlas font, string text)
+	{
+		Vector2f size = Vector2f.Zero;
+		foreach (var c in text)
+		{
+			if (font.GlyphMetrics.TryGetValue(c, out var metrics))
+			{
+				size.X += metrics.Advance;
+				size.Y = Math.Max(size.Y, metrics.Size.Y);
+			}
+		}
+		return size;
 	}
 }
