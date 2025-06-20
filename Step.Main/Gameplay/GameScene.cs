@@ -1,6 +1,5 @@
 using Serilog;
 using Silk.NET.Input;
-using Silk.NET.OpenGL;
 using Step.Engine;
 using Step.Engine.Audio;
 using Step.Engine.Editor;
@@ -8,7 +7,6 @@ using Step.Engine.Graphics;
 using Step.Engine.Graphics.PostProcessing;
 using Step.Main.Gameplay.Builders;
 using Step.Main.Gameplay.UI;
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 
 namespace Step.Main.Gameplay;
@@ -40,13 +38,13 @@ public class GameScene : RenderResult
 	private Viewport? _uiViewport;
 	private Viewport? _gameViewport;
 
-	private readonly float _cameraWidth;
-	private readonly float _cameraHeight;
 	private readonly Camera2d _menuCamera;
 	private readonly Camera2d _gameCamera;
 	private readonly BlendPostEffect _blendPostEffect;
 	private readonly CrtEffect _crtEffect;
 	private readonly BlurEffect _blurEffect;
+
+	private readonly IGameBuilder _gameBuilder;
 
 	public override Texture2d ResultTexture
 	{
@@ -81,13 +79,11 @@ public class GameScene : RenderResult
 		}
 	}
 
-	public GameScene(Engine.Engine engine, float cameraWidth, float cameraHeight)
+	public GameScene(Engine.Engine engine, IGameBuilder gameBuilder, float cameraWidth, float cameraHeight)
 		: base("GameRoot")
 	{
 		_engine = engine;
-
-		_cameraWidth = cameraWidth;
-		_cameraHeight = cameraHeight;
+		_gameBuilder = gameBuilder;
 
 		_menuCamera = new Camera2d(cameraWidth, cameraHeight);
 		_gameCamera = new Camera2d(cameraWidth, cameraHeight);
@@ -191,7 +187,7 @@ public class GameScene : RenderResult
 			Log.Logger.Information("Reload game");
 		}
 
-		_gameLoop = new GameBuilder(_engine, _cameraWidth, _cameraHeight).Build();
+		_gameLoop = _gameBuilder.Build();
 		_gameLoop.AddChild(_gameCamera);
 		_gameLoop.OnFinish += OnGameFinish;
 
