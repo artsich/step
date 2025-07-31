@@ -1,0 +1,19 @@
+name: VisualTestScene
+type: GameObject
+children:
+  - name: PlayerSprite
+    type: Sprite2d
+    layer: 1
+    color: [1, 1, 1, 1]
+    texture: Textures/player.png
+    pivot: [0.5, 0.5]
+    transform:
+      position: [100, 100]
+  - name: EnemySprite
+    type: Sprite2d
+    layer: 1
+    color: [1, 0, 0, 1]
+    texture: Textures/circle-enemy.png
+    pivot: [0.5, 0.5]
+    transform:
+      position: [300, 100] 

@@ -39,7 +39,7 @@ public sealed class Label : Control
 
 	private bool _isDirty = true;
 
-	[EditorProperty]
+	[Export]
 	public string Text
 	{
 		get => _text;

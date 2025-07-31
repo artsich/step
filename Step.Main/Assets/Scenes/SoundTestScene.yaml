@@ -1,0 +1,8 @@
+name: SoundTestScene
+type: GameObject
+scripts:
+  - name: SoundController
+    assembly: Step.Main
+    class: Step.Main.Scripts.SoundController
+    properties:
+      sound_path: "Music/dash.wav" 

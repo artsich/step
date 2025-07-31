@@ -4,13 +4,13 @@ namespace Step.Engine.Collisions;
 
 public abstract class CollisionShape : GameObject
 {
-	[EditorProperty]
+	[Export]
 	public bool Visible { get; set; }
 
-	[EditorProperty]
+	[Export]
 	public bool IsStatic { get; set; }
 
-	[EditorProperty]
+	[Export]
 	public bool IsActive { get; set; } = true;
 
 	public int CollisionMask { get; set; }

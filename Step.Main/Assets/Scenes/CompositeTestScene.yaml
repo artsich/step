@@ -1,0 +1,13 @@
+name: CompositeTestScene
+type: GameObject
+children:
+  - name: SoundSystem
+    type: GameObject
+    scene_path: "Scenes/SoundTestScene.yaml"
+    transform:
+      position: [0, 0]
+  - name: VisualSystem
+    type: GameObject
+    scene_path: "Scenes/VisualTestScene.yaml"
+    transform:
+      position: [0, 0] 

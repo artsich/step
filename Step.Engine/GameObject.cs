@@ -9,7 +9,7 @@ public class GameObject(string name = nameof(GameObject))
 {
 	public string Name { get; init; } = name;
 
-	[EditorProperty]
+	[Export]
 	public bool Enabled { get; set; } = true;
 
 	public Transform LocalTransform = new();
@@ -18,6 +18,7 @@ public class GameObject(string name = nameof(GameObject))
 
 	protected GameObject? _parent;
 	protected List<GameObject> children = [];
+	protected List<IScriptComponent> scripts = [];
 
 	private bool _markedAsFree;
 
@@ -53,6 +54,12 @@ public class GameObject(string name = nameof(GameObject))
 			child.Start();
 		}
 
+		foreach (var script in scripts)
+		{
+			script.Initialize(this);
+			script.OnStart();
+		}
+
 		OnStart();
 	}
 
@@ -61,6 +68,11 @@ public class GameObject(string name = nameof(GameObject))
 		foreach (var child in children)
 		{
 			child.End();
+		}
+
+		foreach (var script in scripts)
+		{
+			script.OnEnd();
 		}
 
 		OnEnd();
@@ -104,6 +116,10 @@ public class GameObject(string name = nameof(GameObject))
 		foreach (var child in children)
 		{
 			child.Update(deltaTime);
+		}
+		foreach (var script in scripts)
+		{
+			script.Update(deltaTime);
 		}
 		OnUpdateEnd();
 	}
@@ -213,6 +229,26 @@ public class GameObject(string name = nameof(GameObject))
 		return children.OfType<T>();
 	}
 
+	public void AddScript(IScriptComponent script)
+	{
+		scripts.Add(script);
+	}
+
+	public void RemoveScript(IScriptComponent script)
+	{
+		scripts.Remove(script);
+	}
+
+	public T? GetScript<T>() where T : class, IScriptComponent
+	{
+		return scripts.OfType<T>().FirstOrDefault();
+	}
+
+	public IEnumerable<T> GetScripts<T>() where T : class, IScriptComponent
+	{
+		return scripts.OfType<T>();
+	}
+
 	protected virtual void OnDebugDraw() { }
 
 	protected virtual void OnStart() { }
@@ -226,4 +262,106 @@ public class GameObject(string name = nameof(GameObject))
 	protected virtual void OnRender() { }
 
 	protected internal virtual void OnRenderEnd() { }
+
+	// Загрузка GameObject из YAML файла
+	public static T Load<T>(string pathToYaml) where T : GameObject
+	{
+		return (T)LoadInternal(pathToYaml);
+	}
+
+	private static GameObject LoadInternal(string pathToYaml)
+	{
+		var fullPath = Path.Combine(Assets.AssetsFolder, pathToYaml);
+		if (!File.Exists(fullPath))
+			throw new FileNotFoundException($"Scene file not found: {fullPath}");
+
+		var yamlContent = File.ReadAllText(fullPath);
+		var stream = new StringReader(yamlContent);
+		var yaml = new YamlDotNet.RepresentationModel.YamlStream();
+		yaml.Load(stream);
+
+		var document = yaml.Documents[0];
+		var rootNode = document.RootNode;
+		
+		return CreateGameObjectFromYaml(rootNode);
+	}
+
+	private static GameObject CreateGameObjectFromYaml(YamlNode node)
+	{
+		var mapping = (YamlMappingNode)node;
+		
+		// Получаем имя и тип
+		var name = mapping["name"].ToString();
+		var type = mapping.ContainsKey("type") ? mapping["type"].ToString() : "GameObject";
+		
+		// Создаем GameObject нужного типа с YAML данными
+		var gameObject = GameObjectTypes.CreateByType(type, name, mapping);
+		
+		// Устанавливаем базовые свойства
+		if (mapping.ContainsKey("enabled"))
+			gameObject.Enabled = bool.Parse(mapping["enabled"].ToString());
+		
+		// Устанавливаем трансформ
+		if (mapping.ContainsKey("transform"))
+		{
+			var transformNode = (YamlMappingNode)mapping["transform"];
+			if (transformNode.ContainsKey("position"))
+			{
+				var pos = transformNode["position"].ToString();
+				gameObject.LocalTransform.Position = ParseVector2f(pos);
+			}
+			if (transformNode.ContainsKey("rotation"))
+				gameObject.LocalTransform.Rotation = float.Parse(transformNode["rotation"].ToString());
+			if (transformNode.ContainsKey("scale"))
+			{
+				var scale = transformNode["scale"].ToString();
+				gameObject.LocalTransform.Scale = ParseVector2f(scale);
+			}
+		}
+
+		// Обрабатываем ссылку на сцену
+		if (mapping.ContainsKey("scene_path"))
+		{
+			var childScene = LoadInternal(mapping["scene_path"].ToString());
+			childScene.Name = name;
+			return childScene;
+		}
+
+		// Добавляем скрипты
+		if (mapping.ContainsKey("scripts"))
+		{
+			var scriptsNode = (YamlSequenceNode)mapping["scripts"];
+			var scriptLoader = new Resources.ScriptLoader();
+			foreach (YamlMappingNode scriptNode in scriptsNode)
+			{
+				var script = scriptLoader.LoadScript(
+					scriptNode["assembly"].ToString(),
+					scriptNode["class"].ToString(),
+					new Dictionary<string, object>() // TODO: Parse properties
+				);
+				gameObject.AddScript(script);
+			}
+		}
+
+		// Добавляем дочерние объекты
+		if (mapping.ContainsKey("children"))
+		{
+			var childrenNode = (YamlSequenceNode)mapping["children"];
+			foreach (YamlMappingNode childNode in childrenNode)
+			{
+				var child = CreateGameObjectFromYaml(childNode);
+				gameObject.AddChild(child);
+			}
+		}
+
+		return gameObject;
+	}
+	
+	private static Vector2f ParseVector2f(string str)
+	{
+		// Парсим "[x, y]" в Vector2f
+		var clean = str.Trim('[', ']');
+		var parts = clean.Split(',');
+		return new Vector2f(float.Parse(parts[0]), float.Parse(parts[1]));
+	}
 }

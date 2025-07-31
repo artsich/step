@@ -1,0 +1,5 @@
+- Never generate code unless explicitly asked
+- Be concise and to the point  
+- Focus on analysis and explanation rather than implementation
+- Ask for clarification before making assumptions
+- Prefer reading and analyzing existing code over writing new code

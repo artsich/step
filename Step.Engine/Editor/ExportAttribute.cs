@@ -1,14 +1,14 @@
 ﻿namespace Step.Engine.Editor;
 
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-public class EditorPropertyAttribute(float from = 0f, float to = 0f, float speed = 0f, bool isColor = false) : Attribute
+public class ExportAttribute(float from = 0f, float to = 0f, float speed = 0f, bool isColor = false) : Attribute
 {
-	public EditorPropertyAttribute(bool isColor)
+	public ExportAttribute(bool isColor)
 		: this(0f, 0f, 0f, isColor)
 	{
 	}
 
-	public EditorPropertyAttribute() : this(false) 
+	public ExportAttribute() : this(false) 
 	{
 	}
 

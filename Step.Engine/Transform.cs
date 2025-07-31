@@ -4,13 +4,13 @@ namespace Step.Engine;
 
 public class Transform
 {
-	[EditorProperty(speed: 0.1f)]
+	[Export(speed: 0.1f)]
 	public Vector2f Position { get; set; }
 
-	[EditorProperty(-MathF.PI, MathF.PI)]
+	[Export(-MathF.PI, MathF.PI)]
 	public float Rotation { get; set; }
 
-	[EditorProperty(speed: 0.1f)]
+	[Export(speed: 0.1f)]
 	public Vector2f Scale { get; set; }
 
 	public Transform()

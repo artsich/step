@@ -5,7 +5,7 @@ namespace Step.Engine.Physics;
 
 public class KinematicBody2D : GameObject
 {
-	[EditorProperty]
+	[Export]
 	public Vector2f Velocity { get; set; }
 
 	public KinematicBody2D(CollisionShape collisionShape, string name = nameof(KinematicBody2D))
