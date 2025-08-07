@@ -51,8 +51,8 @@ public static class EditOf
 				continue;
 
 			if (property
-				.GetCustomAttributes(typeof(EditorPropertyAttribute), true)
-				.FirstOrDefault() is not EditorPropertyAttribute attribute)
+				.GetCustomAttributes(typeof(ExportAttribute), true)
+				.FirstOrDefault() is not ExportAttribute attribute)
 			{
 				continue;
 			}

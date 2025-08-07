@@ -8,7 +8,7 @@ public sealed class TextureRect : Control
 	private Texture2d? _texture;
 	private Rect? _region;
 
-	[EditorProperty]
+	[Export]
 	public Vector2f Pivot { get; set; } = new(0f);
 
 	public GeometryType Type = GeometryType.Quad;

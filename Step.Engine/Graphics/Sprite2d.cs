@@ -10,7 +10,7 @@ public sealed class Sprite2d : CanvasItem
 
 	public GeometryType GType = GeometryType.Quad;
 
-	[EditorProperty]
+	[Export]
 	public Vector2f Pivot { get; set; } = new(0.5f);
 
 	public Sprite2d(Renderer renderer, Texture2d atlas, Rect? region = null)

@@ -7,7 +7,7 @@ public sealed class RectangleShape2d : CollisionShape
 {
 	private readonly Renderer _renderer;
 
-	[EditorProperty]
+	[Export]
 	public Vector2f Size { get; set; } = Vector2f.One;
 
 	public Box2f Aabb

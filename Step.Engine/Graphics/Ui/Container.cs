@@ -4,7 +4,7 @@ namespace Step.Engine.Graphics.UI;
 
 public abstract class Container : Control
 {
-	[EditorProperty]
+	[Export]
 	public float Spacing { get; set; } = 5f;
 	public bool UniformSize { get; set; } = false;
 

@@ -7,7 +7,7 @@ public sealed class CircleCollisionShape : CollisionShape
 {
 	private readonly Renderer _renderer;
 
-	[EditorProperty(from: 0f, speed: 0.1f)]
+	[Export(from: 0f, speed: 0.1f)]
 	public float Radius { get; set; } = 1.0f;
 
 	public CircleCollisionShape(Renderer renderer)

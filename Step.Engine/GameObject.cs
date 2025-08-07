@@ -9,7 +9,7 @@ public class GameObject(string name = nameof(GameObject))
 {
 	public string Name { get; init; } = name;
 
-	[EditorProperty]
+	[Export]
 	public bool Enabled { get; set; } = true;
 
 	public Transform LocalTransform = new();

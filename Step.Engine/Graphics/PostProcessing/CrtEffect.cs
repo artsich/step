@@ -13,19 +13,19 @@ public sealed class CrtEffect(Vector2i screenSize, Renderer renderer) : IPostEff
 
 	private float _time;
 
-	[EditorProperty(speed: 0.01f)]
+	[Export(speed: 0.01f)]
 	public float Distortion { get; set; } = 0.04f;
 
-	[EditorProperty(speed: 0.0001f)]
+	[Export(speed: 0.0001f)]
 	public float Dispersion { get; set; } = 0.0015f;
 
-	[EditorProperty(speed: 0.01f)]
+	[Export(speed: 0.01f)]
 	public float BendScale { get; set; } = 1.5f;
 
-	[EditorProperty(speed: 0.01f)]
+	[Export(speed: 0.01f)]
 	public float VignetteIntensity { get; set; } = 2.77f;
 
-	[EditorProperty(speed: 0.01f)]
+	[Export(speed: 0.01f)]
 	public float VignetteRoundness { get; set; } = 0.5f;
 
 	public Vector2f VignetteTarget { get; set; } = new(0.5f);
