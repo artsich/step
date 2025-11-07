@@ -18,6 +18,7 @@ public enum PhysicLayers : int
 	Magnet = 1 << 2,
 	Frame = 1 << 3,
 	Shield = 1 << 4,
+	Trail = 1 << 5,
 }
 
 public enum GameState
