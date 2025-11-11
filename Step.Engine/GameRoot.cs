@@ -1,5 +1,4 @@
-﻿using Step.Engine.Collisions;
-using Step.Engine.Graphics;
+﻿using Step.Engine.Graphics;
 
 namespace Step.Engine;
 
@@ -9,65 +8,41 @@ public sealed class GameRoot
 
 	public static GameRoot I => _instance;
 
-	private GameObject? _scene;
-	private readonly Queue<Action> _deferredActions = [];
+	private readonly SceneController _sceneController = new();
+	private readonly CameraStack _cameraStack = new();
+	private readonly DeferredActionQueue _deferredActions = new();
+	private readonly GameLoopCoordinator _loopCoordinator;
 
-	public float TimeScale = 1.0f;
-
-	public float RealDt { get; private set; }
-
-	public float ScaledDt { get; private set; }
-
-	public GameObject Scene => _scene ?? throw new InvalidOperationException("Scene is null");
-
-	public ICamera2d? CurrentCamera => _cameras.TryPeek(out var result) ? result : null;
-
-	private Stack<ICamera2d> _cameras = [];
-
-	public void PushCamera(ICamera2d camera) => _cameras.Push(camera);
-
-	public void PopCamera() => _cameras.Pop();
-
-	public void SetScene(GameObject scene)
+	private GameRoot()
 	{
-		_scene?.End();
-		CollisionSystem.Ins.Reset();
-
-		_scene = scene;
-		_scene.Start();
+		_loopCoordinator = new GameLoopCoordinator(_sceneController, _deferredActions);
 	}
 
-	public void Update(float dt)
+	public float TimeScale
 	{
-		RealDt = dt;
-		ScaledDt = dt * TimeScale;
-
-		_scene?.Update(ScaledDt);
-		CollisionSystem.Ins.Process();
-
-		ProcessDeferred();
+		get => _loopCoordinator.TimeScale;
+		set => _loopCoordinator.TimeScale = value;
 	}
 
-	public void Draw()
-	{
-		_scene?.Draw();
-	}
+	public float RealDt => _loopCoordinator.RealDeltaTime;
 
-	public void DebugDraw()
-	{
-		_scene?.DebugDraw();
-	}
+	public float ScaledDt => _loopCoordinator.ScaledDeltaTime;
 
-	public void Defer(Action action)
-	{
-		_deferredActions.Enqueue(action);
-	}
+	public GameObject Scene => _sceneController.Scene;
 
-	private void ProcessDeferred()
-	{
-		while (_deferredActions.TryDequeue(out var action))
-		{
-			action();
-		}
-	}
+	public ICamera2d? CurrentCamera => _cameraStack.Current;
+
+	public void PushCamera(ICamera2d camera) => _cameraStack.Push(camera);
+
+	public void PopCamera() => _cameraStack.Pop();
+
+	public void SetScene(GameObject scene) => _sceneController.SetScene(scene);
+
+	internal void Update(float dt) => _loopCoordinator.Update(dt);
+
+	internal void Draw() => _loopCoordinator.Draw();
+
+	internal void DebugDraw() => _loopCoordinator.DebugDraw();
+
+	internal void Defer(Action action) => _deferredActions.Enqueue(action);
 }
