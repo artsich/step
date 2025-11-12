@@ -5,6 +5,8 @@ using Step.Engine.Graphics;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Builders;
 
+Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
 const int TargetFps = 144;
 
 var windowOptions = WindowOptions.Default with

@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Step.Engine;
 
-public class Assets
+public static class Assets
 {
 	private static readonly JsonSerializerOptions JsonOptions = new()
 	{
@@ -21,7 +21,7 @@ public class Assets
 
 	private static readonly Dictionary<string, Texture2d> _textureCache = [];
 
-	public const string AssetsFolder = "./Assets";
+	public const string AssetsFolder = "Assets";
 
 	public static Emitter LoadEmitter(string path)
 	{
@@ -44,7 +44,7 @@ public class Assets
 		{
 			return cachedTexture;
 		}
-
+		
 		var texture = Texture2d.LoadFromFile(fullPath);
 		_textureCache[fullPath] = texture;
 		return texture;
@@ -55,5 +55,5 @@ public class Assets
 		return NAudioLoader.LoadSound(FullPath(path));
 	}
 
-	public static string FullPath(string path) => Path.Combine(AssetsFolder, path);
+	private static string FullPath(string path) => Path.Combine(Directory.GetCurrentDirectory(), AssetsFolder, path);
 }
