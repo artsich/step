@@ -1,15 +1,16 @@
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Main.Gameplay.TowerDefense.Core;
 
 namespace Step.Main.Gameplay.TowerDefense;
 
-public sealed class TowerDefenseBase : GameObject
+public sealed class Base : GameObject
 {
 	private const float BaseSize = 40f;
 
 	private Vector4f BaseColor { get; set; } = new(1f, 0f, 0f, 1f);
 
-	public TowerDefenseBase(Renderer renderer, Level level) : base(nameof(TowerDefenseBase))
+	public Base(Renderer renderer, Level level) : base(nameof(Base))
 	{
 		var baseSprite = new Sprite2d(renderer, renderer.DefaultWhiteTexture)
 		{

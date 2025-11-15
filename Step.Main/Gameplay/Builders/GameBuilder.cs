@@ -1,5 +1,6 @@
 using Step.Engine;
 using Step.Main.Gameplay.TowerDefense;
+using Step.Main.Gameplay.TowerDefense.Core;
 using Step.Main.Gameplay.UI;
 
 namespace Step.Main.Gameplay.Builders;
@@ -26,16 +27,16 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		
 		var level = CreateLevel();
 		
-		var path = new TowerDefensePath(engine.Renderer, level);
+		var path = new TowerDefense.Path(engine.Renderer, level);
 		gameLoop.AddChild(path);
 		
-		var baseObj = new TowerDefenseBase(engine.Renderer, level);
+		var baseObj = new Base(engine.Renderer, level);
 		gameLoop.AddChild(baseObj);
 		
-		var grid = new TowerDefenseGrid(engine.Renderer, level);
+		var grid = new Towers(engine.Renderer, level);
 		gameLoop.AddChild(grid);
 		
-		var spawns = new TowerDefenseSpawns(engine.Renderer, level);
+		var spawns = new Spawns(engine.Renderer, level);
 		gameLoop.AddChild(spawns);
 		
 		return gameLoop;
@@ -45,13 +46,16 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 	{
 		string[] map =
 		{
-			"..TTTTTTT..",
-			".SPPPPPPPB.",
-			"..TTTTTTT..",
+			"....T....",
+			"...PPP...",
+			"..TPTP.B.",
+			"...P.PTP.",
+			".SPPTPPP.",
 		};
 
 		return new Level()
 			.LoadFromStrings(30f, map)
+			.ConfigureSpawn(enemyCount: 100, spawnFrequency: 0.25f)
 			.Build();
 	}
 }

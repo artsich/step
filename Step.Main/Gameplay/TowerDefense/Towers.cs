@@ -1,9 +1,10 @@
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Main.Gameplay.TowerDefense.Core;
 
 namespace Step.Main.Gameplay.TowerDefense;
 
-public sealed class TowerDefenseGrid : GameObject
+public sealed class Towers : GameObject
 {
 	private readonly Renderer _renderer;
 	private readonly List<Sprite2d> _gridCells = new();
@@ -14,7 +15,7 @@ public sealed class TowerDefenseGrid : GameObject
 
 	private IReadOnlyList<Vector2f> TowerPlaces { get; }
 
-	public TowerDefenseGrid(Renderer renderer, Level level) : base(nameof(TowerDefenseGrid))
+	public Towers(Renderer renderer, Level level) : base(nameof(Towers))
 	{
 		_renderer = renderer;
 		_cellSize = level.TowerCellSize;

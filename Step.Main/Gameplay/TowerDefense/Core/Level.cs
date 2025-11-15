@@ -1,9 +1,16 @@
-using System;
-using System.Collections.Generic;
-using Serilog.Core;
-using Step.Engine;
+namespace Step.Main.Gameplay.TowerDefense.Core;
+public readonly struct SpawnSettings
+{
+	public int EnemyCount { get; }
+	public float SpawnFrequency { get; }
+	public float SpawnIntervalSeconds => 1f / SpawnFrequency;
 
-namespace Step.Main.Gameplay.TowerDefense;
+	internal SpawnSettings(int enemyCount, float spawnFrequency)
+	{
+		EnemyCount = enemyCount;
+		SpawnFrequency = spawnFrequency;
+	}
+}
 
 public class Level
 {
@@ -12,11 +19,13 @@ public class Level
 	private const char BaseChar = 'B';
 	private const char TowerChar = 'T';
 
-	private readonly List<Vector2f> _pathPoints = new();
-	private readonly List<Vector2f> _spawnPositions = new();
-	private readonly List<Vector2f> _towerPlaces = new();
+	private readonly List<Vector2f> _pathPoints = [];
+	private readonly List<Vector2f> _spawnPositions = [];
+	private readonly List<Vector2f> _towerPlaces = [];
+	private readonly Dictionary<Vector2f, IReadOnlyList<Vector2f>> _pathsFromSpawn = new();
 
 	private bool _baseDefined;
+	private SpawnSettings? _spawnSettings;
 
 	private float TileSize { get; set; } = 30f;
 
@@ -24,9 +33,26 @@ public class Level
 	public float TowerCellSize => TileSize;
 
 	public IReadOnlyList<Vector2f> PathPoints => _pathPoints;
+	
 	public IReadOnlyList<Vector2f> SpawnPositions => _spawnPositions;
+	
 	public IReadOnlyList<Vector2f> TowerPlaces => _towerPlaces;
+
 	public Vector2f BasePosition { get; private set; }
+
+	public SpawnSettings Spawn => _spawnSettings ?? throw new InvalidOperationException("Spawn settings are not configured. Call ConfigureSpawn before Build().");
+
+	public Level ConfigureSpawn(int enemyCount, float spawnFrequency)
+	{
+		if (enemyCount <= 0)
+			throw new ArgumentOutOfRangeException(nameof(enemyCount), "Enemy count must be greater than zero.");
+
+		if (spawnFrequency <= 0f || float.IsNaN(spawnFrequency) || float.IsInfinity(spawnFrequency))
+			throw new ArgumentOutOfRangeException(nameof(spawnFrequency), "Spawn frequency must be a finite value greater than zero.");
+
+		_spawnSettings = new SpawnSettings(enemyCount, spawnFrequency);
+		return this;
+	}
 	
 	public Level LoadFromStrings(float tileSize, params string[] rows)
 	{
@@ -58,6 +84,12 @@ public class Level
 			for (int col = 0; col < width; col++)
 			{
 				char cell = rows[row][col];
+
+				if (cell == '.')
+				{
+					continue;
+				}
+
 				if (!IsKnownCell(cell))
 				{
 					Serilog.Log.Warning("Unknown cell: {Cell}", cell);
@@ -103,6 +135,12 @@ public class Level
 		if (!_baseDefined)
 			throw new InvalidOperationException("Level map must contain a base tile (B).");
 
+		if (!_spawnSettings.HasValue)
+			throw new InvalidOperationException("Spawn settings must be configured before building the level.");
+
+		if (_spawnSettings.Value.SpawnFrequency <= 0f)
+			throw new InvalidOperationException("Spawn frequency must be greater than zero.");
+
 		return this;
 	}
 
@@ -111,8 +149,10 @@ public class Level
 		_pathPoints.Clear();
 		_spawnPositions.Clear();
 		_towerPlaces.Clear();
+		_pathsFromSpawn.Clear();
 		_baseDefined = false;
 		BasePosition = Vector2f.Zero;
+		_spawnSettings = null;
 	}
 
 	private static bool IsKnownCell(char cell)
@@ -121,6 +161,22 @@ public class Level
 			   || cell == SpawnChar
 			   || cell == BaseChar
 			   || cell == TowerChar;
+	}
+
+	public IReadOnlyList<Vector2f> GetPathFromSpawn(Vector2f spawnPosition)
+	{
+		if (!_baseDefined)
+			throw new InvalidOperationException("Level must have a base defined before requesting a path.");
+
+		if (!_spawnPositions.Contains(spawnPosition))
+			throw new ArgumentException("Spawn position is not part of the current level.", nameof(spawnPosition));
+
+		if (_pathsFromSpawn.TryGetValue(spawnPosition, out var cachedPath))
+			return cachedPath;
+
+		var path = PathFinder.BuildPath(spawnPosition, BasePosition, _pathPoints, TileSize);
+		_pathsFromSpawn[spawnPosition] = path;
+		return path;
 	}
 }
 

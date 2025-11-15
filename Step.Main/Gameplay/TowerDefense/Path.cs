@@ -1,10 +1,10 @@
-using System;
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Main.Gameplay.TowerDefense.Core;
 
 namespace Step.Main.Gameplay.TowerDefense;
 
-public sealed class TowerDefensePath : GameObject
+public sealed class Path : GameObject
 {
 	private readonly Renderer _renderer;
 	private readonly List<Sprite2d> _pathTiles = [];
@@ -13,7 +13,7 @@ public sealed class TowerDefensePath : GameObject
 	private readonly float _pathWidth;
 	private readonly Vector4f _pathColor = new(0.545f, 0.271f, 0.075f, 1f);
 
-	public TowerDefensePath(Renderer renderer, Level level) : base(nameof(TowerDefensePath))
+	public Path(Renderer renderer, Level level) : base(nameof(Path))
 	{
 		_renderer = renderer;
 		_pathWidth = level.PathWidth;
