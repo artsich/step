@@ -1,4 +1,3 @@
-using System;
 using Step.Engine;
 using Step.Engine.Graphics;
 
@@ -23,9 +22,8 @@ public sealed class Enemy : GameObject
 		_moveSpeed = moveSpeed;
 		_targetIndex = Math.Min(1, path.Count - 1);
 
-		var sprite = new Sprite2d(renderer, renderer.DefaultWhiteTexture)
+		var sprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures\\spr_goblin.png"))
 		{
-			Color = new Vector4f(0.95f, 0.76f, 0.2f, 1f),
 			Layer = 7,
 			LocalTransform = new Transform
 			{

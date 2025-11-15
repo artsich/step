@@ -7,7 +7,7 @@ namespace Step.Main.Gameplay.TowerDefense;
 public sealed class Towers : GameObject
 {
 	private readonly Renderer _renderer;
-	private readonly List<Sprite2d> _gridCells = new();
+	private readonly List<Sprite2d> _gridCells = [];
 
 	private readonly float _cellSize;
 
@@ -33,13 +33,12 @@ public sealed class Towers : GameObject
 
 		foreach (var position in TowerPlaces)
 		{
-			var cell = new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
+			var cell = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures\\spr_tower_lightning_tower.png"))
 			{
-				Color = CellColor,
 				LocalTransform = new Transform
 				{
 					Position = position,
-					Scale = new Vector2f(_cellSize, _cellSize)
+					Scale = new Vector2f(_cellSize*0.8f, _cellSize)
 				}
 			};
 			

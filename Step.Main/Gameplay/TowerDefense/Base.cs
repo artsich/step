@@ -8,13 +8,10 @@ public sealed class Base : GameObject
 {
 	private const float BaseSize = 40f;
 
-	private Vector4f BaseColor { get; set; } = new(1f, 0f, 0f, 1f);
-
 	public Base(Renderer renderer, Level level) : base(nameof(Base))
 	{
-		var baseSprite = new Sprite2d(renderer, renderer.DefaultWhiteTexture)
+		var baseSprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures\\Custle.png"))
 		{
-			Color = BaseColor,
 			Layer = 6,
 			LocalTransform = new Transform
 			{

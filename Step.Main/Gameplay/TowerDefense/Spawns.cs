@@ -9,12 +9,10 @@ public sealed class Spawns : GameObject
 	private readonly Renderer _renderer;
 	private readonly Level _level;
 	private readonly SpawnSettings _spawnSettings;
-	private readonly List<Sprite2d> _spawnMarkers = new();
-	private readonly List<Enemy> _activeEnemies = new();
+	private readonly List<Sprite2d> _spawnMarkers = [];
+	private readonly List<Enemy> _activeEnemies = [];
 	private readonly float _spawnSize = 25f;
 	private readonly float _spawnIntervalSeconds;
-
-	private Vector4f SpawnColor { get; } = new(0f, 0f, 1f, 1f);
 
 	private float _spawnTimer;
 	private int _spawnedCount;
@@ -50,9 +48,8 @@ public sealed class Spawns : GameObject
 	{
 		foreach (var spawnPos in _level.SpawnPositions)
 		{
-			var spawnSprite = new Sprite2d(_renderer, _renderer.DefaultWhiteTexture)
+			var spawnSprite = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures\\enemy_spawn1.png"))
 			{
-				Color = SpawnColor,
 				Layer = 5,
 				LocalTransform = new Transform
 				{
