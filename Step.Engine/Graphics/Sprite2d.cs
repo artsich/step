@@ -13,9 +13,11 @@ public sealed class Sprite2d : CanvasItem
 	[Export]
 	public Vector2f Pivot { get; set; } = new(0.5f);
 
-	public Sprite2d(Renderer renderer, Texture2d atlas, Rect? region = null)
+	public Sprite2d(Renderer renderer, Texture2d? atlas = null, Rect? region = null)
 		: base(nameof(Sprite2d))
 	{
+		atlas ??= renderer.DefaultWhiteTexture;
+
 		_renderer = renderer;
 		_atlas = atlas;
 		_region = region ?? new Rect(0f, 0f, atlas.Width, atlas.Height);

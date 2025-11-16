@@ -18,6 +18,10 @@ public sealed class Spawns : GameObject
 	private int _spawnedCount;
 	private int _spawnIndex;
 
+	public IReadOnlyList<Enemy> ActiveEnemies => _activeEnemies;
+
+	public event Action<Enemy>? EnemyReachedBase;
+
 	public Spawns(Renderer renderer, Level level) : base(nameof(Spawns))
 	{
 		_renderer = renderer;
@@ -95,6 +99,8 @@ public sealed class Spawns : GameObject
 
 	private void HandleEnemyReachedBase(Enemy enemy)
 	{
+		EnemyReachedBase?.Invoke(enemy);
+
 		enemy.ReachedBase -= HandleEnemyReachedBase;
 		_activeEnemies.Remove(enemy);
 	}

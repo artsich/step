@@ -1,3 +1,4 @@
+using Serilog.Core;
 using Step.Engine;
 using Step.Main.Gameplay.TowerDefense;
 using Step.Main.Gameplay.TowerDefense.Core;
@@ -32,7 +33,12 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		
 		var baseObj = new Base(engine.Renderer, level);
 		gameLoop.AddChild(baseObj);
-		
+
+		baseObj.OnDead = () =>
+		{
+			gameLoop.OnFinish?.Invoke();
+		};
+
 		var grid = new Towers(engine.Renderer, level);
 		gameLoop.AddChild(grid);
 		
@@ -55,7 +61,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 
 		return new Level()
 			.LoadFromStrings(30f, map)
-			.ConfigureSpawn(enemyCount: 100, spawnFrequency: 0.25f)
+			.ConfigureSpawn(enemyCount: 100, spawnFrequency: 1f)
 			.Build();
 	}
 }
