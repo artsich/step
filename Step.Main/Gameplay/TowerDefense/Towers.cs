@@ -7,17 +7,18 @@ namespace Step.Main.Gameplay.TowerDefense;
 public sealed class Towers : GameObject
 {
 	private readonly Renderer _renderer;
-	private readonly List<Sprite2d> _gridCells = [];
+	private readonly Input _input;
+	private readonly List<Tower> _towers = [];
+	private readonly List<TowerCell> _cells = [];
 
 	private readonly float _cellSize;
 
-	private Vector4f CellColor { get; } = new(0f, 1f, 0f, 0.4f);
-
 	private IReadOnlyList<Vector2f> TowerPlaces { get; }
 
-	public Towers(Renderer renderer, Level level) : base(nameof(Towers))
+	public Towers(Renderer renderer, Input input, Level level) : base(nameof(Towers))
 	{
 		_renderer = renderer;
+		_input = input;
 		_cellSize = level.TowerCellSize;
 		TowerPlaces = level.TowerPlaces;
 		RebuildGrid();
@@ -25,25 +26,42 @@ public sealed class Towers : GameObject
 
 	private void RebuildGrid()
 	{
-		foreach (var cell in _gridCells)
+		foreach (var cell in _cells)
 		{
-			CallDeferred(() => RemoveChild(cell));
+			cell.Clicked -= HandleCellClicked;
+			var cellToRemove = cell;
+			CallDeferred(() => RemoveChild(cellToRemove));
 		}
-		_gridCells.Clear();
+		_cells.Clear();
+
+		foreach (var tower in _towers)
+		{
+			CallDeferred(() => RemoveChild(tower));
+		}
+		_towers.Clear();
 
 		foreach (var position in TowerPlaces)
 		{
-			var cell = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures\\spr_tower_lightning_tower.png"))
-			{
-				LocalTransform = new Transform
-				{
-					Position = position,
-					Scale = new Vector2f(_cellSize*0.8f, _cellSize)
-				}
-			};
-			
-			_gridCells.Add(cell);
-			AddChild(cell);
+			var cell = new TowerCell(_renderer, _input, position, _cellSize);
+			cell.Clicked += HandleCellClicked;
+
+			_cells.Add(cell);
+
+			var cellToAdd = cell;
+			CallDeferred(() => AddChild(cellToAdd));
+		}
+	}
+
+	private void HandleCellClicked(TowerCell cell)
+	{
+		if (cell.IsOccupied)
+			return;
+
+		var tower = new Tower(_renderer, cell.Position, _cellSize);
+		if (cell.TryOccupy(tower))
+		{
+			_towers.Add(tower);
+			CallDeferred(() => AddChild(tower));
 		}
 	}
 }
