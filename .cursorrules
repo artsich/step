@@ -1,0 +1,7 @@
+# Cursor Rules
+
+- Never call `AddChild` or `RemoveChild` directly while iterating over children in the same frame.
+Always schedule those operations via `CallDeferred` (DeferredActionQueue). 
+The exception: if a `GameObject` has not yet been attached to the scene graph (no parent yet), 
+it is safe to configure its children directly before adding it to the hierarchy.
+
