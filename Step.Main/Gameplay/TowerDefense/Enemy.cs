@@ -1,18 +1,31 @@
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Main.Gameplay.TowerDefense.Core;
 
 namespace Step.Main.Gameplay.TowerDefense;
 
 public sealed class Enemy : GameObject
 {
+	private const float DefaultHealth = 2f;
+
 	private readonly IReadOnlyList<Vector2f> _path;
 	private readonly float _moveSpeed;
+	private readonly Health _health;
+
 	private bool _reachedBase;
+	private bool _dead;
 	private int _targetIndex;
 
 	public event Action<Enemy>? ReachedBase;
+	public event Action<Enemy>? Died;
 
-	public Enemy(Renderer renderer, IReadOnlyList<Vector2f> path, float moveSpeed = 25f)
+	public bool IsAlive => !_dead && _health.CurrentHealth > 0f;
+
+	public Enemy(
+		Renderer renderer,
+		IReadOnlyList<Vector2f> path,
+		float moveSpeed = 25f,
+		float maxHealth = DefaultHealth)
 		: base(nameof(Enemy))
 	{
 		if (path.Count == 0)
@@ -20,9 +33,10 @@ public sealed class Enemy : GameObject
 
 		_path = path;
 		_moveSpeed = moveSpeed;
+		_health = new Health(maxHealth);
 		_targetIndex = Math.Min(1, path.Count - 1);
 
-		var sprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures\\spr_goblin.png"))
+		var sprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures/spr_goblin.png"))
 		{
 			Layer = 7,
 			LocalTransform = new Transform
@@ -38,7 +52,7 @@ public sealed class Enemy : GameObject
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		if (_reachedBase)
+		if (_reachedBase || _dead)
 			return;
 
 		if (_targetIndex >= _path.Count)
@@ -82,13 +96,37 @@ public sealed class Enemy : GameObject
 		_targetIndex++;
 	}
 
+	public void ApplyDamage(float amount)
+	{
+		if (amount <= 0f || _dead || _reachedBase)
+			return;
+
+		_health.ApplyDamage(amount);
+
+		if (_health.CurrentHealth <= 0f)
+		{
+			Die();
+		}
+	}
+
 	private void ReachBase()
 	{
 		if (_reachedBase)
 			return;
 
 		_reachedBase = true;
+		_dead = true;
 		ReachedBase?.Invoke(this);
+		QueueFree();
+	}
+
+	private void Die()
+	{
+		if (_dead)
+			return;
+
+		_dead = true;
+		Died?.Invoke(this);
 		QueueFree();
 	}
 }

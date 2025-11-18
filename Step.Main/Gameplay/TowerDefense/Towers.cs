@@ -8,6 +8,7 @@ public sealed class Towers : GameObject
 {
 	private readonly Renderer _renderer;
 	private readonly Input _input;
+	private readonly Spawns _spawns;
 	private readonly List<Tower> _towers = [];
 	private readonly List<TowerCell> _cells = [];
 
@@ -15,10 +16,11 @@ public sealed class Towers : GameObject
 
 	private IReadOnlyList<Vector2f> TowerPlaces { get; }
 
-	public Towers(Renderer renderer, Input input, Level level) : base(nameof(Towers))
+	public Towers(Renderer renderer, Input input, Level level, Spawns spawns) : base(nameof(Towers))
 	{
 		_renderer = renderer;
 		_input = input;
+		_spawns = spawns ?? throw new ArgumentNullException(nameof(spawns));
 		_cellSize = level.TowerCellSize;
 		TowerPlaces = level.TowerPlaces;
 		RebuildGrid();
@@ -57,7 +59,11 @@ public sealed class Towers : GameObject
 		if (cell.IsOccupied)
 			return;
 
-		var tower = new Tower(_renderer, cell.Position, _cellSize);
+		var tower = new Tower(
+			_renderer,
+			cell.Position,
+			_cellSize,
+			() => _spawns.ActiveEnemies);
 		if (cell.TryOccupy(tower))
 		{
 			_towers.Add(tower);

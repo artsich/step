@@ -52,7 +52,7 @@ public sealed class Spawns : GameObject
 	{
 		foreach (var spawnPos in _level.SpawnPositions)
 		{
-			var spawnSprite = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures\\enemy_spawn1.png"))
+			var spawnSprite = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures/enemy_spawn1.png"))
 			{
 				Layer = 5,
 				LocalTransform = new Transform
@@ -78,6 +78,7 @@ public sealed class Spawns : GameObject
 		var path = _level.GetPathFromSpawn(spawnPos);
 		var enemy = new Enemy(_renderer, path);
 		enemy.ReachedBase += HandleEnemyReachedBase;
+		enemy.Died += HandleEnemyDied;
 
 		_activeEnemies.Add(enemy);
 		AddChild(enemy);
@@ -93,6 +94,7 @@ public sealed class Spawns : GameObject
 
 			var enemy = _activeEnemies[i];
 			enemy.ReachedBase -= HandleEnemyReachedBase;
+			enemy.Died -= HandleEnemyDied;
 			_activeEnemies.RemoveAt(i);
 		}
 	}
@@ -102,6 +104,14 @@ public sealed class Spawns : GameObject
 		EnemyReachedBase?.Invoke(enemy);
 
 		enemy.ReachedBase -= HandleEnemyReachedBase;
+		enemy.Died -= HandleEnemyDied;
+		_activeEnemies.Remove(enemy);
+	}
+
+	private void HandleEnemyDied(Enemy enemy)
+	{
+		enemy.ReachedBase -= HandleEnemyReachedBase;
+		enemy.Died -= HandleEnemyDied;
 		_activeEnemies.Remove(enemy);
 	}
 }

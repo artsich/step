@@ -21,7 +21,7 @@ public sealed class Base : GameObject
 	{
 		LocalTransform.Position = level.BasePosition;
 
-		var baseSprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures\\Custle.png"))
+		var baseSprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures/Custle.png"))
 		{
 			Layer = 6
 		};

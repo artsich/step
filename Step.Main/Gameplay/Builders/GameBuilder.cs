@@ -38,11 +38,11 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 			gameLoop.OnFinish?.Invoke();
 		};
 
-		var grid = new Towers(engine.Renderer, engine.Input, level);
-		gameLoop.AddChild(grid);
-		
 		var spawns = new Spawns(engine.Renderer, level);
 		gameLoop.AddChild(spawns);
+		
+		var grid = new Towers(engine.Renderer, engine.Input, level, spawns);
+		gameLoop.AddChild(grid);
 		
 		return gameLoop;
 	}
