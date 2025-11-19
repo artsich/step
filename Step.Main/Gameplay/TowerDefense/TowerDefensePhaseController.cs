@@ -1,5 +1,6 @@
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Engine.Graphics.UI;
 
 namespace Step.Main.Gameplay.TowerDefense;
 
@@ -9,6 +10,8 @@ public sealed class TowerDefensePhaseController : GameObject
 	private readonly Towers _towers;
 	private readonly Base _base;
 	private readonly FightButton _fightButton;
+	private readonly Label _planningLabel;
+	private const string PlanningHintText = "Plan your towers";
 
 	private TowerDefensePhase _currentPhase = TowerDefensePhase.Planning;
 
@@ -28,6 +31,16 @@ public sealed class TowerDefensePhaseController : GameObject
 		_fightButton = new FightButton(renderer, input, HandleFightPressed);
 		_fightButton.LocalPosition = uiPosition;
 		AddChild(_fightButton);
+
+		_planningLabel = new Label(renderer, Constants.Font.UiFontPath)
+		{
+			Text = PlanningHintText,
+			Layer = 60,
+			Visible = false,
+			Color = new Vector4f(0.95f, 0.95f, 0.95f, 1f)
+		};
+		_planningLabel.LocalPosition = new Vector2f(-150f, 65f);
+		AddChild(_planningLabel);
 	}
 
 	protected override void OnStart()
@@ -72,6 +85,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_spawns.StopWave();
 		_fightButton.Enabled = true;
 		_towers.SetPlacementEnabled(true);
+		ShowPlanningHint(true);
 	}
 
 	private void EnterCombatPhase()
@@ -80,6 +94,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_fightButton.Enabled = false;
 		_towers.SetPlacementEnabled(false);
 		_spawns.StartWave();
+		ShowPlanningHint(false);
 	}
 
 	private void EnterGameOverPhase()
@@ -91,6 +106,12 @@ public sealed class TowerDefensePhaseController : GameObject
 		_fightButton.Enabled = false;
 		_towers.SetPlacementEnabled(false);
 		_spawns.StopWave();
+		ShowPlanningHint(false);
+	}
+
+	private void ShowPlanningHint(bool visible)
+	{
+		_planningLabel.Visible = visible;
 	}
 }
 
