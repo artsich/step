@@ -17,10 +17,14 @@ public sealed class Spawns : GameObject
 	private float _spawnTimer;
 	private int _spawnedCount;
 	private int _spawnIndex;
+	private bool _waveActive;
 
 	public IReadOnlyList<Enemy> ActiveEnemies => _activeEnemies;
 
+	public bool WaveInProgress => _waveActive;
+
 	public event Action<Enemy>? EnemyReachedBase;
+	public event Action? WaveCompleted;
 
 	public Spawns(Renderer renderer, Level level) : base(nameof(Spawns))
 	{
@@ -35,6 +39,10 @@ public sealed class Spawns : GameObject
 	protected override void OnUpdate(float deltaTime)
 	{
 		CleanupInactiveEnemies();
+		TryCompleteWave();
+
+		if (!_waveActive)
+			return;
 
 		if (_spawnedCount >= _spawnSettings.EnemyCount)
 			return;
@@ -46,6 +54,8 @@ public sealed class Spawns : GameObject
 			_spawnTimer -= _spawnIntervalSeconds;
 			SpawnEnemy();
 		}
+
+		TryCompleteWave();
 	}
 
 	private void CreateSpawnMarkers()
@@ -113,5 +123,50 @@ public sealed class Spawns : GameObject
 		enemy.ReachedBase -= HandleEnemyReachedBase;
 		enemy.Died -= HandleEnemyDied;
 		_activeEnemies.Remove(enemy);
+	}
+
+	public void StartWave()
+	{
+		if (_waveActive)
+			return;
+
+		if (_activeEnemies.Count > 0)
+		{
+			Serilog.Log.Warning("Cannot start a new wave while enemies are still active.");
+			return;
+		}
+
+		ResetWaveState();
+		_waveActive = true;
+	}
+
+	public void StopWave()
+	{
+		if (!_waveActive)
+			return;
+
+		_waveActive = false;
+	}
+
+	private void ResetWaveState()
+	{
+		_spawnTimer = 0f;
+		_spawnedCount = 0;
+		_spawnIndex = 0;
+	}
+
+	private void TryCompleteWave()
+	{
+		if (!_waveActive)
+			return;
+
+		if (_spawnedCount < _spawnSettings.EnemyCount)
+			return;
+
+		if (_activeEnemies.Count > 0)
+			return;
+
+		_waveActive = false;
+		WaveCompleted?.Invoke();
 	}
 }

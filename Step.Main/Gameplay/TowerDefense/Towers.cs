@@ -13,6 +13,7 @@ public sealed class Towers : GameObject
 	private readonly List<TowerCell> _cells = [];
 
 	private readonly float _cellSize;
+	private bool _placementEnabled = true;
 
 	private IReadOnlyList<Vector2f> TowerPlaces { get; }
 
@@ -46,6 +47,7 @@ public sealed class Towers : GameObject
 		{
 			var cell = new TowerCell(_renderer, _input, position, _cellSize);
 			cell.Clicked += HandleCellClicked;
+			cell.InteractionEnabled = _placementEnabled;
 
 			_cells.Add(cell);
 
@@ -56,6 +58,9 @@ public sealed class Towers : GameObject
 
 	private void HandleCellClicked(TowerCell cell)
 	{
+		if (!_placementEnabled)
+			return;
+
 		if (cell.IsOccupied)
 			return;
 
@@ -68,6 +73,19 @@ public sealed class Towers : GameObject
 		{
 			_towers.Add(tower);
 			CallDeferred(() => AddChild(tower));
+		}
+	}
+
+	public void SetPlacementEnabled(bool enabled)
+	{
+		if (_placementEnabled == enabled)
+			return;
+
+		_placementEnabled = enabled;
+
+		foreach (var cell in _cells)
+		{
+			cell.InteractionEnabled = enabled;
 		}
 	}
 }

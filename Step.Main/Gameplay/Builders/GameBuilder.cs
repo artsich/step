@@ -33,7 +33,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		var baseObj = new Base(engine.Renderer, level);
 		gameLoop.AddChild(baseObj);
 
-		baseObj.OnDead = () =>
+		baseObj.Dead += () =>
 		{
 			gameLoop.OnFinish?.Invoke();
 		};
@@ -43,6 +43,15 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		
 		var grid = new Towers(engine.Renderer, engine.Input, level, spawns);
 		gameLoop.AddChild(grid);
+
+		var phaseController = new TowerDefensePhaseController(
+			engine.Renderer,
+			engine.Input,
+			spawns,
+			grid,
+			baseObj,
+			new Vector2f(120f, -75f));
+		gameLoop.AddChild(phaseController);
 		
 		return gameLoop;
 	}
@@ -60,7 +69,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 
 		return new Level()
 			.LoadFromStrings(30f, map)
-			.ConfigureSpawn(enemyCount: 100, spawnFrequency: 1f)
+			.ConfigureSpawn(enemyCount: 10, spawnFrequency: 0.5f)
 			.Build();
 	}
 }

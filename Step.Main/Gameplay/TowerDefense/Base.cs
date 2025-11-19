@@ -15,7 +15,7 @@ public sealed class Base : GameObject
 	private Spawns? _spawns;
 	private bool _dead = false;
 
-	public Action? OnDead;
+	public event Action? Dead;
 
 	public Base(Renderer renderer, Level level) : base(nameof(Base))
 	{
@@ -85,7 +85,7 @@ public sealed class Base : GameObject
 		if (_healthBar.Hp <= 0f && !_dead)
 		{
 			_dead = true;
-			OnDead?.Invoke();
+			Dead?.Invoke();
 		}
 	}
 }

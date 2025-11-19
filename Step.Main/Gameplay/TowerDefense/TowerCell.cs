@@ -25,6 +25,8 @@ public sealed class TowerCell : GameObject
 
 	public Vector2f Position => LocalTransform.Position;
 
+	public bool InteractionEnabled { get; set; } = true;
+
 	public TowerCell(Renderer renderer, Input input, Vector2f position, float cellSize) 
 		: base(nameof(TowerCell))
 	{
@@ -49,6 +51,12 @@ public sealed class TowerCell : GameObject
 		if (IsOccupied)
 		{
 			ApplyOccupiedState();
+			return;
+		}
+
+		if (!InteractionEnabled)
+		{
+			ApplyDisabledState();
 			return;
 		}
 
@@ -88,12 +96,14 @@ public sealed class TowerCell : GameObject
 
 	private void ApplyHoverState()
 	{
+		_sprite.Visible = true;
 		_sprite.Color = _hoverColor;
 		_sprite.LocalTransform.Scale = CreateScaleVector(HoverScaleFactor);
 	}
 
 	private void ApplyIdleState()
 	{
+		_sprite.Visible = true;
 		_sprite.Color = _baseColor;
 		_sprite.LocalTransform.Scale = CreateScaleVector(NormalScaleFactor);
 	}
@@ -102,6 +112,13 @@ public sealed class TowerCell : GameObject
 	{
 		_sprite.Color = _occupiedColor;
 		_sprite.Visible = false;
+	}
+
+	private void ApplyDisabledState()
+	{
+		_sprite.Visible = true;
+		_sprite.Color = _baseColor;
+		_sprite.LocalTransform.Scale = CreateScaleVector(NormalScaleFactor);
 	}
 
 	private Vector2f CreateScaleVector(float factor)
