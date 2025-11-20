@@ -9,6 +9,7 @@ public sealed class Towers : GameObject
 	private readonly Renderer _renderer;
 	private readonly Input _input;
 	private readonly Spawns _spawns;
+	private readonly TowerEconomy _economy;
 	private readonly List<Tower> _towers = [];
 	private readonly List<TowerCell> _cells = [];
 
@@ -17,11 +18,13 @@ public sealed class Towers : GameObject
 
 	private IReadOnlyList<Vector2f> TowerPlaces { get; }
 
-	public Towers(Renderer renderer, Input input, Level level, Spawns spawns) : base(nameof(Towers))
+	public Towers(Renderer renderer, Input input, Level level, Spawns spawns, TowerEconomy economy) 
+		: base(nameof(Towers))
 	{
 		_renderer = renderer;
 		_input = input;
 		_spawns = spawns ?? throw new ArgumentNullException(nameof(spawns));
+		_economy = economy ?? throw new ArgumentNullException(nameof(economy));
 		_cellSize = level.TowerCellSize;
 		TowerPlaces = level.TowerPlaces;
 		RebuildGrid();
@@ -62,6 +65,12 @@ public sealed class Towers : GameObject
 			return;
 
 		if (cell.IsOccupied)
+		{
+			SellTower(cell);
+			return;
+		}
+
+		if (!_economy.TryPurchaseTower())
 			return;
 
 		var tower = new Tower(
@@ -69,11 +78,27 @@ public sealed class Towers : GameObject
 			cell.Position,
 			_cellSize,
 			() => _spawns.ActiveEnemies);
+
 		if (cell.TryOccupy(tower))
 		{
 			_towers.Add(tower);
 			CallDeferred(() => AddChild(tower));
 		}
+		else
+		{
+			_economy.RefundTowerPurchase();
+		}
+	}
+
+	private void SellTower(TowerCell cell)
+	{
+		var tower = cell.ReleaseTower();
+		if (tower == null)
+			return;
+
+		_towers.Remove(tower);
+		_economy.RefundTowerPurchase();
+		tower.QueueFree();
 	}
 
 	public void SetPlacementEnabled(bool enabled)

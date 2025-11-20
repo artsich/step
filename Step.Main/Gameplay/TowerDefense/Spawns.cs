@@ -24,6 +24,7 @@ public sealed class Spawns : GameObject
 	public bool WaveInProgress => _waveActive;
 
 	public event Action<Enemy>? EnemyReachedBase;
+	public event Action<Enemy>? EnemyDied;
 	public event Action? WaveCompleted;
 
 	public Spawns(Renderer renderer, Level level) : base(nameof(Spawns))
@@ -120,6 +121,8 @@ public sealed class Spawns : GameObject
 
 	private void HandleEnemyDied(Enemy enemy)
 	{
+		EnemyDied?.Invoke(enemy);
+
 		enemy.ReachedBase -= HandleEnemyReachedBase;
 		enemy.Died -= HandleEnemyDied;
 		_activeEnemies.Remove(enemy);

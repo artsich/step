@@ -40,9 +40,22 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 
 		var spawns = new Spawns(engine.Renderer, level);
 		gameLoop.AddChild(spawns);
+
+		var economySettings = TowerEconomySettings.Default;
+		var economy = new TowerEconomy(spawns, economySettings);
+		gameLoop.AddChild(economy);
 		
-		var grid = new Towers(engine.Renderer, engine.Input, level, spawns);
+		var grid = new Towers(engine.Renderer, engine.Input, level, spawns, economy);
 		gameLoop.AddChild(grid);
+
+		var goldCounter = new GoldCounter(engine.Renderer, economy)
+		{
+			LocalTransform = new Transform()
+			{
+				Position = new Vector2f(-130f, 55f)
+			}
+		};
+		gameLoop.AddChild(goldCounter);
 
 		var phaseController = new TowerDefensePhaseController(
 			engine.Renderer,

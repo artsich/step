@@ -33,8 +33,14 @@
   - Emit `ReachedBase` or `Died`; self-cleanup via `QueueFree`.
 - **Towers & Cells** (`Towers`, `TowerCell`, `Tower`):
   - Click on highlighted cells during Planning to instantiate a tower.
+  - Clicking an occupied cell now sells the tower and refunds its cost.
   - Towers search `Spawns.ActiveEnemies` for nearest target in range and fire projectiles with cooldown.
   - Cell interactions are disabled automatically outside Planning phase.
+- **Economy** (`TowerEconomy`, `GoldCounter`):
+  - Start with enough gold for one tower (`StartingGold = TowerCost` by default).
+  - Each kill awards configurable gold (`GoldPerKill`) that can be tuned via `TowerEconomySettings`.
+  - Purchasing a tower withdraws its cost; UI ignores clicks if there isn't enough gold.
+  - Current gold is displayed in the top-left next to a gold coin icon for quick feedback.
 - **UI Elements**:
   - `FightButton`: enabled only while planning.
   - `GameTimer`: simple session timer centered at top.

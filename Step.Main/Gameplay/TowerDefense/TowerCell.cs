@@ -48,12 +48,6 @@ public sealed class TowerCell : GameObject
 	{
 		base.OnUpdate(deltaTime);
 
-		if (IsOccupied)
-		{
-			ApplyOccupiedState();
-			return;
-		}
-
 		if (!InteractionEnabled)
 		{
 			ApplyDisabledState();
@@ -62,6 +56,18 @@ public sealed class TowerCell : GameObject
 
 		var mousePos = _input.MouseWorldPosition;
 		bool hovered = IsMouseOverCell(mousePos);
+
+		if (IsOccupied)
+		{
+			ApplyOccupiedState();
+
+			if (hovered && _input.IsMouseButtonJustPressed(MouseButton.Left))
+			{
+				Clicked?.Invoke(this);
+			}
+
+			return;
+		}
 
 		if (hovered)
 		{
@@ -85,6 +91,26 @@ public sealed class TowerCell : GameObject
 		Tower = tower;
 		_sprite.Visible = false;
 		return true;
+	}
+
+	public Tower? ReleaseTower()
+	{
+		if (Tower == null)
+			return null;
+
+		var removedTower = Tower;
+		Tower = null;
+
+		if (InteractionEnabled)
+		{
+			ApplyIdleState();
+		}
+		else
+		{
+			ApplyDisabledState();
+		}
+
+		return removedTower;
 	}
 
 	private bool IsMouseOverCell(Vector2f mousePos)
