@@ -20,8 +20,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		Input input,
 		Spawns spawns,
 		Towers towers,
-		Base baseObject,
-		Vector2f uiPosition)
+		Base baseObject)
 		: base(nameof(TowerDefensePhaseController))
 	{
 		_spawns = spawns;
@@ -29,7 +28,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_base = baseObject;
 
 		_fightButton = new FightButton(renderer, input, HandleFightPressed);
-		_fightButton.LocalPosition = uiPosition;
+		_fightButton.LocalPosition = new Vector2f(120f, -75f);
 		AddChild(_fightButton);
 
 		_planningLabel = new Label(renderer, Constants.Font.UiFontPath)

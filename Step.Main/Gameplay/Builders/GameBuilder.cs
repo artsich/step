@@ -49,8 +49,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 			engine.Input,
 			spawns,
 			grid,
-			baseObj,
-			new Vector2f(120f, -75f));
+			baseObj);
 		gameLoop.AddChild(phaseController);
 		
 		return gameLoop;
