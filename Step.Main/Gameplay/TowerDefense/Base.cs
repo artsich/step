@@ -82,6 +82,8 @@ public sealed class Base : GameObject
 	{
 		_healthBar.ApplyDamage(DamagePerEnemy);
 
+		(GameRoot.I.CurrentCamera as Camera2d)?.Shake(0.4f, 5f);
+
 		if (_healthBar.Hp <= 0f && !_dead)
 		{
 			_dead = true;
