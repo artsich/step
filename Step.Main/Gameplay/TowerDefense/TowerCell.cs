@@ -50,7 +50,15 @@ public sealed class TowerCell : GameObject
 
 		if (!InteractionEnabled)
 		{
-			ApplyDisabledState();
+			if (IsOccupied)
+			{
+				ApplyOccupiedState();
+			}
+			else
+			{
+				ApplyDisabledState();
+			}
+
 			return;
 		}
 
