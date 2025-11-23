@@ -32,3 +32,7 @@ foreach (var child in children)
 
 Use the same approach for `AddChild`, `QueueFree`, or mass updates triggered mid-frame. When in doubt: if the object already has a parent and the change is triggered during `OnUpdate` / `OnRender`, schedule it via `CallDeferred`.
 
+## Code Comments
+
+Avoid adding comments to explain what code does. Instead, extract logic into well-named functions or methods to make the code self-documenting. Well-named methods and functions make the code more readable and maintainable than comments that can become outdated.
+
