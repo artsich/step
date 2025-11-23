@@ -4,6 +4,7 @@ public enum TowerDefensePhase
 {
 	Planning,
 	Combat,
-	GameOver
+	GameOver,
+	Victory
 }
 

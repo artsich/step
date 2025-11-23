@@ -11,6 +11,7 @@ public sealed class TowerDefensePhaseController : GameObject
 	private readonly Base _base;
 	private readonly FightButton _fightButton;
 	private readonly Label _planningLabel;
+	private readonly VictoryScreen _victoryScreen;
 	private const string PlanningHintText = "Plan your towers";
 
 	private TowerDefensePhase _currentPhase = TowerDefensePhase.Planning;
@@ -40,12 +41,16 @@ public sealed class TowerDefensePhaseController : GameObject
 		};
 		_planningLabel.LocalPosition = new Vector2f(-150f, 65f);
 		AddChild(_planningLabel);
+
+		_victoryScreen = new VictoryScreen(renderer);
+		AddChild(_victoryScreen);
 	}
 
 	protected override void OnStart()
 	{
 		base.OnStart();
 		_spawns.WaveCompleted += HandleWaveCompleted;
+		_spawns.AllWavesCompleted += HandleAllWavesCompleted;
 		_base.Dead += HandleBaseDestroyed;
 		EnterPlanningPhase();
 	}
@@ -54,6 +59,7 @@ public sealed class TowerDefensePhaseController : GameObject
 	{
 		base.OnEnd();
 		_spawns.WaveCompleted -= HandleWaveCompleted;
+		_spawns.AllWavesCompleted -= HandleAllWavesCompleted;
 		_base.Dead -= HandleBaseDestroyed;
 	}
 
@@ -70,7 +76,18 @@ public sealed class TowerDefensePhaseController : GameObject
 		if (_currentPhase != TowerDefensePhase.Combat)
 			return;
 
-		EnterPlanningPhase();
+		if (!_spawns.AreAllWavesCompleted)
+		{
+			EnterPlanningPhase();
+		}
+	}
+
+	private void HandleAllWavesCompleted()
+	{
+		if (_currentPhase != TowerDefensePhase.Combat)
+			return;
+
+		EnterVictoryPhase();
 	}
 
 	private void HandleBaseDestroyed()
@@ -96,6 +113,19 @@ public sealed class TowerDefensePhaseController : GameObject
 		ShowPlanningHint(false);
 	}
 
+	private void EnterVictoryPhase()
+	{
+		if (_currentPhase == TowerDefensePhase.Victory)
+			return;
+
+		_currentPhase = TowerDefensePhase.Victory;
+		_fightButton.Enabled = false;
+		_towers.SetPlacementEnabled(false);
+		_spawns.StopWave();
+		ShowPlanningHint(false);
+		_victoryScreen.Show();
+	}
+
 	private void EnterGameOverPhase()
 	{
 		if (_currentPhase == TowerDefensePhase.GameOver)
@@ -106,6 +136,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_towers.SetPlacementEnabled(false);
 		_spawns.StopWave();
 		ShowPlanningHint(false);
+		_victoryScreen.Hide();
 	}
 
 	private void ShowPlanningHint(bool visible)

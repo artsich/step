@@ -8,31 +8,36 @@ public sealed class Spawns : GameObject
 {
 	private readonly Renderer _renderer;
 	private readonly Level _level;
-	private readonly SpawnSettings _spawnSettings;
 	private readonly List<Sprite2d> _spawnMarkers = [];
 	private readonly List<Enemy> _activeEnemies = [];
 	private readonly float _spawnSize = 25f;
-	private readonly float _spawnIntervalSeconds;
+	private readonly IReadOnlyList<WaveConfig> _waves;
+	private readonly Random _random = new();
 
 	private float _spawnTimer;
 	private int _spawnedCount;
 	private int _spawnIndex;
+	private int _currentWaveIndex;
 	private bool _waveActive;
 
 	public IReadOnlyList<Enemy> ActiveEnemies => _activeEnemies;
 
 	public bool WaveInProgress => _waveActive;
 
+	public int CurrentWaveNumber => _currentWaveIndex + 1;
+	public int TotalWaves => _waves.Count;
+	public bool AreAllWavesCompleted => _currentWaveIndex >= _waves.Count;
+
 	public event Action<Enemy>? EnemyReachedBase;
 	public event Action<Enemy>? EnemyDied;
 	public event Action? WaveCompleted;
+	public event Action? AllWavesCompleted;
 
 	public Spawns(Renderer renderer, Level level) : base(nameof(Spawns))
 	{
 		_renderer = renderer;
 		_level = level;
-		_spawnSettings = level.Spawn;
-		_spawnIntervalSeconds = MathF.Max(_spawnSettings.SpawnIntervalSeconds, 0.001f);
+		_waves = level.Waves;
 
 		CreateSpawnMarkers();
 	}
@@ -45,15 +50,20 @@ public sealed class Spawns : GameObject
 		if (!_waveActive)
 			return;
 
-		if (_spawnedCount >= _spawnSettings.EnemyCount)
+		if (_currentWaveIndex >= _waves.Count)
+			return;
+
+		var currentWave = _waves[_currentWaveIndex];
+
+		if (_spawnedCount >= currentWave.TotalEnemyCount)
 			return;
 
 		_spawnTimer += deltaTime;
 
-		while (_spawnTimer >= _spawnIntervalSeconds && _spawnedCount < _spawnSettings.EnemyCount)
+		while (_spawnTimer >= currentWave.SpawnIntervalSeconds && _spawnedCount < currentWave.TotalEnemyCount)
 		{
-			_spawnTimer -= _spawnIntervalSeconds;
-			SpawnEnemy();
+			_spawnTimer -= currentWave.SpawnIntervalSeconds;
+			SpawnEnemy(currentWave);
 		}
 
 		TryCompleteWave();
@@ -78,7 +88,7 @@ public sealed class Spawns : GameObject
 		}
 	}
 
-	private void SpawnEnemy()
+	private void SpawnEnemy(WaveConfig wave)
 	{
 		if (_level.SpawnPositions.Count == 0)
 			return;
@@ -87,13 +97,21 @@ public sealed class Spawns : GameObject
 		_spawnIndex = (_spawnIndex + 1) % _level.SpawnPositions.Count;
 
 		var path = _level.GetPathFromSpawn(spawnPos);
-		var enemy = new Enemy(_renderer, path);
-		enemy.ReachedBase += HandleEnemyReachedBase;
-		enemy.Died += HandleEnemyDied;
-
+		var enemy = CreateEnemyFromWave(wave, path);
+		
 		_activeEnemies.Add(enemy);
 		AddChild(enemy);
 		_spawnedCount++;
+	}
+
+	private Enemy CreateEnemyFromWave(WaveConfig wave, IReadOnlyList<Vector2f> path)
+	{
+		var enemyType = wave.SelectRandomEnemyType(_random);
+		var enemyConfig = EnemyTypeConfig.GetDefault(enemyType);
+		var enemy = new Enemy(_renderer, path, enemyConfig);
+		enemy.ReachedBase += HandleEnemyReachedBase;
+		enemy.Died += HandleEnemyDied;
+		return enemy;
 	}
 
 	private void CleanupInactiveEnemies()
@@ -139,6 +157,12 @@ public sealed class Spawns : GameObject
 			return;
 		}
 
+		if (AreAllWavesCompleted)
+		{
+			Serilog.Log.Warning("All waves completed. Cannot start a new wave.");
+			return;
+		}
+
 		ResetWaveState();
 		_waveActive = true;
 	}
@@ -163,13 +187,34 @@ public sealed class Spawns : GameObject
 		if (!_waveActive)
 			return;
 
-		if (_spawnedCount < _spawnSettings.EnemyCount)
+		if (_currentWaveIndex >= _waves.Count)
 			return;
 
-		if (_activeEnemies.Count > 0)
+		var currentWave = _waves[_currentWaveIndex];
+
+		if (!IsWaveReadyToComplete(currentWave))
 			return;
 
+		CompleteCurrentWave();
+	}
+
+	private bool IsWaveReadyToComplete(WaveConfig currentWave)
+	{
+		return _spawnedCount >= currentWave.TotalEnemyCount && _activeEnemies.Count == 0;
+	}
+
+	private void CompleteCurrentWave()
+	{
 		_waveActive = false;
-		WaveCompleted?.Invoke();
+		_currentWaveIndex++;
+
+		if (_currentWaveIndex >= _waves.Count)
+		{
+			AllWavesCompleted?.Invoke();
+		}
+		else
+		{
+			WaveCompleted?.Invoke();
+		}
 	}
 }

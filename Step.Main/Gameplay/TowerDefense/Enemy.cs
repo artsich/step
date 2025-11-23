@@ -11,6 +11,7 @@ public sealed class Enemy : GameObject
 	private readonly IReadOnlyList<Vector2f> _path;
 	private readonly float _moveSpeed;
 	private readonly Health _health;
+	private readonly Sprite2d _sprite;
 
 	private bool _reachedBase;
 	private bool _dead;
@@ -25,7 +26,8 @@ public sealed class Enemy : GameObject
 		Renderer renderer,
 		IReadOnlyList<Vector2f> path,
 		float moveSpeed = 25f,
-		float maxHealth = DefaultHealth)
+		float maxHealth = DefaultHealth,
+		Vector4f? color = null)
 		: base(nameof(Enemy))
 	{
 		if (path.Count == 0)
@@ -36,18 +38,27 @@ public sealed class Enemy : GameObject
 		_health = new Health(maxHealth);
 		_targetIndex = Math.Min(1, path.Count - 1);
 
-		var sprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures/spr_goblin.png"))
+		_sprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures/spr_goblin.png"))
 		{
 			Layer = 7,
+			Color = color ?? Vector4f.One,
 			LocalTransform = new Transform
 			{
 				Scale = new Vector2f(18f, 18f)
 			}
 		};
 
-		AddChild(sprite);
+		AddChild(_sprite);
 
 		GlobalPosition = _path[0];
+	}
+
+	public Enemy(
+		Renderer renderer,
+		IReadOnlyList<Vector2f> path,
+		EnemyTypeConfig config)
+		: this(renderer, path, config.MoveSpeed, config.Health, config.Color)
+	{
 	}
 
 	protected override void OnUpdate(float deltaTime)

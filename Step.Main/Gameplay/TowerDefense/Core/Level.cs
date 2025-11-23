@@ -26,6 +26,7 @@ public class Level
 
 	private bool _baseDefined;
 	private SpawnSettings? _spawnSettings;
+	private WaveConfig[]? _waves;
 
 	private float TileSize { get; set; } = 30f;
 
@@ -42,6 +43,8 @@ public class Level
 
 	public SpawnSettings Spawn => _spawnSettings ?? throw new InvalidOperationException("Spawn settings are not configured. Call ConfigureSpawn before Build().");
 
+	public IReadOnlyList<WaveConfig> Waves => _waves ?? throw new InvalidOperationException("Waves are not configured. Call ConfigureWaves before Build().");
+
 	public Level ConfigureSpawn(int enemyCount, float spawnFrequency)
 	{
 		if (enemyCount <= 0)
@@ -51,6 +54,15 @@ public class Level
 			throw new ArgumentOutOfRangeException(nameof(spawnFrequency), "Spawn frequency must be a finite value greater than zero.");
 
 		_spawnSettings = new SpawnSettings(enemyCount, spawnFrequency);
+		return this;
+	}
+
+	public Level ConfigureWaves(params WaveConfig[] waves)
+	{
+		if (waves == null || waves.Length == 0)
+			throw new ArgumentException("Waves array cannot be null or empty.", nameof(waves));
+
+		_waves = waves;
 		return this;
 	}
 	
@@ -135,11 +147,8 @@ public class Level
 		if (!_baseDefined)
 			throw new InvalidOperationException("Level map must contain a base tile (B).");
 
-		if (!_spawnSettings.HasValue)
-			throw new InvalidOperationException("Spawn settings must be configured before building the level.");
-
-		if (_spawnSettings.Value.SpawnFrequency <= 0f)
-			throw new InvalidOperationException("Spawn frequency must be greater than zero.");
+		if (_waves == null || _waves.Length == 0)
+			throw new InvalidOperationException("Waves must be configured before building the level. Call ConfigureWaves before Build().");
 
 		return this;
 	}
@@ -153,6 +162,7 @@ public class Level
 		_baseDefined = false;
 		BasePosition = Vector2f.Zero;
 		_spawnSettings = null;
+		_waves = null;
 	}
 
 	private static bool IsKnownCell(char cell)
