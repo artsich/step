@@ -72,11 +72,12 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 	{
 		string[] map =
 		{
-			"....T....",
-			"...PPP...",
-			"..TPTP.B.",
-			"...P.PTP.",
-			".SPPTPPP.",
+			"...........",
+			"...T.B.T...",
+			"..TPPPPPT..",
+			"...PTTTP...",
+			"..PP...PP..",
+			"..S.....S..",
 		};
 
 		// Создаем 5 волн
