@@ -1,5 +1,6 @@
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Engine.Graphics.UI;
 using Step.Main.Gameplay.TowerDefense.Core;
 
 namespace Step.Main.Gameplay.TowerDefense;
@@ -9,6 +10,7 @@ public sealed class HealthBar : GameObject
 	private readonly Health _health;
 	private readonly Sprite2d _background;
 	private readonly Sprite2d _fill;
+	private readonly Label _label;
 	private readonly float _width;
 	private readonly float _height;
 
@@ -49,6 +51,14 @@ public sealed class HealthBar : GameObject
 		_fill.LocalTransform.Scale = new Vector2f(_width, _height);
 		AddChild(_fill);
 
+		_label = new Label(renderer, Constants.Font.UiFontPath, 14)
+		{
+			Layer = baseLayer + 2,
+			Color = new Vector4f(0.98f, 0.96f, 0.82f, 1f),
+			Pivot = new Vector2f(0.5f, 0.5f)
+		};
+		AddChild(_label);
+
 		_health.HealthChanged += HandleHealthChanged;
 		HandleHealthChanged(_health.CurrentHealth, _health.MaxHealth);
 	}
@@ -68,6 +78,7 @@ public sealed class HealthBar : GameObject
 	{
 		float ratio = max <= 0f ? 0f : current / max;
 		UpdateFill(ratio);
+		UpdateLabel(current, max);
 	}
 
 	private void UpdateFill(float ratio)
@@ -75,6 +86,13 @@ public sealed class HealthBar : GameObject
 		float clamped = Math.Clamp(ratio, 0f, 1f);
 		_fill.Visible = clamped > 0f;
 		_fill.LocalTransform.Scale = new Vector2f(_width * clamped, _height);
+	}
+
+	private void UpdateLabel(float current, float max)
+	{
+		int currentValue = (int)MathF.Round(MathF.Max(0f, current));
+		int maxValue = (int)MathF.Max(1f, MathF.Round(max));
+		_label.Text = $"{currentValue}/{maxValue}";
 	}
 }
 

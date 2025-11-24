@@ -21,7 +21,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 			{ 
 				LocalTransform = new Transform()
 				{
-					Position = new Vector2f(0f, 75f)
+					Position = new Vector2f(120f, 75f)
 				}
 			});
 		
