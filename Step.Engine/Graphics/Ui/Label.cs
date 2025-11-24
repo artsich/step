@@ -38,6 +38,7 @@ public sealed class Label : Control
 	private readonly string _fontPath = "EngineData/Fonts/ProggyClean.ttf";
 
 	private bool _isDirty = true;
+	public Vector2f Pivot { get; set; } = Vector2f.Zero;
 
 	[Export]
 	public string Text
@@ -116,6 +117,14 @@ public sealed class Label : Control
 			return;
 
 		var model = GetGlobalMatrix();
+
+		if (Pivot != Vector2f.Zero)
+		{
+			var textSize = CalculateTextSize(_font, _text);
+			var pivotOffset = new Vector2f(-textSize.X * Pivot.X, textSize.Y * Pivot.Y);
+			var pivotMatrix = Matrix4.CreateTranslation(pivotOffset.X, pivotOffset.Y, 0f);
+			model = pivotMatrix * model;
+		}
 
 		float currentX = 0;
 		foreach (var c in _text)
