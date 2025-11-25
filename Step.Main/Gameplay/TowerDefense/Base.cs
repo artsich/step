@@ -7,13 +7,15 @@ namespace Step.Main.Gameplay.TowerDefense;
 public sealed class Base : GameObject
 {
 	private const float BaseSize = 40f;
-	private const float MaxHealth = 100f;
+	private const float BaseMaxHealth = 100f;
 	private const float DamagePerEnemy = 10f;
+	private const int MaxFortificationLevel = 3;
 
 	private readonly HealthBar _healthBar;
 
 	private Spawns? _spawns;
 	private bool _dead = false;
+	private int _fortificationLevel = 0;
 
 	public event Action? Dead;
 
@@ -33,10 +35,16 @@ public sealed class Base : GameObject
 		float healthBarOffsetY = BaseSize * 0.65f;
 
 		_healthBar = new HealthBar(
-			renderer, MaxHealth, healthBarWidth, healthBarHeight, new Vector2f(0f, healthBarOffsetY), 7);
+			renderer, BaseMaxHealth, healthBarWidth, healthBarHeight, new Vector2f(0f, healthBarOffsetY), 7);
 
 		AddChild(_healthBar);
 	}
+
+	public float CurrentHealth => _healthBar.Hp;
+	public float MaxHealth => _healthBar.MaxHp;
+	public bool IsDestroyed => _dead;
+	public bool NeedsHealing => !_dead && _healthBar.Hp < _healthBar.MaxHp;
+	public bool CanFortify => !_dead && _fortificationLevel < MaxFortificationLevel;
 
 	protected override void OnStart()
 	{
@@ -89,5 +97,29 @@ public sealed class Base : GameObject
 			_dead = true;
 			Dead?.Invoke();
 		}
+	}
+
+	public bool Heal(float amount)
+	{
+		if (!_dead && NeedsHealing && amount > 0f)
+		{
+			return _healthBar.Heal(amount);
+		}
+
+		return false;
+	}
+
+	public bool Fortify(float bonusHealth, bool refillToFull = true)
+	{
+		if (!CanFortify || bonusHealth <= 0f)
+			return false;
+
+		bool changed = _healthBar.IncreaseMaxHealth(bonusHealth, refillToFull);
+		if (changed)
+		{
+			_fortificationLevel++;
+		}
+
+		return changed;
 	}
 }

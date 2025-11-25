@@ -29,5 +29,40 @@ public sealed class Health
 
 		HealthChanged?.Invoke(CurrentHealth, MaxHealth);
 	}
+
+	public bool Heal(float amount)
+	{
+		if (amount <= 0f || CurrentHealth <= 0f)
+			return false;
+
+		float previous = CurrentHealth;
+		CurrentHealth = MathF.Min(MaxHealth, CurrentHealth + amount);
+
+		if (MathF.Abs(previous - CurrentHealth) <= float.Epsilon)
+			return false;
+
+		HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+		return true;
+	}
+
+	public bool IncreaseMaxHealth(float amount, bool refillToFull = true)
+	{
+		if (amount <= 0f || float.IsNaN(amount) || float.IsInfinity(amount))
+			return false;
+
+		MaxHealth = MathF.Max(0f, MaxHealth + amount);
+
+		if (refillToFull)
+		{
+			CurrentHealth = MaxHealth;
+		}
+		else
+		{
+			CurrentHealth = MathF.Min(CurrentHealth, MaxHealth);
+		}
+
+		HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+		return true;
+	}
 }
 

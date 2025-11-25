@@ -28,24 +28,27 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		var level = CreateLevel();
 		
 		var path = new TowerDefense.Path(engine.Renderer, level);
-		gameLoop.AddChild(path);
 		
 		var baseObj = new Base(engine.Renderer, level);
-		gameLoop.AddChild(baseObj);
-
 		baseObj.Dead += () =>
 		{
 			gameLoop.OnFinish?.Invoke();
 		};
 
 		var spawns = new Spawns(engine.Renderer, level);
-		gameLoop.AddChild(spawns);
 
 		var economySettings = TowerEconomySettings.Default;
 		var economy = new TowerEconomy(spawns, economySettings);
-		gameLoop.AddChild(economy);
 		
 		var grid = new Towers(engine.Renderer, engine.Input, level, spawns, economy);
+
+		var baseSupportPanel = new BaseSupportPanel(engine.Renderer, engine.Input, economy, baseObj);
+		baseObj.AddChild(baseSupportPanel);
+
+		gameLoop.AddChild(path);
+		gameLoop.AddChild(baseObj);
+		gameLoop.AddChild(spawns);
+		gameLoop.AddChild(economy);
 		gameLoop.AddChild(grid);
 
 		var goldCounter = new GoldCounter(engine.Renderer, economy)
@@ -62,7 +65,8 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 			engine.Input,
 			spawns,
 			grid,
-			baseObj);
+			baseObj,
+			baseSupportPanel);
 		gameLoop.AddChild(phaseController);
 		
 		return gameLoop;

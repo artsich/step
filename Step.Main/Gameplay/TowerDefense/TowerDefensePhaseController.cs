@@ -12,6 +12,7 @@ public sealed class TowerDefensePhaseController : GameObject
 	private readonly FightButton _fightButton;
 	private readonly Label _planningLabel;
 	private readonly VictoryScreen _victoryScreen;
+	private readonly BaseSupportPanel _baseSupportPanel;
 	private const string PlanningHintText = "Plan your towers";
 
 	private TowerDefensePhase _currentPhase = TowerDefensePhase.Planning;
@@ -21,12 +22,14 @@ public sealed class TowerDefensePhaseController : GameObject
 		Input input,
 		Spawns spawns,
 		Towers towers,
-		Base baseObject)
+		Base baseObject,
+		BaseSupportPanel baseSupportPanel)
 		: base(nameof(TowerDefensePhaseController))
 	{
 		_spawns = spawns;
 		_towers = towers;
 		_base = baseObject;
+		_baseSupportPanel = baseSupportPanel;
 
 		_fightButton = new FightButton(renderer, input, HandleFightPressed);
 		_fightButton.LocalPosition = new Vector2f(120f, -75f);
@@ -102,6 +105,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_fightButton.Enabled = true;
 		_towers.SetPlacementEnabled(true);
 		ShowPlanningHint(true);
+		_baseSupportPanel.SetPlanningMode(true);
 	}
 
 	private void EnterCombatPhase()
@@ -111,6 +115,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_towers.SetPlacementEnabled(false);
 		_spawns.StartWave();
 		ShowPlanningHint(false);
+		_baseSupportPanel.SetPlanningMode(false);
 	}
 
 	private void EnterVictoryPhase()
@@ -123,6 +128,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_towers.SetPlacementEnabled(false);
 		_spawns.StopWave();
 		ShowPlanningHint(false);
+		_baseSupportPanel.SetPlanningMode(false);
 		_victoryScreen.Show();
 	}
 
@@ -136,6 +142,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_towers.SetPlacementEnabled(false);
 		_spawns.StopWave();
 		ShowPlanningHint(false);
+		_baseSupportPanel.SetPlanningMode(false);
 		_victoryScreen.Hide();
 	}
 

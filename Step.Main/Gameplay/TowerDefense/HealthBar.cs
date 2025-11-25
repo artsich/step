@@ -15,6 +15,7 @@ public sealed class HealthBar : GameObject
 	private readonly float _height;
 
 	public float Hp => _health.CurrentHealth;
+	public float MaxHp => _health.MaxHealth;
 
 	public HealthBar(
 		Renderer renderer,
@@ -66,6 +67,16 @@ public sealed class HealthBar : GameObject
 	public void ApplyDamage(float amount)
 	{
 		_health.ApplyDamage(amount);
+	}
+
+	public bool Heal(float amount)
+	{
+		return _health.Heal(amount);
+	}
+
+	public bool IncreaseMaxHealth(float amount, bool refillToFull = true)
+	{
+		return _health.IncreaseMaxHealth(amount, refillToFull);
 	}
 
 	protected override void OnEnd()

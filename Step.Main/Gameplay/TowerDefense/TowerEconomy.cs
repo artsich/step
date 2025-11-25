@@ -31,7 +31,7 @@ public sealed class TowerEconomy : GameObject
 
 	public int TowerCost => _settings.TowerCost;
 
-	public bool CanAffordTower => _currentGold >= _settings.TowerCost;
+	public bool CanAffordTower => CanAfford(_settings.TowerCost);
 
 	public bool TryPurchaseTower()
 	{
@@ -39,6 +39,23 @@ public sealed class TowerEconomy : GameObject
 			return false;
 
 		SpendGold(_settings.TowerCost);
+		return true;
+	}
+
+	public bool CanAfford(int amount)
+	{
+		return amount <= 0 || _currentGold >= amount;
+	}
+
+	public bool TrySpendGold(int amount)
+	{
+		if (amount <= 0)
+			return true;
+
+		if (!CanAfford(amount))
+			return false;
+
+		SpendGold(amount);
 		return true;
 	}
 
