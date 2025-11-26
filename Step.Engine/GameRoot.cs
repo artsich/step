@@ -38,6 +38,8 @@ public sealed class GameRoot
 
 	public void SetScene(GameObject scene) => _sceneController.SetScene(scene);
 
+	public void PropagateEvent(Event e) => _sceneController.PropagateEvent(e);
+
 	internal void Update(float dt) => _loopCoordinator.Update(dt);
 
 	internal void Draw() => _loopCoordinator.Draw();

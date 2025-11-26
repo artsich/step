@@ -1,4 +1,5 @@
 using Silk.NET.Maths;
+using Step.Engine.Editor;
 using Step.Engine.Graphics.Text;
 
 namespace Step.Engine.Graphics.UI;
@@ -104,14 +105,6 @@ public class Button : Control
 				break;
 		}
 
-		var mousePos = _input.MouseWorldPosition;
-		var position = GlobalPosition - (Size * 0.5f);
-
-		_isHovered = mousePos.X >= position.X &&
-					mousePos.X <= position.X + Size.X &&
-					mousePos.Y >= position.Y &&
-					mousePos.Y <= position.Y + Size.Y;
-
 		if (_isHovered && _input.IsMouseButtonJustPressed(Silk.NET.Input.MouseButton.Left))
 		{
 			_isPressed = true;
@@ -124,6 +117,32 @@ public class Button : Control
 				_onClick?.Invoke();
 			}
 		}
+	}
+
+	protected override void OnEvent(Event e)
+	{
+		if (e is MouseHoverEvent mouseHoverEvent)
+		{
+			var position = GlobalPosition - (Size * 0.5f);
+			var mousePos = mouseHoverEvent.Position;
+
+			var isOver = mousePos.X >= position.X &&
+						mousePos.X <= position.X + Size.X &&
+						mousePos.Y >= position.Y &&
+						mousePos.Y <= position.Y + Size.Y;
+
+			if (isOver && !mouseHoverEvent.Handled)
+			{
+				_isHovered = true;
+				mouseHoverEvent.MarkHandled();
+			}
+			else
+			{
+				_isHovered = false;
+			}
+		}
+
+		base.OnEvent(e);
 	}
 
 	protected override void OnRender()

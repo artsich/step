@@ -55,6 +55,8 @@ public sealed class Input
 			MouseScreenPosition.X / _windowSize.X,
 			1f - MouseScreenPosition.Y / _windowSize.Y);
 
+		GameRoot.I.PropagateEvent(new MouseHoverEvent(MouseWorldPosition));
+
 		// Update gamepad button states
 		if (_gamepad is not null)
 		{

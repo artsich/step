@@ -5,6 +5,21 @@ using System.Diagnostics;
 
 namespace Step.Engine;
 
+public abstract class Event 
+{
+	public bool Handled { get; private set; }
+
+	public void MarkHandled()
+	{
+		Handled = true;
+	}
+}
+
+public class MouseHoverEvent(Vector2f position) : Event
+{
+	public Vector2f Position { get; } = position;
+}
+
 public class GameObject(string name = nameof(GameObject))
 {
 	public string Name { get; init; } = name;
@@ -66,6 +81,25 @@ public class GameObject(string name = nameof(GameObject))
 		OnEnd();
 	}
 
+	public void PropagateEvent(Event e)
+	{
+		if (_markedAsFree || !Enabled)
+		{
+			return;
+		}
+
+		OnEvent(e);
+
+		foreach (var child in children)
+		{
+			child.PropagateEvent(e);
+		}
+	}
+
+	protected virtual void OnEvent(Event e) 
+	{ 
+	}
+
 	public void AddChild(GameObject child)
 	{
 		Debug.Assert(this != child, "WTF??");
@@ -110,7 +144,7 @@ public class GameObject(string name = nameof(GameObject))
 
 	public void Draw()
 	{
-		if (!Enabled)
+		if (_markedAsFree || !Enabled)
 		{
 			return;
 		}
