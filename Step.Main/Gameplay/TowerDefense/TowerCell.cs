@@ -17,6 +17,8 @@ public sealed class TowerCell : GameObject
 	private const float NormalScaleFactor = 0.85f;
 	private const float HoverScaleFactor = 0.98f;
 
+	private bool _isHovered;
+
 	public event Action<TowerCell>? Clicked;
 
 	public Tower? Tower { get; private set; }
@@ -50,6 +52,7 @@ public sealed class TowerCell : GameObject
 
 		if (!InteractionEnabled)
 		{
+			_isHovered = false;
 			if (IsOccupied)
 			{
 				ApplyOccupiedState();
@@ -62,14 +65,11 @@ public sealed class TowerCell : GameObject
 			return;
 		}
 
-		var mousePos = _input.MouseWorldPosition;
-		bool hovered = IsMouseOverCell(mousePos);
-
 		if (IsOccupied)
 		{
 			ApplyOccupiedState();
 
-			if (hovered && _input.IsMouseButtonJustPressed(MouseButton.Left))
+			if (_isHovered && _input.IsMouseButtonJustPressed(MouseButton.Left))
 			{
 				Clicked?.Invoke(this);
 			}
@@ -77,7 +77,7 @@ public sealed class TowerCell : GameObject
 			return;
 		}
 
-		if (hovered)
+		if (_isHovered)
 		{
 			ApplyHoverState();
 			if (_input.IsMouseButtonJustPressed(MouseButton.Left))
@@ -126,6 +126,32 @@ public sealed class TowerCell : GameObject
 		float half = _cellSize * 0.5f;
 		return mousePos.X >= Position.X - half && mousePos.X <= Position.X + half
 			&& mousePos.Y >= Position.Y - half && mousePos.Y <= Position.Y + half;
+	}
+
+	protected override void OnEvent(Event e)
+	{
+		if (e is MouseHoverEvent mouseHoverEvent)
+		{
+			if (!InteractionEnabled)
+			{
+				_isHovered = false;
+				return;
+			}
+
+			var isOver = IsMouseOverCell(mouseHoverEvent.Position);
+
+			if (isOver && !mouseHoverEvent.Handled)
+			{
+				_isHovered = true;
+				mouseHoverEvent.MarkHandled();
+			}
+			else
+			{
+				_isHovered = false;
+			}
+		}
+
+		base.OnEvent(e);
 	}
 
 	private void ApplyHoverState()
