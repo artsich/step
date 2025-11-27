@@ -1,4 +1,5 @@
 using Step.Engine;
+using Step.Engine.Audio;
 using Step.Main.Gameplay.TowerDefense;
 using Step.Main.Gameplay.TowerDefense.Core;
 using Step.Main.Gameplay.UI;
@@ -14,6 +15,12 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 {
 	public GameLoop Build()
 	{
+		AudioManager.Ins.LoadSound("base_heal", "Music/TD/base_heal.mp3");
+		AudioManager.Ins.LoadSound("base_upgrade", "Music/TD/base_upgrade.mp3");
+		AudioManager.Ins.LoadSound("main_theme", "Music/TD/main_theme.mp3");
+		AudioManager.Ins.LoadSound("fight", "Music/TD/fight.mp3");
+		AudioManager.Ins.LoadSound("base_hit", "Music/TD/base_hit.mp3");
+
 		var gameLoop = new GameLoop();
 		
 		gameLoop.AddChild(

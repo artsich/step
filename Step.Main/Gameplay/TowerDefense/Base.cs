@@ -1,4 +1,5 @@
 using Step.Engine;
+using Step.Engine.Audio;
 using Step.Engine.Graphics;
 using Step.Main.Gameplay.TowerDefense.Core;
 
@@ -90,6 +91,8 @@ public sealed class Base : GameObject
 	{
 		_healthBar.ApplyDamage(DamagePerEnemy);
 
+		AudioManager.Ins.PlaySound("base_hit");
+
 		(GameRoot.I.CurrentCamera as Camera2d)?.Shake(0.4f, 5f);
 
 		if (_healthBar.Hp <= 0f && !_dead)
@@ -103,7 +106,14 @@ public sealed class Base : GameObject
 	{
 		if (!_dead && NeedsHealing && amount > 0f)
 		{
-			return _healthBar.Heal(amount);
+			var result = _healthBar.Heal(amount);
+
+			if(result)
+			{
+				AudioManager.Ins.PlaySound("base_heal");
+			}
+
+			return result;
 		}
 
 		return false;
@@ -118,6 +128,7 @@ public sealed class Base : GameObject
 		if (changed)
 		{
 			_fortificationLevel++;
+			AudioManager.Ins.PlaySound("base_upgrade");
 		}
 
 		return changed;

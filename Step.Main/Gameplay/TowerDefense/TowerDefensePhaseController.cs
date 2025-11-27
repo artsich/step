@@ -1,4 +1,5 @@
 using Step.Engine;
+using Step.Engine.Audio;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.UI;
 
@@ -56,6 +57,8 @@ public sealed class TowerDefensePhaseController : GameObject
 		_spawns.AllWavesCompleted += HandleAllWavesCompleted;
 		_base.Dead += HandleBaseDestroyed;
 		EnterPlanningPhase();
+
+		AudioManager.Ins.PlaySound("main_theme", true);
 	}
 
 	protected override void OnEnd()
@@ -72,6 +75,7 @@ public sealed class TowerDefensePhaseController : GameObject
 			return;
 
 		EnterCombatPhase();
+		AudioManager.Ins.PlaySound("fight");
 	}
 
 	private void HandleWaveCompleted()
