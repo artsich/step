@@ -1,5 +1,6 @@
 using Step.Engine;
 using Step.Engine.Graphics;
+using Step.Engine.Tween;
 
 namespace Step.Main.Gameplay.TowerDefense;
 
@@ -8,12 +9,21 @@ public sealed class Tower : GameObject
 	private const float SpriteScaleFactor = 0.9f;
 	private const float RangeMultiplier = 3.25f;
 
+	private const float FireScaleBoost = 0.08f;
+	private const float FireScaleOutDuration = 0.08f;
+	private const float FireScaleInDuration = 0.12f;
+
 	private readonly Renderer _renderer;
 	private readonly Func<IReadOnlyList<Enemy>> _enemyProvider;
 	private readonly float _damage;
 	private readonly float _shotsPerSecond;
 	private readonly float _range;
 	private readonly float _projectileSpeed;
+	private readonly Sprite2d _sprite;
+	private readonly TweenPlayer _tweenPlayer = new();
+	private readonly Vector2f _baseScale;
+
+	private ITween? _scaleTween;
 
 	private float _cooldownTimer;
 
@@ -37,20 +47,23 @@ public sealed class Tower : GameObject
 
 		LocalTransform.Position = position;
 
-		var sprite = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures/spr_tower_lightning_tower.png"))
+		_sprite = new Sprite2d(_renderer, Assets.LoadTexture2d("Textures/spr_tower_lightning_tower.png"))
 		{
 			Layer = 8
 		};
 		var scaledSize = cellSize * SpriteScaleFactor;
-		sprite.LocalTransform.Scale = new Vector2f(scaledSize, scaledSize);
+		_sprite.LocalTransform.Scale = new Vector2f(scaledSize, scaledSize);
+		_baseScale = _sprite.LocalTransform.Scale;
 
-		AddChild(sprite);
+		AddChild(_sprite);
 	}
 
 	protected override void OnUpdate(float deltaTime)
 	{
 		if (deltaTime <= 0f)
 			return;
+
+		_tweenPlayer.Update(deltaTime);
 
 		if (_cooldownTimer > 0f)
 		{
@@ -82,7 +95,7 @@ public sealed class Tower : GameObject
 			if (enemy == null || !enemy.IsAlive || enemy.MarkedAsFree)
 				continue;
 
-			float distanceSquared = DistanceSquared(towerPos, enemy.GlobalPosition);
+			float distanceSquared = Vector2.DistanceSquared(towerPos, enemy.GlobalPosition);
 			if (distanceSquared > rangeSquared || distanceSquared >= bestDistance)
 				continue;
 
@@ -103,13 +116,37 @@ public sealed class Tower : GameObject
 
 		AddChild(projectile);
 		projectile.GlobalPosition = GlobalPosition;
+
+		PlayFireScaleTween();
 	}
 
-	private static float DistanceSquared(Vector2f a, Vector2f b)
+	private void PlayFireScaleTween()
 	{
-		float dx = a.X - b.X;
-		float dy = a.Y - b.Y;
-		return (dx * dx) + (dy * dy);
+		if (_scaleTween != null)
+		{
+			_tweenPlayer.Stop(_scaleTween);
+			_sprite.LocalTransform.Scale = _baseScale;
+			_scaleTween = null;
+		}
+
+		var grow = Tween.Float(
+			1f,
+			1f + FireScaleBoost,
+			FireScaleOutDuration,
+			factor => _sprite.LocalTransform.Scale = _baseScale * factor,
+			Easing.EaseOutBack);
+
+		var shrink = Tween.Float(
+			1f + FireScaleBoost,
+			1f,
+			FireScaleInDuration,
+			factor => _sprite.LocalTransform.Scale = _baseScale * factor,
+			Easing.EaseOutQuad);
+
+		var finalize = Tween.Callback(() => _sprite.LocalTransform.Scale = _baseScale);
+
+		_scaleTween = Tween.Sequence(grow, shrink, finalize);
+		_tweenPlayer.Play(_scaleTween);
 	}
 }
 
