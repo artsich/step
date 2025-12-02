@@ -55,7 +55,7 @@ public sealed class FloatTween : ITween
 	private float Interpolate(float t)
 	{
 		var eased = Math.Clamp(_easing(t), 0f, 1f);
-		return _from + (_to - _from) * eased;
+		return StepMath.Lerp(_from, _to, eased);
 	}
 
 	private void Complete()

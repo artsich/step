@@ -8,6 +8,11 @@ public static class StepMath
 		return from + diff * t;
 	}
 
+	public static float Lerp(float a, float b, float t)
+	{
+		return a + (b - a) * t;
+	}
+
 	public static float NormalizeAngle(float angle)
 	{
 		return MathF.IEEERemainder(angle, MathF.PI * 2);
