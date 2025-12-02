@@ -22,9 +22,8 @@ public sealed class Projectile : GameObject
 		_damage = damage;
 		_speed = speed;
 
-		var sprite = new Sprite2d(renderer, renderer.DefaultWhiteTexture)
+		var sprite = new Sprite2d(renderer, Assets.LoadTexture2d("Textures/tower_fire.png"))
 		{
-			Color = new Vector4f(1f, 0.2f, 0.2f, 1f),
 			Layer = 9
 		};
 		sprite.LocalTransform.Scale = new Vector2f(DefaultSize, DefaultSize);
@@ -55,6 +54,8 @@ public sealed class Projectile : GameObject
 
 		float distance = MathF.Sqrt(distanceSquared);
 		float travelDistance = _speed * deltaTime;
+		var direction = new Vector2f(toTarget.X / distance, toTarget.Y / distance);
+		LocalTransform.Rotation = MathF.Atan2(direction.Y, direction.X);
 
 		if (travelDistance >= distance)
 		{
@@ -63,7 +64,6 @@ public sealed class Projectile : GameObject
 			return;
 		}
 
-		var direction = new Vector2f(toTarget.X / distance, toTarget.Y / distance);
 		GlobalPosition += direction * travelDistance;
 	}
 
