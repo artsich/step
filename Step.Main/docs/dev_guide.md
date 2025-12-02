@@ -36,3 +36,6 @@ Use the same approach for `AddChild`, `QueueFree`, or mass updates triggered mid
 
 Avoid adding comments to explain what code does. Instead, extract logic into well-named functions or methods to make the code self-documenting. Well-named methods and functions make the code more readable and maintainable than comments that can become outdated.
 
+
+## Math
+Use only existing math functions from Silk.NET.Maths. Do not create new ones if an equivalent already exists. Validate choices using context 7.

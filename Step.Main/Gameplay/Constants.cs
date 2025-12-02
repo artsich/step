@@ -18,5 +18,9 @@ internal static class Constants
 		public static Vector4f Cross = new(0.79f, 0.24f, 0.57f, 1f);
 
 		public static Vector4f Circle = new(0.96f, 0.44f, 0.57f, 1f);
+
+		public static Vector4f Red = new(1f, 0f, 0f, 1f);
+
+		public static Vector4f White = new(1f, 1f, 1f, 1f);
 	}
 }
