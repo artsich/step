@@ -20,7 +20,6 @@ public sealed class Tower : GameObject
 	private readonly float _range;
 	private readonly float _projectileSpeed;
 	private readonly Sprite2d _sprite;
-	private readonly TweenPlayer _tweenPlayer = new();
 	private readonly Vector2f _baseScale;
 	private readonly Vector2f _projectileSpawnOffset;
 
@@ -64,8 +63,6 @@ public sealed class Tower : GameObject
 	{
 		if (deltaTime <= 0f)
 			return;
-
-		_tweenPlayer.Update(deltaTime);
 
 		if (_cooldownTimer > 0f)
 		{
@@ -126,7 +123,7 @@ public sealed class Tower : GameObject
 	{
 		if (_scaleTween != null)
 		{
-			_tweenPlayer.Stop(_scaleTween);
+			StopTween(_scaleTween);
 			_sprite.LocalTransform.Scale = _baseScale;
 			_scaleTween = null;
 		}
@@ -148,7 +145,7 @@ public sealed class Tower : GameObject
 		var finalize = Tween.Callback(() => _sprite.LocalTransform.Scale = _baseScale);
 
 		_scaleTween = Tween.Sequence(grow, shrink, finalize);
-		_tweenPlayer.Play(_scaleTween);
+		PlayTween(_scaleTween);
 	}
 }
 

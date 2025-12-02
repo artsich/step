@@ -1,6 +1,7 @@
 ﻿using ImGuiNET;
 using Serilog;
 using Step.Engine.Editor;
+using Step.Engine.Tween;
 using System.Diagnostics;
 
 namespace Step.Engine;
@@ -35,6 +36,7 @@ public class GameObject(string name = nameof(GameObject))
 	protected List<GameObject> children = [];
 
 	private bool _markedAsFree;
+	private TweenPlayer? _tweenPlayer;
 
 	public Vector2f LocalPosition
 	{
@@ -78,6 +80,7 @@ public class GameObject(string name = nameof(GameObject))
 			child.End();
 		}
 
+		_tweenPlayer?.Clear();
 		OnEnd();
 	}
 
@@ -134,7 +137,11 @@ public class GameObject(string name = nameof(GameObject))
 			return;
 		}
 
+
 		OnUpdate(deltaTime);
+
+		_tweenPlayer?.Update(deltaTime);
+
 		foreach (var child in children)
 		{
 			child.Update(deltaTime);
@@ -260,4 +267,12 @@ public class GameObject(string name = nameof(GameObject))
 	protected virtual void OnRender() { }
 
 	protected internal virtual void OnRenderEnd() { }
+
+	protected TweenPlayer Tweens => _tweenPlayer ??= new();
+
+	protected bool HasActiveTweens => _tweenPlayer != null;
+
+	protected T PlayTween<T>(T tween) where T : ITween => Tweens.Play(tween);
+
+	protected void StopTween(ITween tween) => _tweenPlayer?.Stop(tween);
 }

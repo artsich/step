@@ -1,8 +1,6 @@
-using Silk.NET.Maths;
 using Step.Engine;
 using Step.Engine.Graphics;
-using Step.Engine.Tween;
-using Step.Main.Gameplay;
+using Step.Main.Gameplay.TowerDefense.Animations;
 using Step.Main.Gameplay.TowerDefense.Core;
 
 namespace Step.Main.Gameplay.TowerDefense;
@@ -17,10 +15,7 @@ public sealed class Enemy : GameObject
 	private readonly float _moveSpeed;
 	private readonly Health _health;
 	private readonly Sprite2d _sprite;
-	private readonly TweenPlayer _tweenPlayer = new();
-	private readonly Vector2f _baseScale;
-	private readonly Vector4f _baseColor;
-	private ITween? _hitTween;
+	private readonly SpriteHitAnimation _hitAnimation;
 
 	private bool _reachedBase;
 	private bool _dead;
@@ -58,8 +53,13 @@ public sealed class Enemy : GameObject
 		};
 
 		AddChild(_sprite);
-		_baseScale = _sprite.LocalTransform.Scale;
-		_baseColor = _sprite.Color;
+		_hitAnimation = new SpriteHitAnimation(
+			_sprite,
+			_sprite.LocalTransform.Scale,
+			_sprite.Color,
+			Tweens,
+			HitScaleFactor,
+			HitDuration);
 
 		GlobalPosition = _path[0];
 	}
@@ -74,8 +74,6 @@ public sealed class Enemy : GameObject
 
 	protected override void OnUpdate(float deltaTime)
 	{
-		_tweenPlayer.Update(deltaTime);
-
 		if (_reachedBase || _dead)
 			return;
 
@@ -126,7 +124,7 @@ public sealed class Enemy : GameObject
 			return;
 
 		_health.ApplyDamage(amount);
-		ApplyHitAnimation();
+		_hitAnimation.Play();
 
 		if (_health.CurrentHealth <= 0f)
 		{
@@ -155,43 +153,6 @@ public sealed class Enemy : GameObject
 		QueueFree();
 	}
 
-	private void ApplyHitAnimation()
-	{
-		if (_hitTween != null)
-		{
-			_tweenPlayer.Stop(_hitTween);
-			_sprite.LocalTransform.Scale = _baseScale;
-			_sprite.Color = _baseColor;
-			_hitTween = null;
-		}
-
-		var tweenUp = new FloatTween(
-			1f,
-			HitScaleFactor,
-			HitDuration,
-			value =>
-			{
-				_sprite.LocalTransform.Scale = _baseScale * value;
-				float factor = (value - 1f) / (HitScaleFactor - 1f);
-				_sprite.Color = Vector4D.Lerp(_baseColor, Constants.GameColors.Red, factor);
-			},
-			Easing.EaseOutBack);
-
-		var tweenDown = new FloatTween(
-			HitScaleFactor,
-			1f,
-			HitDuration,
-			value =>
-			{
-				_sprite.LocalTransform.Scale = _baseScale * value;
-				float factor = (value - 1f) / (HitScaleFactor - 1f);
-				_sprite.Color = Vector4D.Lerp(Constants.GameColors.Red, _baseColor, 1f - factor);
-			},
-			Easing.EaseOutQuad);
-
-		_hitTween = new TweenSequence([tweenUp, tweenDown]);
-		_tweenPlayer.Play(_hitTween);
-	}
 }
 
 
