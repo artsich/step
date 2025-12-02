@@ -22,6 +22,7 @@ public sealed class Tower : GameObject
 	private readonly Sprite2d _sprite;
 	private readonly TweenPlayer _tweenPlayer = new();
 	private readonly Vector2f _baseScale;
+	private readonly Vector2f _projectileSpawnOffset;
 
 	private ITween? _scaleTween;
 
@@ -54,6 +55,7 @@ public sealed class Tower : GameObject
 		var scaledSize = cellSize * SpriteScaleFactor;
 		_sprite.LocalTransform.Scale = new Vector2f(scaledSize, scaledSize);
 		_baseScale = _sprite.LocalTransform.Scale;
+		_projectileSpawnOffset = new Vector2f(0f, _baseScale.Y * 0.5f);
 
 		AddChild(_sprite);
 	}
@@ -115,7 +117,7 @@ public sealed class Tower : GameObject
 			_projectileSpeed);
 
 		AddChild(projectile);
-		projectile.GlobalPosition = GlobalPosition;
+		projectile.GlobalPosition = GlobalPosition + _projectileSpawnOffset;
 
 		PlayFireScaleTween();
 	}
