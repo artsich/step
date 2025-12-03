@@ -48,7 +48,7 @@ public sealed class Enemy : GameObject
 			Color = color ?? Vector4f.One,
 			LocalTransform = new Transform
 			{
-				Scale = new Vector2f(18f, 18f)
+				Scale = new Vector2f(14f)
 			}
 		};
 
