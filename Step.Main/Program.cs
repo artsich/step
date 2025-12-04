@@ -2,6 +2,7 @@
 using Step.Engine;
 using Step.Engine.Editor;
 using Step.Engine.Graphics;
+using Step.Main.Editor;
 using Step.Main.Gameplay;
 using Step.Main.Gameplay.Builders;
 
@@ -42,6 +43,7 @@ new Engine(windowOptions)
 		new ParticlesEditor(
 			engine.Window.FramebufferSize, 
 			new Camera2d(GameCameraWidth, GameCameraHeight)))
+	.AddEditor((_) => new MapEditor())
 	.Run((engine) =>
 		new GameScene(
 			engine,
