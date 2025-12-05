@@ -1,4 +1,5 @@
 namespace Step.Main.Gameplay.TowerDefense.Core;
+
 public readonly struct SpawnSettings
 {
 	public int EnemyCount { get; }
@@ -17,7 +18,7 @@ public class Level
 	private const char PathChar = 'P';
 	private const char SpawnChar = 'S';
 	private const char BaseChar = 'B';
-	private const char TowerChar = 'T';
+	private const char EmptyChar = '.';
 
 	private readonly List<Vector2f> _pathPoints = [];
 	private readonly List<Vector2f> _spawnPositions = [];
@@ -97,11 +98,6 @@ public class Level
 			{
 				char cell = rows[row][col];
 
-				if (cell == '.')
-				{
-					continue;
-				}
-
 				if (!IsKnownCell(cell))
 				{
 					Serilog.Log.Warning("Unknown cell: {Cell}", cell);
@@ -126,7 +122,7 @@ public class Level
 						BasePosition = position;
 						_baseDefined = true;
 						break;
-					case TowerChar:
+					case EmptyChar:
 						_towerPlaces.Add(position);
 						break;
 				}
@@ -170,7 +166,7 @@ public class Level
 		return cell == PathChar
 			   || cell == SpawnChar
 			   || cell == BaseChar
-			   || cell == TowerChar;
+			   || cell == EmptyChar;
 	}
 
 	public IReadOnlyList<Vector2f> GetPathFromSpawn(Vector2f spawnPosition)

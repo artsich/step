@@ -10,9 +10,7 @@ public sealed class TowerCell : GameObject
 	private readonly Input _input;
 	private readonly float _cellSize;
 
-	private readonly Vector4f _baseColor = new(0.1f, 0.35f, 0.4f, 0.4f);
 	private readonly Vector4f _hoverColor = new(0.35f, 0.85f, 0.9f, 0.7f);
-	private readonly Vector4f _occupiedColor = new(0.08f, 0.08f, 0.08f, 0.2f);
 
 	private const float NormalScaleFactor = 0.85f;
 	private const float HoverScaleFactor = 0.98f;
@@ -38,8 +36,8 @@ public sealed class TowerCell : GameObject
 
 		_sprite = new Sprite2d(renderer, renderer.DefaultWhiteTexture)
 		{
-			Color = _baseColor,
-			Layer = 4
+			Layer = 4,
+			Visible = false
 		};
 		_sprite.LocalTransform.Scale = CreateScaleVector(NormalScaleFactor);
 
@@ -53,15 +51,7 @@ public sealed class TowerCell : GameObject
 		if (!InteractionEnabled)
 		{
 			_isHovered = false;
-			if (IsOccupied)
-			{
-				ApplyOccupiedState();
-			}
-			else
-			{
-				ApplyDisabledState();
-			}
-
+			ApplyDisabledState();
 			return;
 		}
 
@@ -163,22 +153,17 @@ public sealed class TowerCell : GameObject
 
 	private void ApplyIdleState()
 	{
-		_sprite.Visible = true;
-		_sprite.Color = _baseColor;
-		_sprite.LocalTransform.Scale = CreateScaleVector(NormalScaleFactor);
+		_sprite.Visible = false;
 	}
 
 	private void ApplyOccupiedState()
 	{
-		_sprite.Color = _occupiedColor;
 		_sprite.Visible = false;
 	}
 
 	private void ApplyDisabledState()
 	{
-		_sprite.Visible = true;
-		_sprite.Color = _baseColor;
-		_sprite.LocalTransform.Scale = CreateScaleVector(NormalScaleFactor);
+		_sprite.Visible = false;
 	}
 
 	private Vector2f CreateScaleVector(float factor)

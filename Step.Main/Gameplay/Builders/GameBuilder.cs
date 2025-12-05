@@ -87,11 +87,11 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		{
 			"................",
 			"......PPPPP.....",
-			"......P.T.PPB...",
-			"...TPPPPPT......",
-			"....PTTTP.......",
+			"......P...PPB...",
+			"...TPPPPP.......",
+			"....P...P.......",
 			"...PP...PPPPP...",
-			"..TP.......TP...",
+			"...P........P...",
 			"...P........PP..",
 			"...S.........S..",
 		};
