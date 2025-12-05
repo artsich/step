@@ -100,12 +100,12 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		{
 			new WaveConfig(
 				enemyTypes: [new EnemyTypeWeight(EnemyType.Enemy1, 1f)],
-				totalEnemyCount: 5,
+				totalEnemyCount: 10,
 				spawnIntervalSeconds: 1f),
 
 			new WaveConfig(
 				enemyTypes: [new EnemyTypeWeight(EnemyType.Enemy2, 1f)],
-				totalEnemyCount: 7,
+				totalEnemyCount: 20,
 				spawnIntervalSeconds: 0.7f),
 
 			new WaveConfig(
@@ -114,7 +114,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 					new EnemyTypeWeight(EnemyType.Enemy1, 0.7f),
 					new EnemyTypeWeight(EnemyType.Enemy2, 0.3f)
 				],
-				totalEnemyCount: 10,
+				totalEnemyCount: 24,
 				spawnIntervalSeconds: 0.8f),
 
 			new WaveConfig(
@@ -124,7 +124,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 					new EnemyTypeWeight(EnemyType.Enemy2, 0.3f),
 					new EnemyTypeWeight(EnemyType.Enemy3, 0.2f)
 				],
-				totalEnemyCount: 12,
+				totalEnemyCount: 25,
 				spawnIntervalSeconds: 0.6f),
 
 			new WaveConfig(
