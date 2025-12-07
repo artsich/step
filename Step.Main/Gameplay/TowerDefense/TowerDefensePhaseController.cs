@@ -16,6 +16,8 @@ public sealed class TowerDefensePhaseController : GameObject
 	private readonly BaseSupportPanel _baseSupportPanel;
 	private const string PlanningHintText = "Plan your towers";
 
+	private readonly SpeedUpTime _speedUpBtn;
+
 	private TowerDefensePhase _currentPhase = TowerDefensePhase.Planning;
 
 	public TowerDefensePhaseController(
@@ -48,6 +50,12 @@ public sealed class TowerDefensePhaseController : GameObject
 
 		_victoryScreen = new VictoryScreen(renderer);
 		AddChild(_victoryScreen);
+
+		_speedUpBtn = new SpeedUpTime(renderer, input)
+		{
+			LocalPosition = new Vector2f(-130f, -75f)
+		};
+		AddChild(_speedUpBtn);
 	}
 
 	protected override void OnStart()
@@ -110,6 +118,9 @@ public sealed class TowerDefensePhaseController : GameObject
 		_towers.SetPlacementEnabled(true);
 		ShowPlanningHint(true);
 		_baseSupportPanel.SetPlanningMode(true);
+	
+		_speedUpBtn.Enabled = false;
+		_speedUpBtn.Reset();
 	}
 
 	private void EnterCombatPhase()
@@ -120,6 +131,8 @@ public sealed class TowerDefensePhaseController : GameObject
 		_spawns.StartWave();
 		ShowPlanningHint(false);
 		_baseSupportPanel.SetPlanningMode(false);
+
+		_speedUpBtn.Enabled = true;
 	}
 
 	private void EnterVictoryPhase()
