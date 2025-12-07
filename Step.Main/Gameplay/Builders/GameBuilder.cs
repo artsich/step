@@ -30,7 +30,7 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 			{ 
 				LocalTransform = new Transform()
 				{
-					Position = new Vector2f(120f, 75f)
+					Position = new Vector2f(0f, 75f)
 				}
 			});
 		
@@ -54,12 +54,6 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 		var baseSupportPanel = new BaseSupportPanel(engine.Renderer, engine.Input, economy, baseObj);
 		baseObj.AddChild(baseSupportPanel);
 
-		gameLoop.AddChild(path);
-		gameLoop.AddChild(baseObj);
-		gameLoop.AddChild(spawns);
-		gameLoop.AddChild(economy);
-		gameLoop.AddChild(grid);
-
 		var goldCounter = new GoldCounter(engine.Renderer, economy)
 		{
 			LocalTransform = new Transform()
@@ -67,7 +61,6 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 				Position = new Vector2f(-130f, 55f)
 			}
 		};
-		gameLoop.AddChild(goldCounter);
 
 		var phaseController = new TowerDefensePhaseController(
 			engine.Renderer,
@@ -76,8 +69,16 @@ public class GameBuilder(Engine.Engine engine) : IGameBuilder
 			grid,
 			baseObj,
 			baseSupportPanel);
+		// The phaseController needs to be added before the grid to prevent mouse-event conflicts with the towerCells.
 		gameLoop.AddChild(phaseController);
-		
+
+		gameLoop.AddChild(path);
+		gameLoop.AddChild(baseObj);
+		gameLoop.AddChild(spawns);
+		gameLoop.AddChild(economy);
+		gameLoop.AddChild(grid);
+		gameLoop.AddChild(goldCounter);
+
 		return gameLoop;
 	}
 
