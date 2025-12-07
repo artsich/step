@@ -33,7 +33,7 @@ public sealed class TowerDefensePhaseController : GameObject
 		_baseSupportPanel = baseSupportPanel;
 
 		_fightButton = new FightButton(renderer, input, HandleFightPressed);
-		_fightButton.LocalPosition = new Vector2f(120f, -75f);
+		_fightButton.LocalPosition = new Vector2f(-130f, -75f);
 		AddChild(_fightButton);
 
 		_planningLabel = new Label(renderer, Constants.Font.UiFontPath)
