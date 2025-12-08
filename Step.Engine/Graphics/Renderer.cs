@@ -110,6 +110,11 @@ public class Renderer(int screenWidth, int screenHeight, GL GL) : IRenderCommand
 		_renderTargets.Push(renderTarget);
 	}
 
+	public void Clear()
+	{
+		GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+	}
+	
 	public void PopRenderTarget()
 	{
 		if (_renderTargets.Count == 0)

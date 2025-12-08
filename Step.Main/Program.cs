@@ -43,7 +43,9 @@ new Engine(windowOptions)
 		new ParticlesEditor(
 			engine.Window.FramebufferSize, 
 			new Camera2d(GameCameraWidth, GameCameraHeight)))
-	.AddEditor((_) => new MapEditor())
+	.AddEditor((e) => new MapEditor(
+			e.Window.FramebufferSize, 
+			new Camera2d(GameCameraWidth, GameCameraHeight)))
 	.Run((engine) =>
 		new GameScene(
 			engine,
