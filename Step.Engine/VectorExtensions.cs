@@ -61,10 +61,10 @@ public static class VectorExtensions
 		return new (vector.X, vector.Y);
 	}
 
-	//public static System.Numerics.Vector2 ToSystem(this Vector2f vector)
-	//{
-	//	return new (vector.X, vector.Y);
-	//}
+	public static System.Numerics.Vector2 ToSystem(this Vector2f vector)
+	{
+		return new (vector.X, vector.Y);
+	}
 
 	public static Vector4f FromSystem(this System.Numerics.Vector4 vector)
 	{

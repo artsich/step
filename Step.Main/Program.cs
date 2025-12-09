@@ -35,17 +35,23 @@ const float InverseTargetAspectRatio = 1f / TargetAspectRatio;
 const float GameCameraWidth = 320f;
 const float GameCameraHeight = GameCameraWidth * InverseTargetAspectRatio;
 
-// new GameBuilder().Build();
-
 //engine.AddEditor(new EffectsEditor(_crtEffect));
 new Engine(windowOptions)
 	.AddEditor((engine) => 
-		new ParticlesEditor(
-			engine.Window.FramebufferSize, 
-			new Camera2d(GameCameraWidth, GameCameraHeight)))
-	.AddEditor((e) => new MapEditor(
-			e.Window.FramebufferSize, 
-			new Camera2d(GameCameraWidth, GameCameraHeight)))
+		new AssetsWindow(
+			new ParticlesEditor(
+				engine.Window.FramebufferSize, 
+				new Camera2d(GameCameraWidth, GameCameraHeight)),
+			new MapEditor(
+				engine.Window.FramebufferSize, 
+				new Camera2d(GameCameraWidth, GameCameraHeight))))
+	.AddEditor((engine) => new GameControlsWindow(engine))
+	.AddEditor((engine) => new AudioSettingsWindow(engine, 0.15f))
+	.AddEditor((engine) => new EngineControlsWindow(engine))
+	.AddEditor((engine) => new PerformanceWindow(engine))
+	.AddEditor((engine) => new SceneWindow())
+	.AddEditor((engine) => new GameRenderWindow(engine))
+	.AddEditor((engine) => new DebugLogWindow())
 	.Run((engine) =>
 		new GameScene(
 			engine,

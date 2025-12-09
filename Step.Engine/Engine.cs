@@ -25,9 +25,8 @@ public abstract class RenderResult(string name) : GameObject(name)
  */
 public class Engine(WindowOptions windowOptions)
 {
-	private const float TargetAspectRatio = 16f / 9f;
-
 	private ImGuiController _imGuiController;
+	private EditorUI _editorUI;
 
 	private IWindow _window;
 	private static GL GL => Ctx.GL;
@@ -40,14 +39,15 @@ public class Engine(WindowOptions windowOptions)
 
 	private Input _gameInput;
 
-	private bool _gameLoopPaused;
 	private bool _editorEnabled = false;
 	private float _lastUpdateTime;
 
 	private List<IEditorView> _editors = [];
 	private List<Func<Engine, IEditorView>> _editorFactories = [];
 
+	private bool _gameLoopPaused;
 	private float _audioMasterVolume = 0.15f;
+	private Func<Engine, RenderResult> _gameCreator;
 
 	public IWindow Window => _window;
 
@@ -55,11 +55,34 @@ public class Engine(WindowOptions windowOptions)
 
 	public Renderer Renderer { get; private set; }
 
+	public IReadOnlyList<IEditorView> Editors => _editors;
+
 	public Engine AddEditor(Func<Engine, IEditorView> factory)
 	{
 		_editorFactories.Add(factory);
 		return this;
 	}
+
+	public void SetGameLoopPaused(bool paused)
+	{
+		_gameLoopPaused = paused;
+	}
+
+	public void SetMasterVolume(float volume)
+	{
+		_audioMasterVolume = volume;
+		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
+	}
+
+	public void ReloadGame()
+	{
+		if (_gameCreator != null)
+		{
+			GameRoot.I.SetScene(_gameCreator(this));
+		}
+	}
+
+	public float LastUpdateTime { get; private set; }
 
 	public void Run(Func<Engine, RenderResult> gameCreator)
 	{
@@ -68,9 +91,11 @@ public class Engine(WindowOptions windowOptions)
 			_window.Load += () =>
 			{
 				InitSystems();
+				_gameCreator = gameCreator;
 				var game = gameCreator(this);
 				GameRoot.I.SetScene(game);
 				_editorFactories.ForEach(fact => _editors.Add(fact(this)));
+				_editorUI = new EditorUI(_imGuiController, _editors);
 			};
 
 			_window.Closing += () =>
@@ -86,115 +111,17 @@ public class Engine(WindowOptions windowOptions)
 					| ClearBufferMask.StencilBufferBit);
 				GameRoot.I.Draw();
 
-				var renderResult = (GameRoot.I.Scene as RenderResult);
-				Debug.Assert(renderResult != null);
-
 				if (_editorEnabled)
 				{
-					_imGuiController.Update((float)dt);
-					ImGui.DockSpaceOverViewport();
-
-					if (ImGui.Begin("Assets"))
-					{
-						if (ImGui.BeginTabBar("Main Tabs"))
-						{
-							foreach (var editor in _editors)
-							{
-								if (ImGui.BeginTabItem(editor.Name))
-								{
-									editor.Draw();
-									ImGui.EndTabItem();
-								}
-							}
-							ImGui.EndTabBar();
-						}
-						ImGui.End();
-					}
-
-					if (ImGui.Begin("Game controls"))
-					{
-						if (ImGui.Button("Game & Assets reload"))
-						{
-							GameRoot.I.SetScene(gameCreator(this));
-						}
-
-						ImGui.Text($"Mouse: {_gameInput.MouseWorldPosition.X:F0}, {_gameInput.MouseWorldPosition.Y:F0}");
-
-						ImGui.End();
-					}
-
-					if (ImGui.Begin("Audio Settings"))
-					{
-						ImGui.SliderFloat("Master volume", ref _audioMasterVolume, 0f, 1f);
-						ImGui.End();
-					}
-
-					if (ImGui.Begin("Engine controls"))
-					{
-						if (ImGui.Button("Clear console"))
-						{
-							Console.Clear();
-						}
-
-						if (ImGui.Button(_gameLoopPaused ? "Paused" : "Un pause"))
-						{
-							_gameLoopPaused = !_gameLoopPaused;
-						}
-
-						ImGui.End();
-					}
-
-					ImGui.ShowDebugLogWindow();
-
-					if (ImGui.Begin("Performance"))
-					{
-						var ms = dt * 1000f;
-						var fps = 1000 / ms;
-						ImGui.Text($"Render time: {ms:F2}ms | {fps:F2}fps");
-						ImGui.Text($"Update time: {_lastUpdateTime * 1000:F2}ms");
-
-						ImGui.Separator();
-						ImGui.Text($"Collision shapes: {CollisionSystem.Ins.Count}");
-
-						ImGui.Separator();
-						ImGui.Text($"GPU Draw time: {Renderer.Stats.GpuTimeMs:F5} ms");
-						ImGui.Text($"Shaders used: {Renderer.Stats.ActiveShaders}");
-
-						ImGui.End();
-					}
-
-					if (ImGui.Begin("Scene"))
-					{
-						GameRoot.I.DebugDraw();
-						ImGui.End();
-					}
-
-
-					if (ImGui.Begin("Game render", ImGuiWindowFlags.NoScrollbar))
-					{
-						var availRegion = ImGui.GetContentRegionAvail().FromSystem();
-						var imgSize = StepMath
-							.AdjustToAspect(
-								TargetAspectRatio,
-								availRegion)
-							.ToSystem();
-
-						var headerOffset = new Vector2f(
-							(ImGui.GetWindowSize().X - availRegion.X) / 2f,
-							ImGui.GetWindowSize().Y - availRegion.Y);
-
-						ImGui.Image((nint)renderResult.ResultTexture.Handle, imgSize, new(0f, 1f), new(1f, 0f));
-
-						var windowPos = ImGui.GetWindowPos().FromSystem();
-						Input.SetMouseOffset(windowPos + headerOffset);
-						Input.SetWindowSize(imgSize.FromSystem());
-						ImGui.End();
-					}
-
-					_imGuiController.Render();
+					// todo: should i update editor here?
+					_editorUI.Update((float)dt);
+					_editorUI.Render();
 				}
 				else
 				{
+					var renderResult = (GameRoot.I.Scene as RenderResult);
+					Debug.Assert(renderResult != null);
+
 					Renderer.DrawScreenRectNow(renderResult.ResultTexture);
 				}
 			};
@@ -202,6 +129,7 @@ public class Engine(WindowOptions windowOptions)
 			_window.Update += (dt) =>
 			{
 				_lastUpdateTime = (float)dt;
+				LastUpdateTime = (float)dt;
 				if (Input.IsKeyJustPressed(Key.F1))
 				{
 					_window.Close();
@@ -221,8 +149,6 @@ public class Engine(WindowOptions windowOptions)
 				}
 #endif
 				CheckWindowStateToggle();
-
-				AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
 				if (_editorEnabled)
 				{
@@ -295,8 +221,6 @@ public class Engine(WindowOptions windowOptions)
 		var screenSize = new Vector2i(_window.FramebufferSize.X, _window.FramebufferSize.Y);
 		Renderer = new Renderer(screenSize.X, screenSize.Y, Ctx.GL);
 		Renderer.Load();
-
-		AudioManager.Ins.SetMasterVolume(_audioMasterVolume);
 
 		_gameInput = new Input(_inputContext);
 

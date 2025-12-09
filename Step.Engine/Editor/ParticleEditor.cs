@@ -1,6 +1,5 @@
 ﻿using ImGuiNET;
 using Serilog;
-using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Step.Engine.Graphics;
 using Step.Engine.Graphics.Particles;

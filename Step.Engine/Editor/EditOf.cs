@@ -1,5 +1,4 @@
 ﻿using ImGuiNET;
-using Silk.NET.Maths;
 
 namespace Step.Engine.Editor;
 
