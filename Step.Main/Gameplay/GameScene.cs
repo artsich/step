@@ -91,8 +91,6 @@ public class GameScene : RenderResult
 		// TODO: required for valid collision check (input.mouseWorldPosition return invalid result and leads to invalid calculation for shield)
 		GameRoot.I.PushCamera(_gameCamera);
 
-		_engine.Keyboard.KeyDown += HandleKeyDown;
-
 		_crtEffect = new CrtEffect(
 			engine.Window.FramebufferSize,
 			engine.Renderer);
@@ -147,20 +145,25 @@ public class GameScene : RenderResult
 		ToPausedState();
 	}
 
-	private void HandleKeyDown(IKeyboard keyboard, Key key, int arg3)
+	protected override void OnEvent(Event e)
 	{
-		if (key == Key.Escape)
+		if (e is KeyboardKeyEvent keyEvent && keyEvent.Pressed)
 		{
-			switch (_currentState)
+			if (keyEvent.Key == Key.Escape)
 			{
-				case GameState.Game:
-					ToPausedState();
-					break;
-				case GameState.Paused:
-					ResumeGame();
-					break;
-				default:
-					break;
+				switch (_currentState)
+				{
+					case GameState.Game:
+						ToPausedState();
+						break;
+					case GameState.Paused:
+						ResumeGame();
+						break;
+					default:
+						break;
+				}
+
+				e.MarkHandled();
 			}
 		}
 	}
@@ -225,7 +228,6 @@ public class GameScene : RenderResult
 	protected override void OnEnd()
 	{
 		base.OnEnd();
-		_engine.Keyboard.KeyDown -= HandleKeyDown;
 		AudioManager.Ins.UnloadSounds();
 
 		_blurEffect.Dispose();

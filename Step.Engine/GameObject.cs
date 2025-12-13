@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Serilog;
+using Silk.NET.Input;
 using Step.Engine.Editor;
 using Step.Engine.Tween;
 using System.Diagnostics;
@@ -19,6 +20,13 @@ public abstract class Event
 public class MouseHoverEvent(Vector2f position) : Event
 {
 	public Vector2f Position { get; } = position;
+}
+
+public class KeyboardKeyEvent(Key key, bool isPressed) : Event
+{
+	public Key Key { get; } = key;
+
+	public bool Pressed { get; } = isPressed;
 }
 
 public class GameObject(string name = nameof(GameObject))

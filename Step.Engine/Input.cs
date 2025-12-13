@@ -215,7 +215,9 @@ public sealed class Input
 		{
 			return;
 		}
+
 		_keyboardKeys[(int)arg2] = true;
+		GameRoot.I.PropagateEvent(new KeyboardKeyEvent(arg2, true));
 	}
 
 	private void OnKeyboardKeyUp(IKeyboard arg1, Key arg2, int arg3)
@@ -224,6 +226,8 @@ public sealed class Input
 		{
 			return;
 		}
+
 		_keyboardKeys[(int)arg2] = false;
+		GameRoot.I.PropagateEvent(new KeyboardKeyEvent(arg2, false));
 	}
 }
