@@ -262,11 +262,11 @@ public class GameObject(string name = nameof(GameObject))
 
 	protected virtual void OnUpdate(float deltaTime) { }
 
-	protected internal virtual void OnUpdateEnd() { }
+	protected virtual void OnUpdateEnd() { }
 
 	protected virtual void OnRender() { }
 
-	protected internal virtual void OnRenderEnd() { }
+	protected virtual void OnRenderEnd() { }
 
 	protected TweenPlayer Tweens => _tweenPlayer ??= new();
 

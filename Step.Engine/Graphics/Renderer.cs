@@ -128,6 +128,8 @@ public class Renderer(int screenWidth, int screenHeight, GL GL) : IRenderCommand
 		{
 			_renderTargets.Peek().Begin();
 		}
+
+		GL.ClearColor(0f, 0f, 0f, 1f);
 	}
 
 	public void DrawObject(Vector2f position, Vector2f size, Vector4f color, Texture2d? texture = null)

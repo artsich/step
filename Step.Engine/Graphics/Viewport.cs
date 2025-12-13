@@ -17,7 +17,7 @@ public sealed class Viewport(Engine engine, ICamera2d camera2d, Vector2i size) :
 		GameRoot.I.PushCamera(camera2d);
 	}
 
-	protected internal override void OnUpdateEnd()
+	protected override void OnUpdateEnd()
 	{
 		base.OnUpdateEnd();
 		GameRoot.I.PopCamera();
@@ -32,7 +32,7 @@ public sealed class Viewport(Engine engine, ICamera2d camera2d, Vector2i size) :
 		_renderTarget.Clear(ClearColor);
 	}
 
-	protected internal override void OnRenderEnd()
+	protected override void OnRenderEnd()
 	{
 		base.OnRenderEnd();
 		_renderer.Flush();
